@@ -147,7 +147,7 @@ conda activate stcm_env
 source /opt/ros/humble/setup.bash
 
 # 3. Source your workspace
-source ~/stcm-assistive-nav/install/setup.bash
+source ./install/setup.bash
 ```
 
 ## Model checkpoints
@@ -191,15 +191,27 @@ ros2 run stcm semantic_map_updater graph_input_path:=/tmp/semantic_graph.json
 4. Persist the generated graph (`graph_output_path`) and feed it back to the updater node to maintain consistency as the robot explores.
 
 ## Tests & utilities
-The legacy perception demos are still available under `stcm/test`. For example:
+The legacy perception demos are still available under `stcm/test`.
 
+**Important**: Before running tests, ensure your environment is properly set up:
 ```bash
-cd stcm
-python test/test_gdino_sam.py imgs/irvl-clutter-test.png
-python test/test_depth_anything.py imgs/color-000089.png
+# 1. Activate conda environment
+conda activate stcm_env
+
+# 2. Source ROS 2 Humble
+source /opt/ros/humble/setup.bash
+
+# 3. Source your workspace (run from repository root)
+source install/setup.bash
 ```
 
-These scripts now import the `stcm.core` modules directly and are useful for quick sanity checks outside of ROS.
+Then run tests from the **repository root**:
+```bash
+python stcm/test/test_gdino_sam.py stcm/imgs/irvl-clutter-test.png
+python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
+```
+
+These scripts import the `stcm.core` modules directly and are useful for quick sanity checks outside of ROS.
 
 ## Checkpoint & data directories
 - Checkpoints: `~/.stcm/ckpts` (override via `STCM_CKPT_DIR`)
