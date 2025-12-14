@@ -10,7 +10,7 @@ from stcm.core.perception import DepthAnythingPredictor
 
 def main(argv):
     # Path to the input image
-    image_path = argv[0]
+    image_path = argv[1]
 
     try:
         logging.info("Initialize object detectors")
@@ -36,6 +36,5 @@ def main(argv):
 
 if __name__ == "__main__":
     # Run the main function with the input image path
-    # app.run(main, ['imgs/color-000078.png'])
-    # app.run(main, ['imgs/color-000019.png'])
-    app.run(main, ['imgs/irvl-clutter-test.png'])
+    # Example usage: python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
+    app.run(main)
