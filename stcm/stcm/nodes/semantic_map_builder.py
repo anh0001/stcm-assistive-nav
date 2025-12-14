@@ -41,6 +41,9 @@ class SemanticMapBuilder(Node):
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.0).value)
         self.graph_path = Path(self.declare_parameter("graph_output_path", "graph.json").value)
+        self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
+        self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
+        self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = nx.Graph()
@@ -56,8 +59,12 @@ class SemanticMapBuilder(Node):
             world_frame=self.world_frame,
         )
 
-        self.gdino = GroundingDINOObjectPredictor()
-        self.sam = SegmentAnythingPredictor()
+        self.gdino = GroundingDINOObjectPredictor(
+            checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
+        )
+        self.sam = SegmentAnythingPredictor(
+            checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
+        )
 
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
@@ -72,6 +79,12 @@ class SemanticMapBuilder(Node):
             threshold_value = thresholds[idx] if idx < len(thresholds) else thresholds[-1]
             threshold_map[label] = float(threshold_value)
         return threshold_map
+
+    @staticmethod
+    def _expanduser_if_set(value: str | None) -> Path | None:
+        if not value:
+            return None
+        return Path(value).expanduser()
 
     def _process_frame(self) -> None:
         frames = self.listener.get_latest_frames()

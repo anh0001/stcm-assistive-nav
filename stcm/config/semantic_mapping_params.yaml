@@ -1,0 +1,33 @@
+# Semantic mapping launch parameters. Adjust these values as needed before running
+# `ros2 launch stcm semantic_mapping.launch.py`.
+
+# Space-separated list describing the target objects for the SAM prompt; end each
+# object with a period to match the expected format in the semantic mapper.
+text_prompt: "table . chair . door ."
+
+# Absolute or relative file path where the semantic graph JSON file will be
+# written by the builder node (and read by the updater node when enabled).
+graph_output_path: "semantic_graph.json"
+
+# Whether to publish simulated time instead of wall time. Leave `false` when
+# running on a real robot and set `true` when replaying bags or using Gazebo.
+use_sim_time: false
+
+# Enable the semantic_map_updater node to continuously update a previously
+# generated graph. Set to `false` when only building a graph once.
+run_updater: false
+
+# Optional override for the GroundingDINO checkpoint (.pth). Leave blank to
+# download via HuggingFace caching, or point to a file such as
+# `~/.stcm/ckpts/gdino/groundingdino_swint_ogc.pth`.
+groundingdino_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/gdino/groundingdino_swint_ogc.pth"
+
+# Optional MobileSAM checkpoint. Defaults to searching under `./ckpts` and
+# `~/.stcm/ckpts`, but you can hardcode a file like
+# `~/.stcm/ckpts/mobilesam/vit_t.pth`.
+mobilesam_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/mobilesam/vit_t.pth"
+
+# Optional Depth-Anything model directory or checkpoint. Provide the HuggingFace
+# repo ID (e.g., `LiheYoung/depth-anything-small-hf`) or a local directory that
+# was downloaded with `stcm_download_checkpoints`.
+depth_anything_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/depth_anything/depth_anything_vitb14.pth"

@@ -1,13 +1,66 @@
+import os
+from pathlib import Path
+
+import yaml
+from ament_index_python.packages import PackageNotFoundError, get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+DEFAULT_TEXT_PROMPT = "table . door . chair ."
+DEFAULT_GRAPH_PATH = "graph.json"
+DEFAULT_USE_SIM_TIME = False
+DEFAULT_RUN_UPDATER = False
+
+try:
+    DEFAULT_CONFIG_PATH = os.path.join(
+        get_package_share_directory("stcm"),
+        "config",
+        "semantic_mapping_params.yaml",
+    )
+except PackageNotFoundError:
+    DEFAULT_CONFIG_PATH = str(Path(__file__).resolve().parent.parent / "config" / "semantic_mapping_params.yaml")
+
+
+def _parse_bool(value):
+    if isinstance(value, bool):
+        return value
+    return str(value).lower() in ("1", "true", "yes", "on")
+
+
+def _load_config(config_path):
+    resolved_path = os.path.expanduser(config_path)
+    if not os.path.exists(resolved_path):
+        raise FileNotFoundError(f"Config file '{resolved_path}' does not exist.")
+    with open(resolved_path, "r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
+
+
+def _resolve_str(context, arg_name, fallback):
+    override = LaunchConfiguration(arg_name).perform(context)
+    return override if override else fallback
+
+
+def _resolve_bool(context, arg_name, fallback):
+    override = LaunchConfiguration(arg_name).perform(context)
+    if override:
+        return _parse_bool(override)
+    return _parse_bool(fallback)
+
+
 def launch_setup(context, *args, **kwargs):
-    text_prompt = LaunchConfiguration("text_prompt").perform(context)
-    graph_path = LaunchConfiguration("graph_output_path").perform(context)
-    run_updater = LaunchConfiguration("run_updater").perform(context).lower() in ("1", "true", "yes")
+    config_path = LaunchConfiguration("config_file").perform(context)
+    config = _load_config(config_path)
+
+    text_prompt = _resolve_str(context, "text_prompt", config.get("text_prompt", DEFAULT_TEXT_PROMPT))
+    graph_path = _resolve_str(context, "graph_output_path", config.get("graph_output_path", DEFAULT_GRAPH_PATH))
+    use_sim_time = _resolve_bool(context, "use_sim_time", config.get("use_sim_time", DEFAULT_USE_SIM_TIME))
+    run_updater = _resolve_bool(context, "run_updater", config.get("run_updater", DEFAULT_RUN_UPDATER))
+    grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
+    mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
+    depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
 
     builder_node = Node(
         package="stcm",
@@ -17,7 +70,10 @@ def launch_setup(context, *args, **kwargs):
         parameters=[
             {"text_prompt": text_prompt},
             {"graph_output_path": graph_path},
-            {"use_sim_time": LaunchConfiguration("use_sim_time")},
+            {"use_sim_time": use_sim_time},
+            {"groundingdino_checkpoint": grounding_ckpt},
+            {"mobilesam_checkpoint": mobilesam_ckpt},
+            {"depth_anything_checkpoint": depth_ckpt},
         ],
     )
 
@@ -30,7 +86,10 @@ def launch_setup(context, *args, **kwargs):
             parameters=[
                 {"text_prompt": text_prompt},
                 {"graph_input_path": graph_path},
-                {"use_sim_time": LaunchConfiguration("use_sim_time")},
+                {"use_sim_time": use_sim_time},
+                {"groundingdino_checkpoint": grounding_ckpt},
+                {"mobilesam_checkpoint": mobilesam_ckpt},
+                {"depth_anything_checkpoint": depth_ckpt},
             ],
         )
         return [builder_node, updater_node]
@@ -41,10 +100,46 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     return LaunchDescription(
         [
-            DeclareLaunchArgument("text_prompt", default_value="table . door . chair ."),
-            DeclareLaunchArgument("graph_output_path", default_value="graph.json"),
-            DeclareLaunchArgument("use_sim_time", default_value="false"),
-            DeclareLaunchArgument("run_updater", default_value="false"),
+            DeclareLaunchArgument(
+                "config_file",
+                default_value=DEFAULT_CONFIG_PATH,
+                description="Path to a YAML file with semantic mapping parameters.",
+            ),
+            DeclareLaunchArgument(
+                "text_prompt",
+                default_value="",
+                description="Override the prompt from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "graph_output_path",
+                default_value="",
+                description="Override the graph path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "use_sim_time",
+                default_value="",
+                description="Override the use_sim_time flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "run_updater",
+                default_value="",
+                description="Override the run_updater flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "groundingdino_checkpoint",
+                default_value="",
+                description="Override the GroundingDINO checkpoint path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "mobilesam_checkpoint",
+                default_value="",
+                description="Override the MobileSAM checkpoint path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "depth_anything_checkpoint",
+                default_value="",
+                description="Override the Depth-Anything model path from the config file.",
+            ),
             OpaqueFunction(function=launch_setup),
         ]
     )

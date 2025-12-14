@@ -162,14 +162,20 @@ ros2 run stcm stcm_download_checkpoints --models mobilesam --target /data/ckpts
 Set `export STCM_CKPT_DIR=/data/ckpts` when using a custom directory. GroundingDINO weights are fetched automatically from the HuggingFace cache; MobileSAM and the optional DepthAnything file are loaded from the checkpoint directory.
 
 ## Launching ROS 2 nodes
-Use the provided launch file for quick bring-up:
+Use the provided launch file for quick bring-up. First, edit `stcm/config/semantic_mapping_params.yaml`
+(or copy it elsewhere) to adjust the prompt, output path, and updater flag—each field includes a short
+comment describing its use. The same file also exposes the model checkpoint fields
+(`groundingdino_checkpoint`, `mobilesam_checkpoint`, `depth_anything_checkpoint`) so
+you can point the launch at custom weights without exporting `STCM_CKPT_DIR`.
+Then launch with that config file:
 
 ```bash
 ros2 launch stcm semantic_mapping.launch.py \
-  text_prompt:="table . chair . door ." \
-  graph_output_path:="/tmp/semantic_graph.json" \
-  run_updater:=false
+  config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml
 ```
+
+You can still override individual values at launch time (`text_prompt:=...`, `graph_output_path:=...`,
+`use_sim_time:=...`, `run_updater:=...`), but keeping them in the YAML makes repeated runs easier.
 
 Key parameters (set via the launch file or `ros2 param set`):
 - `rgb_topic`, `depth_topic`, `camera_info_topic`: remap to your RGB-D driver topics.

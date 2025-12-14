@@ -211,26 +211,42 @@ class GroundingDINOObjectPredictor(ObjectPredictor):
     getting compact bounding boxes arounds generic objects.
     Hope is that these cropped bboxes when used with OpenAI CLIP yields good classification results.
     """
-    def __init__(self):
+    def __init__(self, checkpoint_path: str | Path | None = None, config_path: str | Path | None = None):
         super(GroundingDINOObjectPredictor, self).__init__()
         self.ckpt_repo_id = "ShilongLiu/GroundingDINO"
         self.ckpt_filenmae = "groundingdino_swint_ogc.pth"
-        self.config_file = str(
-            resources.files("stcm.core.cfg.gdino").joinpath("GroundingDINO_SwinT_OGC.py")
+        default_config = resources.files("stcm.core.cfg.gdino").joinpath("GroundingDINO_SwinT_OGC.py")
+        self.config_file = (
+            str(Path(config_path).expanduser()) if config_path else str(default_config)
         )
-        self.model = self.load_model_hf(
-            self.config_file, self.ckpt_repo_id, self.ckpt_filenmae
+        self.model = self.load_model(
+            self.config_file,
+            self.ckpt_repo_id,
+            self.ckpt_filenmae,
+            checkpoint_override=self._resolve_checkpoint_path(checkpoint_path),
         )
     
 
-    def load_model_hf(self, model_config_path, repo_id, filename):
+    def _resolve_checkpoint_path(self, checkpoint_path: str | Path | None):
+        candidates = []
+        if checkpoint_path:
+            candidates.append(Path(checkpoint_path))
+        candidates.append(DEFAULT_CKPT_DIR / "gdino" / self.ckpt_filenmae)
+        for path in candidates:
+            expanded = Path(path).expanduser()
+            if expanded.exists():
+                return expanded
+        return None
+
+    def load_model(self, model_config_path, repo_id, filename, checkpoint_override: Path | None = None):
         """
-        Load model from Hugging Face hub.
+        Load model weights into GroundingDINO, using a local file when available.
 
         Parameters:
         - model_config_path (str): Path to model configuration file.
         - repo_id (str): ID of the repository.
-        - filename (str): Name of the file.
+        - filename (str): Name of the file to fetch when downloading.
+        - checkpoint_override (Path): Optional local checkpoint path.
 
         Returns:
         - torch.nn.Module: Loaded model.
@@ -240,7 +256,10 @@ class GroundingDINOObjectPredictor(ObjectPredictor):
             model = build_model(args)
             args.device = self.device
 
-            cache_file = hf_hub_download(repo_id=repo_id, filename=filename)
+            if checkpoint_override:
+                cache_file = checkpoint_override
+            else:
+                cache_file = hf_hub_download(repo_id=repo_id, filename=filename)
             checkpoint = torch.load(cache_file, map_location=self.device)
             log = model.load_state_dict(clean_state_dict(checkpoint['model']), strict=False)
             print("Model loaded from {} \n => {}".format(cache_file, log))
@@ -349,7 +368,7 @@ class SegmentAnythingPredictor(ObjectPredictor):
     def _resolve_checkpoint_path(self, checkpoint_path):
         candidates = []
         if checkpoint_path:
-            candidates.append(Path(checkpoint_path))
+            candidates.append(Path(checkpoint_path).expanduser())
         candidates.extend(
             [
                 Path("ckpts") / "mobilesam" / "vit_t.pth",
@@ -359,8 +378,9 @@ class SegmentAnythingPredictor(ObjectPredictor):
             ]
         )
         for path in candidates:
-            if path.exists():
-                return path
+            resolved = Path(path).expanduser()
+            if resolved.exists():
+                return resolved
         raise FileNotFoundError(
             f"MobileSAM checkpoint not found. Run 'ros2 run stcm stcm_download_checkpoints' "
             f"or set STCM_CKPT_DIR to a directory that contains mobilesam/vit_t.pth."

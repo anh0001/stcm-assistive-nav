@@ -51,6 +51,9 @@ class SemanticMapUpdater(Node):
         self.processing_period = float(self.declare_parameter("processing_period", 1.5).value)
         self.graph_input_path = Path(self.declare_parameter("graph_input_path", "graph.json").value)
         self.graph_output_path = Path(self.declare_parameter("graph_output_path", "graph_updated.json").value)
+        self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
+        self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
+        self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = read_graph_json(str(self.graph_input_path)) if self.graph_input_path.exists() else nx.Graph()
@@ -69,8 +72,12 @@ class SemanticMapUpdater(Node):
             world_frame=self.world_frame,
         )
 
-        self.gdino = GroundingDINOObjectPredictor()
-        self.sam = SegmentAnythingPredictor()
+        self.gdino = GroundingDINOObjectPredictor(
+            checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
+        )
+        self.sam = SegmentAnythingPredictor(
+            checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
+        )
 
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
@@ -86,6 +93,12 @@ class SemanticMapUpdater(Node):
             threshold_value = thresholds[idx] if idx < len(thresholds) else thresholds[-1]
             threshold_map[label] = float(threshold_value)
         return threshold_map
+
+    @staticmethod
+    def _expanduser_if_set(value: str | None) -> Path | None:
+        if not value:
+            return None
+        return Path(value).expanduser()
 
     def _process_frame(self) -> None:
         if self.pause:
