@@ -20,7 +20,7 @@ DEFAULT_MODELS = {
         "description": "MobileSAM weights for mask extraction.",
     },
     "depth-anything": {
-        "url": "https://huggingface.co/spaces/camenduru/Depth-Anything/resolve/main/depth_anything_vitb14.pth",
+        "url": "https://huggingface.co/LiheYoung/depth_anything_vitb14/resolve/main/pytorch_model.bin",
         "filename": "depth_anything_vitb14.pth",
         "subdir": "depth_anything",
         "description": "Depth-Anything ViT-B checkpoint for monocular depth estimation.",

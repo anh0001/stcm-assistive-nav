@@ -33,11 +33,6 @@ This script will:
 6. Install ROS 2 dependencies
 7. Build the ROS 2 package
 
-**Troubleshooting**: If you see warnings about "Unexpected error writing token file", you can safely ignore them (it's a conda analytics issue) or fix by running:
-```bash
-conda config --set allow_conda_downgrades true
-```
-
 ### Manual Installation
 
 If you prefer to install manually or need to troubleshoot, follow these steps:
@@ -155,28 +150,11 @@ source /opt/ros/humble/setup.bash
 source ~/stcm-assistive-nav/install/setup.bash
 ```
 
-**Tip:** Add this to your `~/.bashrc` for convenience:
-
-```bash
-# Add to ~/.bashrc
-alias stcm_setup='conda activate stcm_env && source /opt/ros/humble/setup.bash && source ~/stcm-assistive-nav/install/setup.bash'
-```
-
-Then you can just run `stcm_setup` in any new terminal.
-
-### Verify Installation
-
-Quick sanity check:
-
-```bash
-python -c "import torch; from groundingdino.util.inference import load_model; print('GroundingDINO import OK')"
-```
-
 ## Model checkpoints
 The perception modules expect the pretrained weights to live under `~/.stcm/ckpts` (override with `STCM_CKPT_DIR`). The helper CLI downloads and renames everything for you:
 
 ```bash
-ros2 run stcm stcm_download_checkpoints               # download all defaults into ~/.stcm/ckpts
+ros2 run stcm stcm_download_checkpoints --target ./models # download all defaults into ./models folder
 ros2 run stcm stcm_download_checkpoints --list        # inspect the available models
 ros2 run stcm stcm_download_checkpoints --models mobilesam --target /data/ckpts
 ```
