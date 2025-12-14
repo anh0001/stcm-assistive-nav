@@ -1,7 +1,3 @@
-# (c) 2024 Jishnu Jaykumar Padalunkal.
-# Work done while being at the Intelligent Robotics and Vision Lab at the University of Texas, Dallas
-# Please check the licenses of the respective works utilized here before using this script.
-
 from absl import app, logging
 from PIL import Image as PILImg
 from stcm.core.vision_utils import annotate, overlay_masks

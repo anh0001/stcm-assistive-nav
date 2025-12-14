@@ -1,7 +1,3 @@
-# (c) 2024 Jishnu Jaykumar Padalunkal.
-# Work done while being at the Intelligent Robotics and Vision Lab at the University of Texas, Dallas
-# Please check the licenses of the respective works utilized here before using this script.
-
 from absl import (app, logging)
 from PIL import Image as PILImg
 from stcm.core.vision_utils import apply_matplotlib_colormap
@@ -36,5 +32,4 @@ def main(argv):
 
 if __name__ == "__main__":
     # Run the main function with the input image path
-    # Example usage: python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
     app.run(main)
