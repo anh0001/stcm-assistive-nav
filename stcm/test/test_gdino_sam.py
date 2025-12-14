@@ -10,7 +10,11 @@ from stcm.core.perception import GroundingDINOObjectPredictor, SegmentAnythingPr
 
 def main(argv):
     # Path to the input image
-    image_path = argv[0]
+    # argv[0] is the script name, argv[1] is the actual first argument
+    if len(argv) < 2:
+        print("Usage: python test_gdino_sam.py <image_path>")
+        return
+    image_path = argv[1]
     text_prompt =  'objects'
 
     try:
@@ -44,6 +48,4 @@ def main(argv):
 
 if __name__ == "__main__":
     # Run the main function with the input image path
-    # app.run(main, ['imgs/color-000078.png'])
-    # app.run(main, ['imgs/color-000019.png'])
-    app.run(main, ['imgs/color-000089.png'])
+    app.run(main)
