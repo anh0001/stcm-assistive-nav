@@ -1,24 +1,36 @@
-absl-py
-chardet
-ftfy
-groundingdino
-huggingface-hub
-matplotlib
-mobile-sam
-networkx
+# numerics
 numpy==1.26.4
+networkx
+tqdm
+
+# vision & geometry
 opencv-python
 open3d
-packaging
-pillow
-PyYAML
-regex
-requests
-ros2-numpy
 scikit-image
 shapely
+Pillow
+matplotlib
+
+# segmentation / helpers
+# mobile-sam is installed from GitHub: pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+mobile-sam
 supervision==0.18.0
-torch
-torchvision
-tqdm
-transformers
+
+# HF ecosystem (pinned to stable versions)
+transformers==4.44.0
+huggingface-hub==0.25.0
+ftfy
+regex
+
+# infra / utils
+requests
+PyYAML
+packaging
+chardet
+absl-py
+
+# ROS helper
+ros2-numpy
+
+# NOTE: torch, torchvision, and groundingdino are installed separately
+# See README.md for proper installation instructions

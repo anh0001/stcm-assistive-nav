@@ -4,15 +4,27 @@ The **Semantic Topological Cognitive Mapping (STCM)** workspace packages the per
 
 ## Requirements
 - Ubuntu 22.04 with ROS 2 Humble (desktop or ros-base)
-- Python ≥ 3.9 and a working CUDA stack for Torch (CPU mode also works but is slower)
-- System dependencies resolved with `rosdep` (`rclpy`, `cv_bridge`, `message_filters`, `tf_transformations`, `ros2_numpy`, etc.)
+- CUDA Toolkit 12.x (tested with 12.4) + cuDNN 9
+- Conda or Miniconda for Python environment management
+- System dependencies resolved with `rosdep` (`rclpy`, `cv_bridge`, `message_filters`, `tf_transformations`, etc.)
 
 ## Installation
+
+**See the main [README.md](../README.md) in the repository root for complete installation instructions.**
+
+Quick summary:
+
+1. Create conda environment: `conda create -n stcm_env python=3.10 -y`
+2. Activate environment: `conda activate stcm_env`
+3. Install PyTorch with CUDA: `pip install torch==2.4.0+cu121 torchvision==0.19.0+cu121 --index-url https://download.pytorch.org/whl/cu121`
+4. Install GroundingDINO from source (recommended)
+5. Install remaining dependencies: `pip install -r requirements.txt`
+6. Build with colcon: `colcon build --packages-select stcm`
+
+Always activate the conda environment before sourcing ROS 2:
 ```bash
-cd stcm-assistive-nav/stcm
-pip install -r requirements.txt
-rosdep install --from-paths . --ignore-src -y
-colcon build --packages-select stcm
+conda activate stcm_env
+source /opt/ros/humble/setup.bash
 source install/setup.bash
 ```
 

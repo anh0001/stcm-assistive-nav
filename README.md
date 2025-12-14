@@ -2,18 +2,174 @@
 
 The **Semantic Topological Cognitive Mapping (STCM)** workspace packages the perception stack into a ROS 2 Humble friendly layout. It exposes Python nodes that listen to synchronized RGB–D data, run GroundingDINO + MobileSAM, and publish semantic graphs that can be consumed by a new robot for high level reasoning.
 
+**Quick Links:**
+- [Installation](#installation) - Detailed setup instructions
+- [Model Checkpoints](#model-checkpoints) - Download pretrained weights
+- [Launching ROS 2 Nodes](#launching-ros-2-nodes) - Running the system
+
 ## Requirements
 - Ubuntu 22.04 with ROS 2 Humble (desktop or ros-base)
-- Python ≥ 3.9 and a working CUDA stack for Torch (CPU mode also works but is slower)
-- System dependencies resolved with `rosdep` (`rclpy`, `cv_bridge`, `message_filters`, `tf_transformations`, `ros2_numpy`, etc.)
+- CUDA Toolkit 12.x (tested with 12.4) + cuDNN 9
+- Conda or Miniconda for Python environment management
+- System dependencies resolved with `rosdep` (`rclpy`, `cv_bridge`, `message_filters`, `tf_transformations`, etc.)
 
 ## Installation
+
+### Quick Start (Automated)
+
+For automated installation, use the provided setup script:
+
 ```bash
-cd stcm-assistive-nav/stcm
+cd ~/stcm-assistive-nav
+./setup_stcm_env.sh
+```
+
+This script will:
+1. Create the `stcm_env` conda environment
+2. Install PyTorch 2.4.0 with CUDA 12.1
+3. Install GroundingDINO from source
+4. Install MobileSAM from GitHub
+5. Install all Python dependencies
+6. Install ROS 2 dependencies
+7. Build the ROS 2 package
+
+**Troubleshooting**: If you see warnings about "Unexpected error writing token file", you can safely ignore them (it's a conda analytics issue) or fix by running:
+```bash
+conda config --set allow_conda_downgrades true
+```
+
+### Manual Installation
+
+If you prefer to install manually or need to troubleshoot, follow these steps:
+
+### System Compatibility
+Your setup: **Ubuntu 22.04 + ROS 2 Humble + CUDA toolkit 12.4 + cuDNN 9**
+
+PyTorch wheels ship their own CUDA runtime (cu121), so your system CUDA 12.4 won't conflict. The binary wheels come with their own cuDNN, so your system cuDNN 9 install is not used by PyTorch.
+
+### Step 1: Create Conda Environment
+
+**Option A:** Create from environment file
+
+```bash
+conda env create -f environment.yml
+conda activate stcm_env
+```
+
+**Option B:** Create manually
+
+```bash
+# Create dedicated environment with Python 3.10
+conda create -n stcm_env python=3.10 -y
+
+# Activate environment
+conda activate stcm_env
+```
+
+### Step 2: Install CUDA-enabled PyTorch
+
+Install PyTorch 2.4.0 with CUDA 12.1 support (stable, known-good combo):
+
+```bash
+pip install \
+  torch==2.4.0+cu121 \
+  torchvision==0.19.0+cu121 \
+  --index-url https://download.pytorch.org/whl/cu121
+```
+
+Verify installation:
+
+```bash
+python -c "import torch; print('torch:', torch.__version__); print('cuda available:', torch.cuda.is_available()); print('cuda version:', torch.version.cuda)"
+```
+
+Expected output:
+- `torch: 2.4.0+cu121`
+- `cuda available: True`
+- `cuda version: 12.1` (wheel's internal runtime, not your system 12.4)
+
+### Step 3: Install GroundingDINO
+
+**Option A (Recommended):** From official repository
+
+```bash
+cd ~
+git clone https://github.com/IDEA-Research/GroundingDINO.git
+cd GroundingDINO
+pip install -e .
+```
+
+This compiles CUDA operators against your current PyTorch 2.4.0 and CUDA toolchain.
+
+**Option B:** PyPI wrapper (if you prefer pip-only)
+
+```bash
+pip install groundingdino-py==0.4.0
+```
+
+### Step 4: Install MobileSAM
+
+MobileSAM is not available on PyPI and must be installed from GitHub:
+
+```bash
+pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+```
+
+### Step 5: Install Remaining Dependencies
+
+```bash
+cd ~/stcm-assistive-nav/stcm
 pip install -r requirements.txt
-rosdep install --from-paths . --ignore-src -y
+```
+
+### Step 6: Install ROS 2 Dependencies
+
+```bash
+# Make sure ROS 2 Humble is sourced
+source /opt/ros/humble/setup.bash
+
+# Install ROS dependencies
+cd ~/stcm-assistive-nav
+rosdep install --from-paths stcm --ignore-src -y
+```
+
+### Step 7: Build the ROS 2 Package
+
+```bash
+cd ~/stcm-assistive-nav
 colcon build --packages-select stcm
-source install/setup.bash
+```
+
+### Step 8: Setup Your Shell Environment
+
+For every new terminal session where you want to use this package:
+
+```bash
+# 1. Activate conda environment FIRST
+conda activate stcm_env
+
+# 2. Source ROS 2 Humble
+source /opt/ros/humble/setup.bash
+
+# 3. Source your workspace
+source ~/stcm-assistive-nav/install/setup.bash
+```
+
+**Tip:** Add this to your `~/.bashrc` for convenience:
+
+```bash
+# Add to ~/.bashrc
+alias stcm_setup='conda activate stcm_env && source /opt/ros/humble/setup.bash && source ~/stcm-assistive-nav/install/setup.bash'
+```
+
+Then you can just run `stcm_setup` in any new terminal.
+
+### Verify Installation
+
+Quick sanity check:
+
+```bash
+python -c "import torch; from groundingdino.util.inference import load_model; print('GroundingDINO import OK')"
 ```
 
 ## Model checkpoints
