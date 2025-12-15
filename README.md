@@ -151,10 +151,10 @@ source ./install/setup.bash
 ```
 
 ## Model checkpoints
-The perception modules expect the pretrained weights to live under the workspace `./models` directory (override with `STCM_CKPT_DIR`). The helper CLI downloads and renames everything for you:
+The perception modules expect the pretrained weights to live under `~/.stcm/ckpts` (override with `STCM_CKPT_DIR`). The helper CLI downloads and renames everything for you:
 
 ```bash
-ros2 run stcm stcm_download_checkpoints               # download all defaults into ./models
+ros2 run stcm stcm_download_checkpoints --target ./models # download all defaults into ./models folder
 ros2 run stcm stcm_download_checkpoints --list        # inspect the available models
 ros2 run stcm stcm_download_checkpoints --models mobilesam --target /data/ckpts
 ```
@@ -220,7 +220,7 @@ python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
 These scripts import the `stcm.core` modules directly and are useful for quick sanity checks outside of ROS.
 
 ## Checkpoint & data directories
-- Checkpoints: `./models` (override via `STCM_CKPT_DIR`)
+- Checkpoints: `~/.stcm/ckpts` (override via `STCM_CKPT_DIR`)
 - RViz config: `stcm/config/semantic_mapping.rviz`
 - Output graphs: configurable per node (`graph_output_path`)
 

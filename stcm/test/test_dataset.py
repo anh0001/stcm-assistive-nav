@@ -2,16 +2,30 @@
 
 """Test a Gounding SAM network on an image database."""
 
+import sys
+from pathlib import Path
 import time
 import scipy
 import torch
-import os, sys
+import os
 import argparse
 import numpy as np
 from PIL import Image as PILImg
 from matplotlib import pyplot as plt
 
-from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
+# Allow running this file directly (python stcm/test/test_dataset.py ...)
+TEST_DIR = Path(__file__).resolve().parent
+PKG_ROOT = TEST_DIR.parent
+if str(PKG_ROOT) not in sys.path:
+    sys.path.insert(0, str(PKG_ROOT))
+
+try:
+    from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
+except ModuleNotFoundError:
+    if str(TEST_DIR) not in sys.path:
+        sys.path.insert(0, str(TEST_DIR))
+    from _ckpt import TEST_CKPT_DIR  # noqa: F401
+
 from stcm.core.datasets.factory import get_dataset
 from stcm.core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
 from stcm.core.vision_utils import annotate, overlay_masks, combine_masks, filter_large_boxes
