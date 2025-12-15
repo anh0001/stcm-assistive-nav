@@ -128,9 +128,10 @@ class DepthAnythingPredictor(DepthPredictor):
         """
         Initializes the DepthAnythingPredictor class.
         """
-        super(DepthPredictor, self).__init__() 
+        super(DepthPredictor, self).__init__()
         self.image_processor = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
         self.model = AutoModelForDepthEstimation.from_pretrained("LiheYoung/depth-anything-small-hf")
+        self.model.to(device=self.device)
         self.logger = logging.getLogger(__name__)
 
     def predict(self, img_pil):
@@ -148,7 +149,7 @@ class DepthAnythingPredictor(DepthPredictor):
             image = img_pil.convert('RGB')
 
             # prepare image for the model
-            inputs = self.image_processor(images=image, return_tensors="pt")
+            inputs = self.image_processor(images=image, return_tensors="pt").to(self.device)
 
             with torch.no_grad():
                 outputs = self.model(**inputs)
