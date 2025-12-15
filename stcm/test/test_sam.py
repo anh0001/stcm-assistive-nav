@@ -1,6 +1,7 @@
 import numpy as np
 from absl import app, logging
 from PIL import Image as PILImg
+from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
 from stcm.core.vision_utils import overlay_masks
 from stcm.core.perception import SegmentAnythingPredictor
 

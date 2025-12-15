@@ -12,8 +12,8 @@ Pillow
 matplotlib
 
 # segmentation / helpers
-# mobile-sam is installed from GitHub: pip install git+https://github.com/ChaoningZhang/MobileSAM.git
-mobile-sam
+# NOTE: mobile-sam is installed separately via setup_stcm_env.sh from GitHub
+# pip install git+https://github.com/ChaoningZhang/MobileSAM.git
 supervision==0.18.0
 
 # HF ecosystem (pinned to stable versions)

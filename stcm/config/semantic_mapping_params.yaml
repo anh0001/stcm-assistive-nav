@@ -19,12 +19,11 @@ run_updater: false
 
 # Optional override for the GroundingDINO checkpoint (.pth). Leave blank to
 # download via HuggingFace caching, or point to a file such as
-# `~/.stcm/ckpts/gdino/groundingdino_swint_ogc.pth`.
+# `./models/gdino/groundingdino_swint_ogc.pth`.
 groundingdino_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/gdino/groundingdino_swint_ogc.pth"
 
-# Optional MobileSAM checkpoint. Defaults to searching under `./ckpts` and
-# `~/.stcm/ckpts`, but you can hardcode a file like
-# `~/.stcm/ckpts/mobilesam/vit_t.pth`.
+# Optional MobileSAM checkpoint. Defaults to searching under `./models`, but you
+# can hardcode a file like `./models/mobilesam/vit_t.pth`.
 mobilesam_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/mobilesam/vit_t.pth"
 
 # Optional Depth-Anything model directory or checkpoint. Provide the HuggingFace

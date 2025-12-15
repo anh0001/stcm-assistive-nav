@@ -3,7 +3,6 @@
 # Please check the licenses of the respective works utilized here before using this script.
 
 
-import os
 import torch
 import logging
 import warnings
@@ -22,11 +21,12 @@ from groundingdino.util.utils import clean_state_dict
 # from segment_anything import SamPredictor, SamAutomaticMaskGenerator, sam_model_registry
 from mobile_sam import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
+from stcm.core.checkpoints import get_default_checkpoint_dir
 
 
 warnings.filterwarnings("ignore")
 
-DEFAULT_CKPT_DIR = Path(os.environ.get("STCM_CKPT_DIR", Path.home() / ".stcm" / "ckpts"))
+DEFAULT_CKPT_DIR = get_default_checkpoint_dir()
 
 
 class Logger(object):

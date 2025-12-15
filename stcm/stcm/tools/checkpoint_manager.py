@@ -4,6 +4,7 @@ from pathlib import Path
 
 import requests
 from tqdm import tqdm
+from stcm.core.checkpoints import get_default_checkpoint_dir
 
 
 DEFAULT_MODELS = {
@@ -55,8 +56,8 @@ def main(argv=None):
     parser.add_argument(
         "--target",
         type=Path,
-        default=Path.home() / ".stcm" / "ckpts",
-        help="Directory where checkpoints will be stored (default: ~/.stcm/ckpts).",
+        default=get_default_checkpoint_dir(),
+        help="Directory where checkpoints will be stored (default: ./models if present, otherwise ~/.stcm/ckpts).",
     )
     parser.add_argument(
         "--models",

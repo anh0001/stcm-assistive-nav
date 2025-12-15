@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image as PILImg
 from matplotlib import pyplot as plt
 
+from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
 from stcm.core.datasets.factory import get_dataset
 from stcm.core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
 from stcm.core.vision_utils import annotate, overlay_masks, combine_masks, filter_large_boxes

@@ -9,6 +9,7 @@ import numpy as np
 import message_filters
 from PIL import Image as PILImg
 from sensor_msgs.msg import Image, CameraInfo
+from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
 from stcm.core.vision_utils import annotate, overlay_masks, combine_masks, filter_large_boxes
 from stcm.core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
 lock = threading.Lock()

@@ -1,5 +1,6 @@
 from absl import (app, logging)
 from PIL import Image as PILImg
+from stcm.test._ckpt import TEST_CKPT_DIR  # noqa: F401
 from stcm.core.vision_utils import apply_matplotlib_colormap
 from stcm.core.perception import DepthAnythingPredictor
 
