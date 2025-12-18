@@ -32,6 +32,11 @@ class SemanticMapBuilder(Node):
         self.camera_frame = self.declare_parameter("camera_frame", "head_camera_rgb_optical_frame").value
         self.base_frame = self.declare_parameter("base_frame", "base_link").value
         self.world_frame = self.declare_parameter("world_frame", "map").value
+        self.use_projected_lidar = bool(self.declare_parameter("use_projected_lidar", False).value)
+        self.projected_lidar_topic = self.declare_parameter(
+            "projected_lidar_topic", "/lidar_points_projected"
+        ).value
+        self.projected_lidar_frame = self.declare_parameter("projected_lidar_frame", "").value
 
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
         thresholds = self.declare_parameter("target_label_thresholds", [2.0, 2.0, 0.6]).value
@@ -57,6 +62,9 @@ class SemanticMapBuilder(Node):
             base_frame=self.base_frame,
             camera_frame=self.camera_frame,
             world_frame=self.world_frame,
+            use_projected_lidar=self.use_projected_lidar,
+            projected_lidar_topic=self.projected_lidar_topic,
+            projected_lidar_frame=self.projected_lidar_frame,
         )
 
         self.gdino = GroundingDINOObjectPredictor(

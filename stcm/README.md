@@ -52,6 +52,7 @@ ros2 launch stcm semantic_mapping.launch.py \
 Key parameters (set via the launch file or `ros2 param set`):
 - `rgb_topic`, `depth_topic`, `camera_info_topic`: remap to your RGB-D driver topics.
 - `camera_frame`, `base_frame`, `world_frame`: match your TF tree (e.g., `camera_link`, `base_link`, `map`).
+- Set `use_projected_lidar: true` to ingest the `/lidar_points_projected` cloud instead of the depth image; tweak `projected_lidar_topic` and `projected_lidar_frame` if your fusion node uses different names or frames.
 - `target_labels` / `target_label_thresholds`: object classes of interest and per-class merge radius.
 - `text_prompt`, `box_threshold`, `text_threshold`: detection prompt and thresholds.
 - `graph_output_path` / `graph_input_path`: where semantic graphs are stored.
