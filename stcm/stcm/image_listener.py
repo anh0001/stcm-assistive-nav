@@ -191,7 +191,12 @@ class ImageListener:
             self._node.get_logger().error("Unable to parse projected cloud: %s", exc)
             return None
 
-        field_names = cloud_array.dtype.names or ()
+        # Handle case where ros_numpy.numpify returns a dict instead of structured array
+        if isinstance(cloud_array, dict):
+            field_names = set(cloud_array.keys())
+        else:
+            field_names = cloud_array.dtype.names or ()
+
         if "u" not in field_names or "v" not in field_names:
             if not self._cloud_field_warning_emitted:
                 self._node.get_logger().error("Projected cloud missing required 'u'/'v' fields.")
@@ -218,8 +223,14 @@ class ImageListener:
             xyz += transform[:3, 3]
 
         depth_vals = xyz[:, 2].astype(np.float32, copy=False)
-        u_coords = np.asarray(cloud_array["u"], dtype=np.float32)
-        v_coords = np.asarray(cloud_array["v"], dtype=np.float32)
+
+        # Handle both dict and structured array formats
+        if isinstance(cloud_array, dict):
+            u_coords = np.asarray(cloud_array["u"], dtype=np.float32)
+            v_coords = np.asarray(cloud_array["v"], dtype=np.float32)
+        else:
+            u_coords = np.asarray(cloud_array["u"], dtype=np.float32)
+            v_coords = np.asarray(cloud_array["v"], dtype=np.float32)
 
         valid = (
             np.isfinite(depth_vals)
@@ -256,10 +267,16 @@ class ImageListener:
         return depth_img
 
     def _extract_cloud_xyz(self, cloud_array, field_names):
-        if {"x", "y", "z"}.issubset(field_names):
+        # Handle both dict and set/tuple of field names
+        if isinstance(field_names, set):
+            field_check = field_names
+        else:
+            field_check = set(field_names) if field_names else set()
+
+        if {"x", "y", "z"}.issubset(field_check):
             points = np.stack((cloud_array["x"], cloud_array["y"], cloud_array["z"]), axis=1)
             return points.astype(np.float32, copy=False)
-        if {"x_lidar", "y_lidar", "z_lidar"}.issubset(field_names):
+        if {"x_lidar", "y_lidar", "z_lidar"}.issubset(field_check):
             points = np.stack(
                 (cloud_array["x_lidar"], cloud_array["y_lidar"], cloud_array["z_lidar"]),
                 axis=1,

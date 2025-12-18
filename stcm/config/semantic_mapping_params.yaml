@@ -22,7 +22,7 @@ world_frame: "map"
 # Enable to replace the depth image with the fused `/lidar_points_projected` cloud.
 # `projected_lidar_frame` overrides the PointCloud2 header frame (leave blank to use header).
 # ============================================================================
-use_projected_lidar: false
+use_projected_lidar: true
 projected_lidar_topic: "/lidar_points_projected"
 projected_lidar_frame: "lidar_link"
 
