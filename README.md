@@ -1,5 +1,8 @@
 # STCM Assistive Navigation
 
+![Ubuntu 22.04](https://img.shields.io/badge/Ubuntu-22.04-orange?logo=ubuntu&logoColor=white)
+![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blue?logo=ros&logoColor=white)
+
 The **Semantic Topological Cognitive Mapping (STCM)** workspace packages the perception stack into a ROS 2 Humble friendly layout. It exposes Python nodes that listen to synchronized RGB–D data, run GroundingDINO + MobileSAM, and publish semantic graphs that can be consumed by a new robot for high level reasoning.
 
 **Quick Links:**

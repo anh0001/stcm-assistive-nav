@@ -1,5 +1,5 @@
 # numerics
-numpy==1.26.4
+numpy==1.24.2  # Pinned because ros2-numpy wheels hard-require this exact version
 networkx
 tqdm
 
@@ -14,11 +14,11 @@ matplotlib
 # segmentation / helpers
 # NOTE: mobile-sam is installed separately via setup_stcm_env.sh from GitHub
 # pip install git+https://github.com/ChaoningZhang/MobileSAM.git
-supervision==0.18.0
+supervision>=0.18.0  # Relax to allow GroundingDINO's newer supervision
 
-# HF ecosystem (pinned to stable versions)
-transformers==4.44.0
-huggingface-hub==0.25.0
+# HF ecosystem (relax to allow GroundingDINO's dependencies)
+transformers>=4.44.0
+huggingface-hub>=0.25.0
 ftfy
 regex
 
@@ -30,7 +30,7 @@ chardet
 absl-py
 
 # ROS helper
-ros2-numpy
+ros2-numpy==0.0.5  # Latest release; metadata pins numpy==1.24.2 so keep them in sync
 
 # NOTE: torch, torchvision, and groundingdino are installed separately
 # See README.md for proper installation instructions

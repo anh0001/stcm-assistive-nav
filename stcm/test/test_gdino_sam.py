@@ -52,7 +52,19 @@ def main(argv):
         logging.info("Annotate the scaled image with bounding boxes, confidence scores, and labels, and display")
         bbox_annotated_pil = annotate(overlay_masks(image_pil, masks), image_pil_bboxes, gdino_conf, phrases)
 
-        bbox_annotated_pil.show()
+        # Save the output image to repo/output folder
+        repo_root = PKG_ROOT.parent
+        output_dir = repo_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / (Path(image_path).stem + "_annotated.png")
+        bbox_annotated_pil.save(output_path)
+        logging.info(f"Saved annotated image to: {output_path}")
+
+        # Try to display (may not work in headless environments)
+        try:
+            bbox_annotated_pil.show()
+        except Exception as e:
+            logging.warning(f"Could not display image: {e}")
 
     except Exception as e:
         # Handle unexpected errors

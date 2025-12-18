@@ -40,7 +40,19 @@ def main(argv):
         # colormap ref: https://github.com/yuki-koyama/pycolormap?tab=readme-ov-file
         depth_to_colomap_pil = apply_matplotlib_colormap(depth_pil, colormap_name='inferno')
 
-        depth_to_colomap_pil.show()
+        # Save the output image to repo/output folder
+        repo_root = PKG_ROOT.parent
+        output_dir = repo_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / (Path(image_path).stem + "_depth.png")
+        depth_to_colomap_pil.save(output_path)
+        logging.info(f"Saved depth map to: {output_path}")
+
+        # Try to display (may not work in headless environments)
+        try:
+            depth_to_colomap_pil.show()
+        except Exception as e:
+            logging.warning(f"Could not display image: {e}")
 
     except Exception as e:
         # Handle unexpected errors

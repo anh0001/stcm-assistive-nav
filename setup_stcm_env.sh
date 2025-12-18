@@ -52,7 +52,33 @@ print("CUDA available:", torch.cuda.is_available())
 print("CUDA runtime:", torch.version.cuda)
 PYTORCH_CHECK
 
-echo -e "\n${YELLOW}Step 3: Installing GroundingDINO${NC}"
+echo -e "\n${YELLOW}Step 3: Installing STCM Python dependencies (ros2-numpy requires numpy==1.24.2)${NC}"
+pip_user -r "$SCRIPT_DIR/stcm/requirements.txt"
+"$PYTHON_BIN" - <<'NUMPY_ROS2_CHECK'
+import sys
+import numpy
+import importlib.metadata
+from importlib.metadata import PackageNotFoundError
+
+expected_numpy = "1.24.2"
+expected_ros2_numpy = "0.0.5"
+
+numpy_version = numpy.__version__
+try:
+    ros2_numpy_version = importlib.metadata.version("ros2-numpy")
+except PackageNotFoundError:
+    sys.exit("ros2-numpy is missing; pip likely bailed with a resolver error. Fix the install and rerun.")
+
+print("NumPy pinned to:", numpy_version)
+print("ros2-numpy version:", ros2_numpy_version)
+
+if numpy_version != expected_numpy:
+    sys.exit(f"Expected numpy {expected_numpy} but found {numpy_version}. Please rerun setup.")
+if ros2_numpy_version != expected_ros2_numpy:
+    sys.exit(f"Expected ros2-numpy {expected_ros2_numpy} but found {ros2_numpy_version}. Please rerun setup.")
+NUMPY_ROS2_CHECK
+
+echo -e "\n${YELLOW}Step 4: Installing GroundingDINO${NC}"
 if [ -d "$HOME/GroundingDINO" ]; then
     echo -e "${YELLOW}Existing GroundingDINO repo detected. Pulling latest...${NC}"
     git -C "$HOME/GroundingDINO" pull --ff-only
@@ -61,21 +87,23 @@ else
 fi
 pip_user --no-build-isolation "$HOME/GroundingDINO"
 
-echo -e "\n${YELLOW}Step 4: Installing MobileSAM${NC}"
+echo -e "\n${YELLOW}Step 5: Installing MobileSAM${NC}"
 pip_user git+https://github.com/ChaoningZhang/MobileSAM.git
 
-echo -e "\n${YELLOW}Step 5: Installing STCM Python dependencies${NC}"
-pip_user -r "$SCRIPT_DIR/stcm/requirements.txt"
-
 echo -e "\n${YELLOW}Step 6: Installing ROS 2 dependencies via rosdep${NC}"
+set +u  # ROS setup scripts reference unset vars such as AMENT_TRACE_SETUP_FILES
 source /opt/ros/humble/setup.bash
+set -u
 rosdep install --from-paths "$SCRIPT_DIR/stcm" --ignore-src -y
 
-echo -e "\n${YELLOW}Step 7: Building ROS 2 package${NC}"
+echo -e "\n${YELLOW}Step 7: Cleaning previous colcon build artifacts (safe if absent)${NC}"
+rm -rf "$SCRIPT_DIR/build" "$SCRIPT_DIR/install" "$SCRIPT_DIR/log"
+
+echo -e "\n${YELLOW}Step 8: Building ROS 2 package${NC}"
 cd "$SCRIPT_DIR"
 colcon build --packages-select stcm
 
-echo -e "\n${YELLOW}Step 8: Verifying imports${NC}"
+echo -e "\n${YELLOW}Step 9: Verifying imports${NC}"
 "$PYTHON_BIN" - <<'VERIFY'
 import torch
 from groundingdino.util.inference import load_model
