@@ -1,0 +1,114 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Prime System Python User Base",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && python3 -m pip install --upgrade --user pip && python3 -m pip install --user ros2-numpy && python3 -m pip install --user torch torchvision torchaudio",
+            "problemMatcher": [],
+            "detail": "Install node dependencies into the isolated user base (extend this command as imports grow)"
+        },
+        {
+            "label": "Build STCM Package",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && colcon build --packages-select stcm --symlink-install",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Build the STCM package with ROS sourced on the distro interpreter + isolated PYTHONUSERBASE"
+        },
+        {
+            "label": "Clean Build STCM Package",
+            "type": "shell",
+            "command": "rm -rf build/stcm install/stcm log/ && export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && colcon build --packages-select stcm --symlink-install",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Clean and rebuild the STCM package using the system Python runtime + isolated PYTHONUSERBASE"
+        },
+        {
+            "label": "Launch Semantic Mapping",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 launch stcm semantic_mapping.launch.py config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml",
+            "problemMatcher": [],
+            "detail": "Launch semantic mapping with the config file using the system Python + isolated user base"
+        },
+        {
+            "label": "Launch Semantic Mapping (with Updater)",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 launch stcm semantic_mapping.launch.py config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml run_updater:=true",
+            "problemMatcher": [],
+            "detail": "Launch semantic mapping with the updater enabled on the system Python runtime"
+        },
+        {
+            "label": "Run Semantic Map Builder Node",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm semantic_map_builder --ros-args -p text_prompt:='table . chair . door .' -p graph_output_path:=/tmp/semantic_graph.json",
+            "problemMatcher": [],
+            "detail": "Run semantic map builder node directly with the isolated system Python user base"
+        },
+        {
+            "label": "Download Model Checkpoints",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm stcm_download_checkpoints",
+            "problemMatcher": [],
+            "detail": "Download all default model checkpoints after sourcing ROS + workspace on system Python"
+        },
+        {
+            "label": "Test GroundingDINO + MobileSAM",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 stcm/test/test_gdino_sam.py stcm/imgs/irvl-clutter-test.png",
+            "problemMatcher": [],
+            "detail": "Test the perception pipeline on a sample image with the system Python user base"
+        },
+        {
+            "label": "Test Depth Anything",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 stcm/test/test_depth_anything.py stcm/imgs/color-000089.png",
+            "problemMatcher": [],
+            "detail": "Test depth estimation on sample image"
+        },
+        {
+            "label": "Run Semantic Map Builder (Split Runtime - System Python)",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm semantic_map_builder ${input:splitBuilderArgs}",
+            "problemMatcher": [],
+            "detail": "Run the builder on the system interpreter (with PYTHONUSERBASE exported) while delegating perception to an external service; override args to point at your IPC endpoint"
+        },
+        {
+            "label": "Run Semantic Map Updater (Split Runtime - System Python)",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm semantic_map_updater ${input:splitUpdaterArgs}",
+            "problemMatcher": [],
+            "detail": "Run the updater on the system interpreter (with PYTHONUSERBASE exported) while relying on a separate perception service"
+        },
+        {
+            "label": "Start Perception Service (Split Runtime - System Python)",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && ${input:perceptionServiceCommand}",
+            "problemMatcher": [],
+            "detail": "Launch the Torch-heavy perception server using the same system Python + isolated user base (edit the prompted command to match your implementation)"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "splitBuilderArgs",
+            "type": "promptString",
+            "description": "Extra ros2 arguments for the builder when using the split runtime (include leading spaces, e.g., \"--ros-args -p perception_endpoint:=tcp://127.0.0.1:5555\")",
+            "default": ""
+        },
+        {
+            "id": "splitUpdaterArgs",
+            "type": "promptString",
+            "description": "Extra ros2 arguments for the updater in the split runtime (e.g., \"--ros-args -p graph_input_path:=/tmp/semantic_graph.json\")",
+            "default": ""
+        },
+        {
+            "id": "perceptionServiceCommand",
+            "type": "promptString",
+            "description": "Command that starts the perception service using the system Python + PYTHONUSERBASE (e.g., \"python3 -m stcm.services.perception_server --transport=zeromq --bind=tcp://0.0.0.0:5555\")",
+            "default": "python3 -m stcm.services.perception_server --transport=zeromq --bind=tcp://0.0.0.0:5555"
+        }
+    ]
+}

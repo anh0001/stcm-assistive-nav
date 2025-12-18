@@ -5,16 +5,16 @@
 # CAMERA TOPICS - Adjust to match your RGB-D camera driver
 # Find your topics: ros2 topic list | grep image
 # ============================================================================
-rgb_topic: "/camera/color/image_raw"
+rgb_topic: "/camera/image_raw"
 depth_topic: "/camera/aligned_depth_to_color/image_raw"
-camera_info_topic: "/camera/color/camera_info"
+camera_info_topic: "/camera/camera_info"
 
 # ============================================================================
 # TF FRAMES - Adjust to match your robot's transform tree
 # Verify: ros2 run tf2_tools view_frames
 # ============================================================================
-camera_frame: "camera_color_optical_frame"
-base_frame: "base_link"
+camera_frame: "camera_link"
+base_frame: "base_footprint"
 world_frame: "map"
 
 # ============================================================================
@@ -24,19 +24,19 @@ world_frame: "map"
 # ============================================================================
 use_projected_lidar: false
 projected_lidar_topic: "/lidar_points_projected"
-projected_lidar_frame: ""
+projected_lidar_frame: "lidar_link"
 
 # ============================================================================
 # OBJECT DETECTION - What to detect and track
 # ============================================================================
 # Space-separated list; end each object with " ." (space + period)
-text_prompt: "table . chair . door ."
+text_prompt: "tables . chairs . door lift . trash bins . bottles . white drinking cups . metallic desk . drinking faucets . brown cardboard box ."
 
 # List of object classes matching the text_prompt
-target_labels: ["table", "chair", "door"]
+target_labels: ["table", "chair", "door lift", "trash bin", "bottle", "cup", "desk", "faucet", "cardboard box"]
 
 # Per-class merge radius in meters (larger values for bigger objects)
-target_label_thresholds: [2.0, 0.6, 2.0]
+target_label_thresholds: [2.0, 0.6, 2.0, 1.0, 0.5, 0.5, 2.0, 0.5, 1.0]
 
 # Detection confidence thresholds (0.0-1.0)
 box_threshold: 0.55
@@ -49,7 +49,7 @@ text_threshold: 0.55
 graph_output_path: "semantic_graph.json"
 
 # Set `true` for bag playback or Gazebo, `false` for live robot
-use_sim_time: false
+use_sim_time: true
 
 # Enable updater node to continuously update an existing graph
 run_updater: false
