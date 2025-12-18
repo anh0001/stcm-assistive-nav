@@ -113,15 +113,16 @@ class SemanticMapBuilder(Node):
 
     def _normalize_label_key(self, text: str) -> str:
         tokens = []
+        es_suffixes = ("ches", "shes", "sses", "xes", "zes")
         for raw_token in text.split():
             token = raw_token.strip(" .,;:()[]{}-_\"'\n\t").lower()
             if not token:
                 continue
             if len(token) > 3 and token.endswith("ies"):
                 token = token[:-3] + "y"
-            elif len(token) > 4 and token.endswith("es"):
+            elif len(token) > 4 and token.endswith(es_suffixes):
                 token = token[:-2]
-            elif len(token) > 3 and token.endswith("s"):
+            elif len(token) > 3 and token.endswith("s") and not token.endswith("ss"):
                 token = token[:-1]
             tokens.append(token)
         return " ".join(tokens)
