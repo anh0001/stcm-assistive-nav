@@ -1,139 +1,101 @@
 #!/bin/bash
-# STCM Environment Setup Script
-# This script automates the installation of STCM with proper conda environment setup
+# STCM Environment Setup Script (system Python + isolated PYTHONUSERBASE)
 
-set -e  # Exit on error
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${GREEN}====================================${NC}"
 echo -e "${GREEN}STCM Environment Setup${NC}"
 echo -e "${GREEN}====================================${NC}"
 
-# Check if conda is installed
-if ! command -v conda &> /dev/null; then
-    echo -e "${RED}Error: conda is not installed${NC}"
-    echo "Please install Miniconda or Anaconda first:"
-    echo "https://docs.conda.io/en/latest/miniconda.html"
-    exit 1
-fi
-
-# Check if ROS 2 Humble is available
-if [ ! -f "/opt/ros/humble/setup.bash" ]; then
-    echo -e "${RED}Error: ROS 2 Humble not found${NC}"
-    echo "Please install ROS 2 Humble first:"
-    echo "https://docs.ros.org/en/humble/Installation.html"
-    exit 1
-fi
-
-# Create conda environment
-echo -e "\n${YELLOW}Step 1: Creating conda environment 'stcm_env'${NC}"
-if conda env list | grep -q "^stcm_env "; then
-    echo -e "${YELLOW}Environment 'stcm_env' already exists. Skipping creation.${NC}"
-else
-    conda create -n stcm_env python=3.10 -y
-    echo -e "${GREEN}Environment created successfully${NC}"
-fi
-
-# Activate the environment
-echo -e "\n${YELLOW}Step 2: Activating conda environment${NC}"
-source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate stcm_env
-
-# Ensure pip is properly installed in the conda environment
-echo -e "\n${YELLOW}Step 2.5: Ensuring pip is properly installed in conda environment${NC}"
-conda install pip -y
-
-# Install PyTorch with CUDA support
-echo -e "\n${YELLOW}Step 3: Installing PyTorch 2.4.0 with CUDA 12.1${NC}"
-pip install \
-  torch==2.4.0+cu121 \
-  torchvision==0.19.0+cu121 \
-  --index-url https://download.pytorch.org/whl/cu121
-
-# Verify PyTorch installation
-echo -e "\n${YELLOW}Verifying PyTorch installation...${NC}"
-python -c "import torch; print('PyTorch version:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA version:', torch.version.cuda)"
-
-# Install GroundingDINO
-echo -e "\n${YELLOW}Step 4: Installing GroundingDINO${NC}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -d "$HOME/GroundingDINO" ]; then
-    echo -e "${YELLOW}GroundingDINO already cloned. Using existing installation.${NC}"
-    cd "$HOME/GroundingDINO"
-    git pull
-else
-    cd "$HOME"
-    git clone https://github.com/IDEA-Research/GroundingDINO.git
-    cd GroundingDINO
+
+# Require python3 and ROS Humble
+if ! command -v python3 >/dev/null 2>&1; then
+    echo -e "${RED}Error: python3 not found. Install system Python 3.10 (default on Ubuntu 22.04).${NC}"
+    exit 1
 fi
-# Install without build isolation to use already installed torch
-pip install --no-build-isolation -e .
+if [ ! -f "/opt/ros/humble/setup.bash" ]; then
+    echo -e "${RED}Error: ROS 2 Humble not found at /opt/ros/humble/setup.bash${NC}"
+    echo "Install ROS 2 Humble before running this script."
+    exit 1
+fi
 
-# Install MobileSAM from GitHub
-echo -e "\n${YELLOW}Step 5: Installing MobileSAM${NC}"
-pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+PYTHON_BIN="$(command -v python3)"
+DEFAULT_USERBASE="$HOME/.local/stcm_sys_py310"
+export PYTHONUSERBASE="${PYTHONUSERBASE:-$DEFAULT_USERBASE}"
+mkdir -p "$PYTHONUSERBASE"
 
-# Install remaining dependencies
-echo -e "\n${YELLOW}Step 6: Installing remaining Python dependencies${NC}"
-cd "$SCRIPT_DIR/stcm"
+echo -e "${YELLOW}Using PYTHONUSERBASE=${PYTHONUSERBASE}${NC}"
+echo -e "${YELLOW}Add 'export PYTHONUSERBASE=${PYTHONUSERBASE}' to your shell profile for future terminals.${NC}"
 
-# Install core dependencies first to avoid version conflicts
-echo "Installing core numerical and build dependencies..."
-pip install numpy==1.26.4 setuptools wheel Cython
+pip_user() {
+    "$PYTHON_BIN" -m pip install --user "$@"
+}
 
-# Install specific versioned packages to avoid backtracking
-echo "Installing pinned versions..."
-pip install \
-  supervision==0.18.0 \
-  transformers==4.44.0 \
-  huggingface-hub==0.25.0
+echo -e "\n${YELLOW}Step 1: Upgrading pip in the isolated user base${NC}"
+"$PYTHON_BIN" -m pip install --upgrade --user pip
 
-# Install remaining packages
-echo "Installing remaining dependencies..."
-pip install \
-  networkx \
-  tqdm \
-  opencv-python \
-  open3d \
-  scikit-image \
-  shapely \
-  Pillow \
-  matplotlib \
-  ftfy \
-  regex \
-  requests \
-  PyYAML \
-  packaging \
-  chardet \
-  absl-py \
-  ros2-numpy
+echo -e "\n${YELLOW}Step 2: Installing PyTorch 2.4.0 (CUDA 12.1 wheels)${NC}"
+pip_user torch==2.4.0+cu121 torchvision==0.19.0+cu121 --index-url https://download.pytorch.org/whl/cu121
 
-# Install ROS dependencies
-echo -e "\n${YELLOW}Step 7: Installing ROS 2 dependencies${NC}"
+echo -e "\n${YELLOW}Verifying PyTorch installation...${NC}"
+"$PYTHON_BIN" - <<'PYTORCH_CHECK'
+import torch
+print("PyTorch version:", torch.__version__)
+print("CUDA available:", torch.cuda.is_available())
+print("CUDA runtime:", torch.version.cuda)
+PYTORCH_CHECK
+
+echo -e "\n${YELLOW}Step 3: Installing GroundingDINO${NC}"
+if [ -d "$HOME/GroundingDINO" ]; then
+    echo -e "${YELLOW}Existing GroundingDINO repo detected. Pulling latest...${NC}"
+    git -C "$HOME/GroundingDINO" pull --ff-only
+else
+    git clone https://github.com/IDEA-Research/GroundingDINO.git "$HOME/GroundingDINO"
+fi
+pip_user --no-build-isolation "$HOME/GroundingDINO"
+
+echo -e "\n${YELLOW}Step 4: Installing MobileSAM${NC}"
+pip_user git+https://github.com/ChaoningZhang/MobileSAM.git
+
+echo -e "\n${YELLOW}Step 5: Installing STCM Python dependencies${NC}"
+pip_user -r "$SCRIPT_DIR/stcm/requirements.txt"
+
+echo -e "\n${YELLOW}Step 6: Installing ROS 2 dependencies via rosdep${NC}"
 source /opt/ros/humble/setup.bash
-cd "$SCRIPT_DIR"
-rosdep install --from-paths stcm --ignore-src -y
+rosdep install --from-paths "$SCRIPT_DIR/stcm" --ignore-src -y
 
-# Build the ROS 2 package
-echo -e "\n${YELLOW}Step 8: Building ROS 2 package${NC}"
+echo -e "\n${YELLOW}Step 7: Building ROS 2 package${NC}"
+cd "$SCRIPT_DIR"
 colcon build --packages-select stcm
 
-# Verify installation
-echo -e "\n${YELLOW}Step 9: Verifying installation${NC}"
-python -c "import torch; from groundingdino.util.inference import load_model; print('GroundingDINO import OK')"
+echo -e "\n${YELLOW}Step 8: Verifying imports${NC}"
+"$PYTHON_BIN" - <<'VERIFY'
+import torch
+from groundingdino.util.inference import load_model
+import mobile_sam
+print("Torch:", torch.__version__)
+print("GroundingDINO + MobileSAM import OK")
+VERIFY
 
-# Success message
 echo -e "\n${GREEN}====================================${NC}"
 echo -e "${GREEN}Installation completed successfully!${NC}"
 echo -e "${GREEN}====================================${NC}"
-echo -e "\nTo use STCM in a new terminal, run:"
-echo -e "${YELLOW}conda activate stcm_env${NC}"
-echo -e "${YELLOW}source /opt/ros/humble/setup.bash${NC}"
-echo -e "${YELLOW}source $(dirname "$0")/install/setup.bash${NC}"
-echo -e "\nOr add this alias to your ~/.bashrc:"
-echo -e "${YELLOW}alias stcm_setup='conda activate stcm_env && source /opt/ros/humble/setup.bash && source $(dirname "$0")/install/setup.bash'${NC}"
+cat <<EOF
+
+Next steps for each terminal:
+1. export PYTHONUSERBASE="$PYTHONUSERBASE"    # add to ~/.bashrc for convenience
+2. source /opt/ros/humble/setup.bash
+3. source $(dirname "$0")/install/setup.bash
+
+Optional helper alias:
+    echo 'export PYTHONUSERBASE="$PYTHONUSERBASE"' >> ~/.bashrc
+    echo 'alias stcm_setup="export PYTHONUSERBASE=$PYTHONUSERBASE && source /opt/ros/humble/setup.bash && source $SCRIPT_DIR/install/setup.bash"' >> ~/.bashrc
+
+EOF

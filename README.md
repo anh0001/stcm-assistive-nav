@@ -10,7 +10,7 @@ The **Semantic Topological Cognitive Mapping (STCM)** workspace packages the per
 ## Requirements
 - Ubuntu 22.04 with ROS 2 Humble (desktop or ros-base)
 - CUDA Toolkit 12.x (tested with 12.4) + cuDNN 9
-- Conda or Miniconda for Python environment management
+- System Python 3.10 (default on Ubuntu 22.04). Packages are installed via `python3 -m pip --user` into an isolated `PYTHONUSERBASE`.
 - System dependencies resolved with `rosdep` (`rclpy`, `cv_bridge`, `message_filters`, `tf_transformations`, etc.)
 
 ## Installation
@@ -25,128 +25,101 @@ cd ~/stcm-assistive-nav
 ```
 
 This script will:
-1. Create the `stcm_env` conda environment
-2. Install PyTorch 2.4.0 with CUDA 12.1
-3. Install GroundingDINO from source
-4. Install MobileSAM from GitHub
-5. Install all Python dependencies
-6. Install ROS 2 dependencies
-7. Build the ROS 2 package
+1. Export (or create) `PYTHONUSERBASE=${HOME}/.local/stcm_sys_py310`
+2. Upgrade pip + install PyTorch 2.4.0 (CUDA 12.1 wheels), GroundingDINO, MobileSAM, and the rest of the Python dependencies into that isolated user base
+3. Install ROS dependencies via `rosdep`
+4. Build the ROS 2 package and verify imports
 
 ### Manual Installation
 
-If you prefer to install manually or need to troubleshoot, follow these steps:
+If you prefer to install manually or need to troubleshoot, follow these steps. All commands rely on the system `python3` and an isolated user base so ROS continues using the distro interpreter.
 
 ### System Compatibility
 Your setup: **Ubuntu 22.04 + ROS 2 Humble + CUDA toolkit 12.4 + cuDNN 9**
 
-PyTorch wheels ship their own CUDA runtime (cu121), so your system CUDA 12.4 won't conflict. The binary wheels come with their own cuDNN, so your system cuDNN 9 install is not used by PyTorch.
+PyTorch wheels ship their own CUDA runtime (cu121) + cuDNN, so your system CUDA 12.4 installation is fine—the NVIDIA driver just needs to meet the minimum version required by the wheel.
 
-### Step 1: Create Conda Environment
-
-**Option A:** Create from environment file
+### Step 0: Export an isolated `PYTHONUSERBASE`
 
 ```bash
-conda env create -f environment.yml
-conda activate stcm_env
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"  # pick any clean directory
+mkdir -p "$PYTHONUSERBASE"
+echo 'export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"' >> ~/.bashrc  # optional helper
 ```
 
-**Option B:** Create manually
+All subsequent `python3 -m pip install --user ...` commands will land inside that directory. This keeps ROS’ `/usr/bin/python3` happy without polluting `~/.local`.
+
+### Step 1: Upgrade pip inside that user base
 
 ```bash
-# Create dedicated environment with Python 3.10
-conda create -n stcm_env python=3.10 -y
-
-# Activate environment
-conda activate stcm_env
+python3 -m pip install --upgrade --user pip
 ```
 
 ### Step 2: Install CUDA-enabled PyTorch
 
-Install PyTorch 2.4.0 with CUDA 12.1 support (stable, known-good combo):
-
 ```bash
-pip install \
+python3 -m pip install --user \
   torch==2.4.0+cu121 \
   torchvision==0.19.0+cu121 \
   --index-url https://download.pytorch.org/whl/cu121
 ```
 
-Verify installation:
+Verify:
 
 ```bash
-python -c "import torch; print('torch:', torch.__version__); print('cuda available:', torch.cuda.is_available()); print('cuda version:', torch.version.cuda)"
+python3 - <<'PY'
+import torch
+print('torch:', torch.__version__)
+print('cuda available:', torch.cuda.is_available())
+print('cuda runtime:', torch.version.cuda)
+PY
 ```
 
-Expected output:
-- `torch: 2.4.0+cu121`
-- `cuda available: True`
-- `cuda version: 12.1` (wheel's internal runtime, not your system 12.4)
-
 ### Step 3: Install GroundingDINO
-
-**Option A (Recommended):** From official repository
 
 ```bash
 cd ~
 git clone https://github.com/IDEA-Research/GroundingDINO.git
-cd GroundingDINO
-pip install -e .
+python3 -m pip install --user --no-build-isolation -e ./GroundingDINO
 ```
 
-This compiles CUDA operators against your current PyTorch 2.4.0 and CUDA toolchain.
-
-**Option B:** PyPI wrapper (if you prefer pip-only)
-
-```bash
-pip install groundingdino-py==0.4.0
-```
+> Prefer the source install so the CUDA extensions compile against the PyTorch wheel above. A `pip install groundingdino-py` fallback works, but the source tree is more flexible for patches.
 
 ### Step 4: Install MobileSAM
 
-MobileSAM is not available on PyPI and must be installed from GitHub:
-
 ```bash
-pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+python3 -m pip install --user git+https://github.com/ChaoningZhang/MobileSAM.git
 ```
 
-### Step 5: Install Remaining Dependencies
+### Step 5: Install remaining requirements
 
 ```bash
 cd ~/stcm-assistive-nav/stcm
-pip install -r requirements.txt
+python3 -m pip install --user -r requirements.txt
 ```
 
-### Step 6: Install ROS 2 Dependencies
+### Step 6: Install ROS 2 dependencies
 
 ```bash
-# Make sure ROS 2 Humble is sourced
-source /opt/ros/humble/setup.bash
-
-# Install ROS dependencies
 cd ~/stcm-assistive-nav
+source /opt/ros/humble/setup.bash
 rosdep install --from-paths stcm --ignore-src -y
 ```
 
-### Step 7: Build the ROS 2 Package
+### Step 7: Build the ROS 2 package
 
 ```bash
 cd ~/stcm-assistive-nav
 colcon build --packages-select stcm
 ```
 
-### Step 8: Setup Your Shell Environment
+### Step 8: Setup your shell environment
 
-For every new terminal session where you want to use this package:
+For every new terminal session:
 
 ```bash
-# 1. Activate conda environment FIRST
-conda activate stcm_env
-
-# 2. Source ROS 2 Humble
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"  # ensure this matches the path you picked earlier
 source /opt/ros/humble/setup.bash
-
-# 3. Source your workspace
 source ./install/setup.bash
 ```
 
@@ -210,8 +183,8 @@ The legacy perception demos are still available under `stcm/test`.
 
 **Important**: Before running tests, ensure your environment is properly set up:
 ```bash
-# 1. Activate conda environment
-conda activate stcm_env
+# 1. Export PYTHONUSERBASE so python finds the isolated deps
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"
 
 # 2. Source ROS 2 Humble
 source /opt/ros/humble/setup.bash
