@@ -121,11 +121,13 @@ class SemanticMapBuilder(Node):
 
         image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
-        if not np.any(keep_index):
+        # Convert PyTorch tensor to numpy for np.any() and indexing
+        keep_index_np = keep_index.numpy() if hasattr(keep_index, 'numpy') else keep_index
+        if not np.any(keep_index_np):
             return
         masks = masks[keep_index]
         gdino_conf = gdino_conf[keep_index]
-        selected_idx = np.where(keep_index)[0]
+        selected_idx = np.where(keep_index_np)[0]
         phrases = [phrases[i] for i in selected_idx]
 
         self._update_graph(
@@ -228,4 +230,6 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        # Only shutdown if context is still valid
+        if rclpy.ok():
+            rclpy.shutdown()

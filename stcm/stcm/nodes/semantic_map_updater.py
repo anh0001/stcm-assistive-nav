@@ -289,4 +289,6 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        # Only shutdown if context is still valid
+        if rclpy.ok():
+            rclpy.shutdown()

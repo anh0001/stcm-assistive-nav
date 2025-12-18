@@ -184,18 +184,50 @@ class ImageListener:
             self.RT_camera = rt_camera
             self.RT_base = rt_base
 
-    def _project_cloud_to_depth(self, cloud: PointCloud2, width: int, height: int) -> Optional[np.ndarray]:
-        try:
-            cloud_array = ros_numpy.numpify(cloud)
-        except Exception as exc:  # pragma: no cover - defensive guard
-            self._node.get_logger().error("Unable to parse projected cloud: %s", exc)
+    def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
+        """Parse PointCloud2 message preserving ALL fields including custom u/v."""
+        import struct
+
+        # Build numpy dtype from PointCloud2 fields
+        dtype_list = []
+        for field in cloud.fields:
+            # Map PointCloud2 datatypes to numpy dtypes
+            type_map = {
+                1: np.int8, 2: np.uint8,
+                3: np.int16, 4: np.uint16,
+                5: np.int32, 6: np.uint32,
+                7: np.float32, 8: np.float64
+            }
+            np_dtype = type_map.get(field.datatype)
+            if np_dtype is None:
+                self._node.get_logger().warn(f"Unknown datatype {field.datatype} for field {field.name}")
+                continue
+
+            dtype_list.append((field.name, np_dtype))
+
+        if not dtype_list:
             return None
 
-        # Handle case where ros_numpy.numpify returns a dict instead of structured array
-        if isinstance(cloud_array, dict):
-            field_names = set(cloud_array.keys())
-        else:
-            field_names = cloud_array.dtype.names or ()
+        # Create structured array from raw data
+        dtype = np.dtype(dtype_list)
+        try:
+            # Reshape raw data into structured array
+            cloud_array = np.frombuffer(cloud.data, dtype=dtype)
+            return cloud_array
+        except Exception as exc:
+            self._node.get_logger().error(f"Failed to parse PointCloud2: {exc}")
+            return None
+
+    def _project_cloud_to_depth(self, cloud: PointCloud2, width: int, height: int) -> Optional[np.ndarray]:
+        # Parse PointCloud2 with all fields preserved
+        cloud_array = self._parse_pointcloud2_all_fields(cloud)
+        if cloud_array is None:
+            if not self._cloud_field_warning_emitted:
+                self._node.get_logger().error("Unable to parse projected cloud")
+                self._cloud_field_warning_emitted = True
+            return None
+
+        field_names = cloud_array.dtype.names or ()
 
         if "u" not in field_names or "v" not in field_names:
             if not self._cloud_field_warning_emitted:
