@@ -199,7 +199,9 @@ class ImageListener:
 
         if "u" not in field_names or "v" not in field_names:
             if not self._cloud_field_warning_emitted:
-                self._node.get_logger().error("Projected cloud missing required 'u'/'v' fields.")
+                self._node.get_logger().error(
+                    f"Projected cloud missing required 'u'/'v' fields. Available fields: {list(field_names)}"
+                )
                 self._cloud_field_warning_emitted = True
             return None
 
