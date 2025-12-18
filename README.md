@@ -161,13 +161,26 @@ ros2 run stcm stcm_download_checkpoints --models mobilesam --target /data/ckpts
 
 Set `export STCM_CKPT_DIR=/data/ckpts` when using a custom directory. GroundingDINO weights are fetched automatically from the HuggingFace cache; MobileSAM and the optional DepthAnything file are loaded from the checkpoint directory.
 
+## Required Inputs
+
+**Camera Topics** (find with `ros2 topic list | grep image`):
+- RGB image (e.g., `/camera/color/image_raw`)
+- Depth image (e.g., `/camera/aligned_depth_to_color/image_raw`)
+- Camera info (e.g., `/camera/color/camera_info`)
+
+**TF Transforms** (verify with `ros2 run tf2_tools view_frames`):
+- `camera_frame → base_frame → world_frame` (e.g., `camera_optical_frame → base_link → map`)
+- Without SLAM/localization, publish static transform: `ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map base_link`
+
+**Object Classes** (configure in YAML):
+```yaml
+text_prompt: "table . chair . door ."  # each class ends with " ."
+target_labels: ["table", "chair", "door"]
+target_label_thresholds: [2.0, 0.6, 2.0]  # merge radius in meters
+```
+
 ## Launching ROS 2 nodes
-Use the provided launch file for quick bring-up. First, edit `stcm/config/semantic_mapping_params.yaml`
-(or copy it elsewhere) to adjust the prompt, output path, and updater flag—each field includes a short
-comment describing its use. The same file also exposes the model checkpoint fields
-(`groundingdino_checkpoint`, `mobilesam_checkpoint`, `depth_anything_checkpoint`) so
-you can point the launch at custom weights without exporting `STCM_CKPT_DIR`.
-Then launch with that config file:
+Edit `stcm/config/semantic_mapping_params.yaml` to configure topics, TF frames, object classes, and checkpoints. Then launch:
 
 ```bash
 ros2 launch stcm semantic_mapping.launch.py \
@@ -177,12 +190,7 @@ ros2 launch stcm semantic_mapping.launch.py \
 You can still override individual values at launch time (`text_prompt:=...`, `graph_output_path:=...`,
 `use_sim_time:=...`, `run_updater:=...`), but keeping them in the YAML makes repeated runs easier.
 
-Key parameters (set via the launch file or `ros2 param set`):
-- `rgb_topic`, `depth_topic`, `camera_info_topic`: remap to your RGB-D driver topics.
-- `camera_frame`, `base_frame`, `world_frame`: match your TF tree (e.g., `camera_link`, `base_link`, `map`).
-- `target_labels` / `target_label_thresholds`: object classes of interest and per-class merge radius.
-- `text_prompt`, `box_threshold`, `text_threshold`: detection prompt and thresholds.
-- `graph_output_path` / `graph_input_path`: where semantic graphs are stored.
+All parameters are configured in the YAML file (topics, TF frames, detection settings, output paths).
 
 Run the updater separately once you have an initial graph:
 

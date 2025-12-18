@@ -54,6 +54,11 @@ def launch_setup(context, *args, **kwargs):
     config_path = LaunchConfiguration("config_file").perform(context)
     config = _load_config(config_path)
 
+    def _node_params():
+        params = dict(config)
+        params.pop("run_updater", None)
+        return params
+
     text_prompt = _resolve_str(context, "text_prompt", config.get("text_prompt", DEFAULT_TEXT_PROMPT))
     graph_path = _resolve_str(context, "graph_output_path", config.get("graph_output_path", DEFAULT_GRAPH_PATH))
     use_sim_time = _resolve_bool(context, "use_sim_time", config.get("use_sim_time", DEFAULT_USE_SIM_TIME))
@@ -62,35 +67,46 @@ def launch_setup(context, *args, **kwargs):
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
 
+    builder_params = _node_params()
+    builder_params.update(
+        {
+            "text_prompt": text_prompt,
+            "graph_output_path": graph_path,
+            "use_sim_time": use_sim_time,
+            "groundingdino_checkpoint": grounding_ckpt,
+            "mobilesam_checkpoint": mobilesam_ckpt,
+            "depth_anything_checkpoint": depth_ckpt,
+        }
+    )
+
     builder_node = Node(
         package="stcm",
         executable="semantic_map_builder",
         name="semantic_map_builder",
         output="screen",
-        parameters=[
-            {"text_prompt": text_prompt},
-            {"graph_output_path": graph_path},
-            {"use_sim_time": use_sim_time},
-            {"groundingdino_checkpoint": grounding_ckpt},
-            {"mobilesam_checkpoint": mobilesam_ckpt},
-            {"depth_anything_checkpoint": depth_ckpt},
-        ],
+        parameters=[builder_params],
     )
 
     if run_updater:
+        updater_params = _node_params()
+        updater_params.update(
+            {
+                "text_prompt": text_prompt,
+                "graph_input_path": config.get("graph_input_path", graph_path),
+                "graph_output_path": graph_path,
+                "use_sim_time": use_sim_time,
+                "groundingdino_checkpoint": grounding_ckpt,
+                "mobilesam_checkpoint": mobilesam_ckpt,
+                "depth_anything_checkpoint": depth_ckpt,
+            }
+        )
+
         updater_node = Node(
             package="stcm",
             executable="semantic_map_updater",
             name="semantic_map_updater",
             output="screen",
-            parameters=[
-                {"text_prompt": text_prompt},
-                {"graph_input_path": graph_path},
-                {"use_sim_time": use_sim_time},
-                {"groundingdino_checkpoint": grounding_ckpt},
-                {"mobilesam_checkpoint": mobilesam_ckpt},
-                {"depth_anything_checkpoint": depth_ckpt},
-            ],
+            parameters=[updater_params],
         )
         return [builder_node, updater_node]
 

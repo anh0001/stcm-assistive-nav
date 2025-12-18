@@ -1,21 +1,53 @@
 # Semantic mapping launch parameters. Adjust these values as needed before running
 # `ros2 launch stcm semantic_mapping.launch.py`.
 
-# Space-separated list describing the target objects for the SAM prompt; end each
-# object with a period to match the expected format in the semantic mapper.
+# ============================================================================
+# CAMERA TOPICS - Adjust to match your RGB-D camera driver
+# Find your topics: ros2 topic list | grep image
+# ============================================================================
+rgb_topic: "/camera/color/image_raw"
+depth_topic: "/camera/aligned_depth_to_color/image_raw"
+camera_info_topic: "/camera/color/camera_info"
+
+# ============================================================================
+# TF FRAMES - Adjust to match your robot's transform tree
+# Verify: ros2 run tf2_tools view_frames
+# ============================================================================
+camera_frame: "camera_color_optical_frame"
+base_frame: "base_link"
+world_frame: "map"
+
+# ============================================================================
+# OBJECT DETECTION - What to detect and track
+# ============================================================================
+# Space-separated list; end each object with " ." (space + period)
 text_prompt: "table . chair . door ."
 
-# Absolute or relative file path where the semantic graph JSON file will be
-# written by the builder node (and read by the updater node when enabled).
+# List of object classes matching the text_prompt
+target_labels: ["table", "chair", "door"]
+
+# Per-class merge radius in meters (larger values for bigger objects)
+target_label_thresholds: [2.0, 0.6, 2.0]
+
+# Detection confidence thresholds (0.0-1.0)
+box_threshold: 0.55
+text_threshold: 0.55
+
+# ============================================================================
+# OUTPUT AND TIMING
+# ============================================================================
+# Where to save the semantic graph JSON file
 graph_output_path: "semantic_graph.json"
 
-# Whether to publish simulated time instead of wall time. Leave `false` when
-# running on a real robot and set `true` when replaying bags or using Gazebo.
+# Set `true` for bag playback or Gazebo, `false` for live robot
 use_sim_time: false
 
-# Enable the semantic_map_updater node to continuously update a previously
-# generated graph. Set to `false` when only building a graph once.
+# Enable updater node to continuously update an existing graph
 run_updater: false
+
+# ============================================================================
+# MODEL CHECKPOINTS
+# ============================================================================
 
 # Optional override for the GroundingDINO checkpoint (.pth). Leave blank to
 # download via HuggingFace caching, or point to a file such as
