@@ -13,7 +13,7 @@ camera_info_topic: "/camera/camera_info"
 # TF FRAMES - Adjust to match your robot's transform tree
 # Verify: ros2 run tf2_tools view_frames
 # ============================================================================
-camera_frame: "camera_link"
+camera_frame: "camera_color_optical_frame"
 base_frame: "base_footprint"
 world_frame: "map"
 

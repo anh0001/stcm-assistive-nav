@@ -276,7 +276,7 @@ class SemanticMapUpdater(Node):
 
     def destroy_node(self):
         save_graph_json(self.graph, file=str(self.graph_output_path))
-        self.get_logger().info("Updated graph saved to %s", self.graph_output_path.resolve())
+        self.get_logger().info(f"Updated graph saved to {self.graph_output_path.resolve()}")
         super().destroy_node()
 
 

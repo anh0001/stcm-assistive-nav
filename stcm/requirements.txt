@@ -31,6 +31,7 @@ absl-py
 
 # ROS helper
 ros2-numpy==0.0.5  # Latest release; metadata pins numpy==1.24.2 so keep them in sync
+transforms3d>=0.4.1  # Override Ubuntu's ROS dependency to avoid the removed np.float alias
 
 # NOTE: torch, torchvision, and groundingdino are installed separately
 # See README.md for proper installation instructions

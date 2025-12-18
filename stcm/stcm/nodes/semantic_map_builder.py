@@ -78,7 +78,7 @@ class SemanticMapBuilder(Node):
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
         self.timer = self.create_timer(self.processing_period, self._process_frame)
 
-        self.get_logger().info("Semantic map builder ready (labels: %s)", ", ".join(self.distance_thresholds.keys()))
+        self.get_logger().info(f"Semantic map builder ready (labels: {', '.join(self.distance_thresholds.keys())})")
 
     def _build_threshold_map(self, labels, thresholds):
         thresholds = list(thresholds) if isinstance(thresholds, (list, tuple)) else [thresholds]
@@ -215,7 +215,7 @@ class SemanticMapBuilder(Node):
 
     def destroy_node(self):
         save_graph_json(self.graph, file=str(self.graph_path))
-        self.get_logger().info("Semantic graph saved to %s", self.graph_path.resolve())
+        self.get_logger().info(f"Semantic graph saved to {self.graph_path.resolve()}")
         super().destroy_node()
 
 
