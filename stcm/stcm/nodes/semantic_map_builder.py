@@ -7,6 +7,7 @@ from typing import Dict, List
 
 import networkx as nx
 import numpy as np
+import torch
 import ros2_numpy as ros_numpy
 import rclpy
 from PIL import Image as PILImg
@@ -37,10 +38,15 @@ class SemanticMapBuilder(Node):
             "projected_lidar_topic", "/lidar_points_projected"
         ).value
         self.projected_lidar_frame = self.declare_parameter("projected_lidar_frame", "").value
+        self.projected_lidar_timeout = float(
+            self.declare_parameter("projected_lidar_timeout_sec", 2.0).value
+        )
 
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
         thresholds = self.declare_parameter("target_label_thresholds", [2.0, 2.0, 0.6]).value
         self.distance_thresholds = self._build_threshold_map(labels, thresholds)
+        self._label_lookup = self._build_label_lookup(self.distance_thresholds.keys())
+        self._unknown_phrase_cache: set[str] = set()
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
@@ -65,6 +71,7 @@ class SemanticMapBuilder(Node):
             use_projected_lidar=self.use_projected_lidar,
             projected_lidar_topic=self.projected_lidar_topic,
             projected_lidar_frame=self.projected_lidar_frame,
+            projected_lidar_timeout_sec=self.projected_lidar_timeout,
         )
 
         self.gdino = GroundingDINOObjectPredictor(
@@ -88,17 +95,95 @@ class SemanticMapBuilder(Node):
             threshold_map[label] = float(threshold_value)
         return threshold_map
 
+    def _build_label_lookup(self, labels):
+        lookup = {}
+        token_lookup = {}
+        for label in labels:
+            normalized = self._normalize_label_key(label)
+            if not normalized:
+                continue
+            if normalized in lookup and lookup[normalized] != label:
+                self.get_logger().warning(
+                    "Duplicate normalized label '%s' maps to both '%s' and '%s'", normalized, lookup[normalized], label
+                )
+            lookup[normalized] = label
+            token_lookup[normalized] = normalized.split()
+        self._label_token_lookup = token_lookup
+        return lookup
+
+    def _normalize_label_key(self, text: str) -> str:
+        tokens = []
+        for raw_token in text.split():
+            token = raw_token.strip(" .,;:()[]{}-_\"'\n\t").lower()
+            if not token:
+                continue
+            if len(token) > 3 and token.endswith("ies"):
+                token = token[:-3] + "y"
+            elif len(token) > 4 and token.endswith("es"):
+                token = token[:-2]
+            elif len(token) > 3 and token.endswith("s"):
+                token = token[:-1]
+            tokens.append(token)
+        return " ".join(tokens)
+
+    def _canonicalize_phrase(self, phrase: str) -> str | None:
+        normalized_phrase = self._normalize_label_key(phrase)
+        if normalized_phrase in self._label_lookup:
+            return self._label_lookup[normalized_phrase]
+
+        phrase_tokens = normalized_phrase.split()
+        for normalized_label, original_label in self._label_lookup.items():
+            label_tokens = self._label_token_lookup.get(normalized_label, [])
+            if all(token in phrase_tokens for token in label_tokens):
+                return original_label
+
+        if normalized_phrase and normalized_phrase not in self._unknown_phrase_cache:
+            self._unknown_phrase_cache.add(normalized_phrase)
+            self.get_logger().warning(
+                "Skipping detection phrase '%s' because it does not match any target_labels.",
+                phrase,
+            )
+        return None
+
     @staticmethod
     def _expanduser_if_set(value: str | None) -> Path | None:
         if not value:
             return None
         return Path(value).expanduser()
 
+    def _filter_to_target_labels(self, boxes, masks, scores, phrases):
+        valid_indices = []
+        canonical_phrases = []
+        for idx, phrase in enumerate(phrases):
+            canonical_label = self._canonicalize_phrase(phrase)
+            if canonical_label is None:
+                continue
+            canonical_phrases.append(canonical_label)
+            valid_indices.append(idx)
+
+        if not valid_indices:
+            return None
+
+        def _select(container):
+            if hasattr(container, "index_select"):
+                index_tensor = torch.as_tensor(valid_indices, dtype=torch.long, device=container.device)
+                return container.index_select(0, index_tensor)
+            if isinstance(container, np.ndarray):
+                return container[valid_indices]
+            return [container[i] for i in valid_indices]
+
+        filtered_boxes = _select(boxes)
+        filtered_masks = _select(masks)
+        filtered_scores = _select(scores)
+        return filtered_boxes, filtered_masks, filtered_scores, canonical_phrases
+
     def _process_frame(self) -> None:
         frames = self.listener.get_latest_frames()
         if frames is None:
+            self.get_logger().debug("No frames available from listener")
             return
 
+        self.get_logger().info("Processing frame - running detection")
         rgb_image = frames["rgb"].astype(np.uint8)
         depth_image = frames["depth"]
         rt_camera = frames["rt_camera"]
@@ -109,10 +194,13 @@ class SemanticMapBuilder(Node):
         bboxes, phrases, gdino_conf = self.gdino.predict(
             img_pil, self.text_prompt, self.box_threshold, self.text_threshold
         )
+        self.get_logger().info(f"GroundingDINO detected {len(phrases)} objects: {phrases}")
         bboxes, gdino_conf, phrases, skip_detection = filter(
-            bboxes, gdino_conf, phrases, 1, 0.8, 0.8, 0.8, 0.01, True
+            bboxes, gdino_conf, phrases, 1, 1.0, 0.9, 0.9, 0.005, True
         )
+        self.get_logger().info(f"After filtering: {len(phrases)} objects remain")
         if skip_detection or len(phrases) == 0:
+            self.get_logger().debug("Skipping frame: no detections after filtering")
             return
 
         width = rgb_image.shape[1]
@@ -129,6 +217,12 @@ class SemanticMapBuilder(Node):
         gdino_conf = gdino_conf[keep_index]
         selected_idx = np.where(keep_index_np)[0]
         phrases = [phrases[i] for i in selected_idx]
+
+        filtered = self._filter_to_target_labels(image_pil_bboxes, masks, gdino_conf, phrases)
+        if filtered is None:
+            self.get_logger().debug("Detections did not match any target_labels; skipping frame.")
+            return
+        image_pil_bboxes, masks, gdino_conf, phrases = filtered
 
         self._update_graph(
             masks.cpu().numpy(), phrases, rt_camera, rt_base, depth_image, frames["intrinsics"]

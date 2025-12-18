@@ -35,6 +35,7 @@ class ImageListener:
         use_projected_lidar: bool = False,
         projected_lidar_topic: str = "/lidar_points_projected",
         projected_lidar_frame: str | None = None,
+        projected_lidar_timeout_sec: float = 2.0,
     ) -> None:
         self._node = node
         self._lock = threading.Lock()
@@ -45,13 +46,24 @@ class ImageListener:
         self.rgb_frame_id: Optional[str] = None
         self.rgb_frame_stamp = None
 
+        self.rgb_topic = rgb_topic
+        self.depth_topic = depth_topic
+        self._depth_topic_name = depth_topic or "<depth topic unavailable>"
         self.base_frame = base_frame
         self.camera_frame = camera_frame
+        self._rgb_frame_override = camera_frame.strip() if camera_frame else None
         self.world_frame = world_frame
         self.use_projected_lidar = bool(use_projected_lidar)
         self.projected_lidar_topic = projected_lidar_topic
+        self._projected_topic_name = projected_lidar_topic or "<projected lidar topic unavailable>"
         self.projected_lidar_frame = projected_lidar_frame or None
         self._cloud_field_warning_emitted = False
+        self.projected_lidar_timeout_sec = max(0.0, float(projected_lidar_timeout_sec))
+        self._projected_lidar_timeout_ns = int(self.projected_lidar_timeout_sec * 1e9) if self.projected_lidar_timeout_sec > 0.0 else 0
+        self._lidar_depth_active = False
+        self._cloud_missing_warned = False
+        self._cloud_timeout_warned = False
+        self._last_cloud_time: Optional[Time] = None
 
         self.intrinsics: Optional[np.ndarray] = None
         self.fx = None
@@ -67,34 +79,47 @@ class ImageListener:
             CameraInfo, camera_info_topic, self._camera_info_callback, qos_profile_sensor_data
         )
 
-        self._rgb_sub = message_filters.Subscriber(
-            node, Image, rgb_topic, qos_profile=qos_profile_sensor_data
-        )
+        self._rgb_depth_sub = None
+        self._rgb_cloud_sub = None
         self._depth_sub = None
         self._cloud_sub = None
+        self._depth_synchronizer = None
+        self._cloud_synchronizer = None
 
-        if self.use_projected_lidar:
-            self._cloud_sub = message_filters.Subscriber(
-                node, PointCloud2, projected_lidar_topic, qos_profile=qos_profile_sensor_data
+        if depth_topic:
+            self._rgb_depth_sub = message_filters.Subscriber(
+                node, Image, rgb_topic, qos_profile=qos_profile_sensor_data
             )
-            self._synchronizer = message_filters.ApproximateTimeSynchronizer(
-                [self._rgb_sub, self._cloud_sub],
-                queue_size=queue_size,
-                slop=slop_seconds,
-                allow_headerless=False,
-            )
-            self._synchronizer.registerCallback(self._callback_rgb_cloud)
-        else:
             self._depth_sub = message_filters.Subscriber(
                 node, Image, depth_topic, qos_profile=qos_profile_sensor_data
             )
-            self._synchronizer = message_filters.ApproximateTimeSynchronizer(
-                [self._rgb_sub, self._depth_sub],
+            self._depth_synchronizer = message_filters.ApproximateTimeSynchronizer(
+                [self._rgb_depth_sub, self._depth_sub],
                 queue_size=queue_size,
                 slop=slop_seconds,
                 allow_headerless=False,
             )
-            self._synchronizer.registerCallback(self._callback_rgbd)
+            self._depth_synchronizer.registerCallback(self._callback_rgbd)
+
+        if self.use_projected_lidar:
+            self._rgb_cloud_sub = message_filters.Subscriber(
+                node, Image, rgb_topic, qos_profile=qos_profile_sensor_data
+            )
+            self._cloud_sub = message_filters.Subscriber(
+                node, PointCloud2, projected_lidar_topic, qos_profile=qos_profile_sensor_data
+            )
+            self._cloud_synchronizer = message_filters.ApproximateTimeSynchronizer(
+                [self._rgb_cloud_sub, self._cloud_sub],
+                queue_size=queue_size,
+                slop=slop_seconds,
+                allow_headerless=False,
+            )
+            self._cloud_synchronizer.registerCallback(self._callback_rgb_cloud)
+
+        if self._depth_synchronizer is None and self._cloud_synchronizer is None:
+            raise ValueError(
+                "ImageListener requires either a depth topic or a projected LiDAR topic to be enabled."
+            )
 
     def _camera_info_callback(self, msg: CameraInfo) -> None:
         intrinsics = np.array(msg.k).reshape(3, 3)
@@ -109,6 +134,49 @@ class ImageListener:
         self._node.destroy_subscription(self._camera_info_sub)
         self._camera_info_sub = None
 
+    def _record_projected_cloud_sample(self, stamp_msg) -> None:
+        if not self.use_projected_lidar:
+            return
+        self._lidar_depth_active = True
+        self._last_cloud_time = Time.from_msg(stamp_msg)
+        if self._cloud_missing_warned or self._cloud_timeout_warned:
+            self._node.get_logger().info(
+                "Projected LiDAR topic '%s' is active; prioritizing fused depth.",
+                self._projected_topic_name,
+            )
+        self._cloud_missing_warned = False
+        self._cloud_timeout_warned = False
+
+    def _projected_cloud_is_recent(self) -> bool:
+        if not self.use_projected_lidar or not self._lidar_depth_active:
+            return False
+        if self._last_cloud_time is None:
+            return False
+        if self._projected_lidar_timeout_ns == 0:
+            return True
+        now = self._node.get_clock().now()
+        elapsed = now - self._last_cloud_time
+        return elapsed.nanoseconds <= self._projected_lidar_timeout_ns
+
+    def _handle_projected_lidar_unavailable(self, reason: str) -> None:
+        if not self.use_projected_lidar:
+            return
+        if reason == "missing" and not self._cloud_missing_warned:
+            self._node.get_logger().warning(
+                "Projected LiDAR topic '%s' has not produced any data; falling back to depth topic '%s'.",
+                self._projected_topic_name,
+                self._depth_topic_name,
+            )
+            self._cloud_missing_warned = True
+        elif reason == "timeout" and not self._cloud_timeout_warned:
+            self._node.get_logger().warning(
+                "Projected LiDAR topic '%s' has not updated within %.1f s; reusing depth topic '%s'.",
+                self._projected_topic_name,
+                self.projected_lidar_timeout_sec,
+                self._depth_topic_name,
+            )
+            self._cloud_timeout_warned = True
+
     def _lookup_tf(self, target_frame: str, source_frame: str) -> Optional[np.ndarray]:
         try:
             transform = self._tf_buffer.lookup_transform(
@@ -118,7 +186,7 @@ class ImageListener:
                 timeout=Duration(seconds=0.2),
             )
         except (LookupException, ConnectivityException, ExtrapolationException) as exc:
-            self._node.get_logger().warning("TF lookup failed (%s -> %s): %s", source_frame, target_frame, exc)
+            self._node.get_logger().warning(f"TF lookup failed ({source_frame} -> {target_frame}): {exc}")
             return None
 
         translation = transform.transform.translation
@@ -130,6 +198,15 @@ class ImageListener:
     def _callback_rgbd(self, rgb: Image, depth: Image) -> None:
         if not self._camera_info_ready.is_set():
             return
+
+        if self.use_projected_lidar:
+            if self._lidar_depth_active:
+                if self._projected_cloud_is_recent():
+                    return
+                self._lidar_depth_active = False
+                self._handle_projected_lidar_unavailable("timeout")
+            else:
+                self._handle_projected_lidar_unavailable("missing")
 
         rt_camera = self._lookup_tf(self.base_frame, self.camera_frame)
         rt_base = self._lookup_tf(self.world_frame, self.base_frame)
@@ -152,7 +229,7 @@ class ImageListener:
         with self._lock:
             self.im = rgb_image.copy()
             self.depth = depth_cv.copy()
-            self.rgb_frame_id = rgb.header.frame_id
+            self.rgb_frame_id = self._rgb_frame_override or rgb.header.frame_id
             self.rgb_frame_stamp = rgb.header.stamp
             self.height = depth_cv.shape[0]
             self.width = depth_cv.shape[1]
@@ -161,28 +238,34 @@ class ImageListener:
 
     def _callback_rgb_cloud(self, rgb: Image, cloud: PointCloud2) -> None:
         if not self._camera_info_ready.is_set():
+            self._node.get_logger().debug("RGB-Cloud callback: waiting for camera info")
             return
 
         rt_camera = self._lookup_tf(self.base_frame, self.camera_frame)
         rt_base = self._lookup_tf(self.world_frame, self.base_frame)
 
         if rt_camera is None or rt_base is None:
+            self._node.get_logger().debug("RGB-Cloud callback: TF lookup failed")
             return
 
         depth_cv = self._project_cloud_to_depth(cloud, rgb.width, rgb.height)
         if depth_cv is None:
+            self._node.get_logger().debug("RGB-Cloud callback: cloud projection failed")
             return
+
+        self._node.get_logger().info("RGB-Cloud callback: successfully processed frame")
 
         rgb_image = ros_numpy.numpify(rgb)
         with self._lock:
             self.im = rgb_image.copy()
             self.depth = depth_cv
-            self.rgb_frame_id = rgb.header.frame_id
+            self.rgb_frame_id = self._rgb_frame_override or rgb.header.frame_id
             self.rgb_frame_stamp = rgb.header.stamp
             self.height = depth_cv.shape[0]
             self.width = depth_cv.shape[1]
             self.RT_camera = rt_camera
             self.RT_base = rt_base
+        self._record_projected_cloud_sample(rgb.header.stamp)
 
     def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
         """Parse PointCloud2 message preserving ALL fields including custom u/v."""

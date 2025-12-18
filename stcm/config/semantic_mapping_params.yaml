@@ -13,6 +13,7 @@ camera_info_topic: "/camera/camera_info"
 # TF FRAMES - Adjust to match your robot's transform tree
 # Verify: ros2 run tf2_tools view_frames
 # ============================================================================
+# `camera_frame` also overrides the frame_id reported by `rgb_topic` when publishing debug images.
 camera_frame: "camera_color_optical_frame"
 base_frame: "base_footprint"
 world_frame: "map"
@@ -25,6 +26,8 @@ world_frame: "map"
 use_projected_lidar: true
 projected_lidar_topic: "/lidar_points_projected"
 projected_lidar_frame: "lidar_link"
+# Seconds to wait for projected lidar frames before falling back to the depth topic.
+projected_lidar_timeout_sec: 2.0
 
 # ============================================================================
 # OBJECT DETECTION - What to detect and track

@@ -147,6 +147,7 @@ Set `export STCM_CKPT_DIR=/data/ckpts` when using a custom directory. GroundingD
 
 **TF Transforms** (verify with `ros2 run tf2_tools view_frames`):
 - `camera_frame → base_frame → world_frame` (e.g., `camera_optical_frame → base_link → map`)
+- The `camera_frame` parameter is also used to override the RGB topic's `frame_id` when the nodes republish segmented images, so use it to correct cameras that advertise the wrong frame.
 - Without SLAM/localization, publish static transform: `ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map base_link`
 
 **Object Classes** (configure in YAML):
