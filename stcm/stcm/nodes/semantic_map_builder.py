@@ -145,7 +145,7 @@ class SemanticMapBuilder(Node):
                 continue
             if normalized in lookup and lookup[normalized] != label:
                 self.get_logger().warning(
-                    "Duplicate normalized label '%s' maps to both '%s' and '%s'", normalized, lookup[normalized], label
+                    f"Duplicate normalized label '{normalized}' maps to both '{lookup[normalized]}' and '{label}'"
                 )
             lookup[normalized] = label
             token_lookup[normalized] = normalized.split()
@@ -183,9 +183,7 @@ class SemanticMapBuilder(Node):
         if normalized_phrase and normalized_phrase not in self._unknown_phrase_cache:
             self._unknown_phrase_cache.add(normalized_phrase)
             self.get_logger().warning(
-                "Skipping detection phrase '%s' (normalized: '%s') because it does not match any target_labels.",
-                phrase,
-                normalized_phrase,
+                f"Skipping detection phrase '{phrase}' (normalized: '{normalized_phrase}') because it does not match any target_labels."
             )
         return None
 
@@ -428,7 +426,7 @@ class SemanticMapBuilder(Node):
             depth_cv = ros_numpy.numpify(depth_msg).astype(np.float32)
             depth_cv /= 1000.0
             return depth_cv
-        self.get_logger().error("Unsupported depth type: %s", depth_msg.encoding)
+        self.get_logger().error(f"Unsupported depth type: {depth_msg.encoding}")
         return None
 
     def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
@@ -449,7 +447,7 @@ class SemanticMapBuilder(Node):
             np_dtype = type_map.get(field.datatype)
             if np_dtype is None:
                 self.get_logger().warning(
-                    "Unknown datatype %s for field %s", field.datatype, field.name
+                    f"Unknown datatype {field.datatype} for field {field.name}"
                 )
                 continue
             count = field.count if field.count > 0 else 1
@@ -500,7 +498,7 @@ class SemanticMapBuilder(Node):
         if "u" not in field_names or "v" not in field_names:
             if not self._cloud_field_warning_emitted:
                 self.get_logger().error(
-                    "Projected cloud missing required 'u'/'v' fields. Available fields: %s", list(field_names)
+                    f"Projected cloud missing required 'u'/'v' fields. Available fields: {list(field_names)}"
                 )
                 self._cloud_field_warning_emitted = True
             return None
@@ -591,9 +589,7 @@ class SemanticMapBuilder(Node):
                 cloud_stamp_ns, cloud_msg, diff_ns = selection
                 if slop_ns > 0 and diff_ns > slop_ns:
                     self.get_logger().warning(
-                        "Projected LiDAR delta %.3fs exceeds slop %.3fs",
-                        diff_ns / 1e9,
-                        slop_ns / 1e9,
+                        f"Projected LiDAR delta {diff_ns / 1e9:.3f}s exceeds slop {slop_ns / 1e9:.3f}s"
                     )
                 projected_cloud = self._parse_pointcloud2_all_fields(cloud_msg)
                 if projected_cloud is not None:
@@ -620,9 +616,7 @@ class SemanticMapBuilder(Node):
                 depth_stamp_ns, depth_msg, diff_ns = selection
                 if slop_ns > 0 and diff_ns > slop_ns:
                     self.get_logger().warning(
-                        "Depth delta %.3fs exceeds slop %.3fs",
-                        diff_ns / 1e9,
-                        slop_ns / 1e9,
+                        f"Depth delta {diff_ns / 1e9:.3f}s exceeds slop {slop_ns / 1e9:.3f}s"
                     )
                 depth_image = self._parse_depth_image(depth_msg)
             self._trim_queue(pending_depth, rgb_stamp_ns - slop_ns)
@@ -761,7 +755,15 @@ class SemanticMapBuilder(Node):
                 final=True,
             )
 
-        self.get_logger().info(f"Offline rosbag processing complete. Frames processed: {processed_frames}")
+        # Print prominent completion messages
+        self.get_logger().info("=" * 80)
+        self.get_logger().info("ROSBAG PROCESSING COMPLETE")
+        self.get_logger().info(f"Total frames processed: {processed_frames}")
+        self.get_logger().info(f"Graph saved to: {self.graph_path}")
+        self.get_logger().info(f"Total nodes in graph: {self.graph.number_of_nodes()}")
+        self.get_logger().info(f"Total edges in graph: {self.graph.number_of_edges()}")
+        self.get_logger().info("You can now stop the process with Ctrl+C")
+        self.get_logger().info("=" * 80)
 
     def _update_graph(
         self,
@@ -882,6 +884,12 @@ def main(args=None):
     try:
         if node.offline_sequential:
             node.run_offline_bag()
+            # After offline processing completes, keep reminding user to exit
+            node.get_logger().info("Offline processing done. Waiting for Ctrl+C to exit...")
+            import time
+            while rclpy.ok():
+                time.sleep(5)
+                node.get_logger().info(">>> ROSBAG PROCESSING COMPLETE - Press Ctrl+C to exit <<<")
         else:
             rclpy.spin(node)
     except KeyboardInterrupt:
