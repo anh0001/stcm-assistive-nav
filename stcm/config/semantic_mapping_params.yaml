@@ -46,6 +46,26 @@ box_threshold: 0.55
 text_threshold: 0.55
 
 # ============================================================================
+# DETECTION FILTERING - Additional pruning before segmentation
+# ============================================================================
+# Skip frame if any detection confidence exceeds this (0.0-1.0, default 1.0 = disabled)
+filter_conf_bound: 1.0
+
+# Remove detections below this image-space y position (normalized).
+# 0.0 = top of image, 1.0 = bottom of image (not 3D/world z).
+filter_y_val: 0.95
+
+# Reject boxes larger than this fraction of image width/height (0.0-1.0)
+filter_percent_width: 0.9
+filter_percent_height: 0.9
+
+# Reject boxes smaller than this fraction of total image area (0.0-1.0)
+filter_percent_area: 0.005
+
+# Enable/disable all detection filters
+filter_enabled: true
+
+# ============================================================================
 # SPATIAL RELATIONSHIPS - Edge creation between objects
 # ============================================================================
 # Maximum distance in meters to create edges between nodes (spatial relationships)
@@ -56,10 +76,13 @@ edge_distance_threshold: 3.0
 # OUTPUT AND TIMING
 # ============================================================================
 # Where to save the semantic graph JSON file
-graph_output_path: "semantic_graph.json"
+graph_output_path: "output/semantic_graph.json"
 
 # Set `true` for bag playback or Gazebo, `false` for live robot
 use_sim_time: true
+
+# Clear the TF buffer when /clock jumps backward (common with rosbag loop/restart)
+reset_tf_on_time_jump: true
 
 # Enable updater node to continuously update an existing graph
 run_updater: false

@@ -149,12 +149,23 @@ Set `export STCM_CKPT_DIR=/data/ckpts` when using a custom directory. GroundingD
 - `camera_frame → base_frame → world_frame` (e.g., `camera_optical_frame → base_link → map`)
 - The `camera_frame` parameter is also used to override the RGB topic's `frame_id` when the nodes republish segmented images, so use it to correct cameras that advertise the wrong frame.
 - Without SLAM/localization, publish static transform: `ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map base_link`
+- When replaying rosbag data that loops or resets time, keep `reset_tf_on_time_jump: true` in the YAML to clear stale TF history.
 
 **Object Classes** (configure in YAML):
 ```yaml
 text_prompt: "table . chair . door ."  # each class ends with " ."
 target_labels: ["table", "chair", "door"]
 target_label_thresholds: [2.0, 0.6, 2.0]  # merge radius in meters
+```
+
+**Detection Filtering** (optional, configure in YAML):
+```yaml
+filter_conf_bound: 1.0
+filter_y_val: 1.0
+filter_percent_width: 0.9
+filter_percent_height: 0.9
+filter_percent_area: 0.005
+filter_enabled: true
 ```
 
 **Spatial Relationships** (optional, configure in YAML):

@@ -27,6 +27,7 @@ class SemanticMapBuilder(Node):
     def __init__(self) -> None:
         super().__init__("semantic_map_builder")
 
+        self.use_sim_time = bool(self.get_parameter("use_sim_time").value)
         self.rgb_topic = self.declare_parameter("rgb_topic", "/head_camera/rgb/image_raw").value
         self.depth_topic = self.declare_parameter("depth_topic", "/head_camera/depth_registered/image_raw").value
         self.camera_info_topic = self.declare_parameter("camera_info_topic", "/head_camera/rgb/camera_info").value
@@ -41,6 +42,7 @@ class SemanticMapBuilder(Node):
         self.projected_lidar_timeout = float(
             self.declare_parameter("projected_lidar_timeout_sec", 2.0).value
         )
+        self.reset_tf_on_time_jump = bool(self.declare_parameter("reset_tf_on_time_jump", True).value)
 
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
         thresholds = self.declare_parameter("target_label_thresholds", [2.0, 2.0, 0.6]).value
@@ -50,6 +52,12 @@ class SemanticMapBuilder(Node):
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
+        self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
+        self.filter_y_val = float(self.declare_parameter("filter_y_val", 1.0).value)
+        self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.9).value)
+        self.filter_percent_height = float(self.declare_parameter("filter_percent_height", 0.9).value)
+        self.filter_percent_area = float(self.declare_parameter("filter_percent_area", 0.005).value)
+        self.filter_enabled = bool(self.declare_parameter("filter_enabled", True).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.0).value)
         self.edge_distance_threshold = float(self.declare_parameter("edge_distance_threshold", 3.0).value)
         self.graph_path = Path(self.declare_parameter("graph_output_path", "graph.json").value)
@@ -73,6 +81,7 @@ class SemanticMapBuilder(Node):
             projected_lidar_topic=self.projected_lidar_topic,
             projected_lidar_frame=self.projected_lidar_frame,
             projected_lidar_timeout_sec=self.projected_lidar_timeout,
+            reset_tf_on_time_jump=self.reset_tf_on_time_jump,
         )
 
         self.gdino = GroundingDINOObjectPredictor(
@@ -130,6 +139,7 @@ class SemanticMapBuilder(Node):
 
     def _canonicalize_phrase(self, phrase: str) -> str | None:
         normalized_phrase = self._normalize_label_key(phrase)
+
         if normalized_phrase in self._label_lookup:
             return self._label_lookup[normalized_phrase]
 
@@ -142,8 +152,9 @@ class SemanticMapBuilder(Node):
         if normalized_phrase and normalized_phrase not in self._unknown_phrase_cache:
             self._unknown_phrase_cache.add(normalized_phrase)
             self.get_logger().warning(
-                "Skipping detection phrase '%s' because it does not match any target_labels.",
+                "Skipping detection phrase '%s' (normalized: '%s') because it does not match any target_labels.",
                 phrase,
+                normalized_phrase,
             )
         return None
 
@@ -197,10 +208,19 @@ class SemanticMapBuilder(Node):
             img_pil, self.text_prompt, self.box_threshold, self.text_threshold
         )
         self.get_logger().info(f"GroundingDINO detected {len(phrases)} objects: {phrases}")
+
         bboxes, gdino_conf, phrases, skip_detection = filter(
-            bboxes, gdino_conf, phrases, 1, 1.0, 0.9, 0.9, 0.005, True
+            bboxes,
+            gdino_conf,
+            phrases,
+            self.filter_conf_bound,
+            self.filter_y_val,
+            self.filter_percent_width,
+            self.filter_percent_height,
+            self.filter_percent_area,
+            self.filter_enabled,
         )
-        self.get_logger().info(f"After filtering: {len(phrases)} objects remain")
+        self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
         if skip_detection or len(phrases) == 0:
             self.get_logger().debug("Skipping frame: no detections after filtering")
             return

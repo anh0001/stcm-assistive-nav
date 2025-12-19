@@ -13,6 +13,7 @@ DEFAULT_TEXT_PROMPT = "table . door . chair ."
 DEFAULT_GRAPH_PATH = "graph.json"
 DEFAULT_USE_SIM_TIME = False
 DEFAULT_RUN_UPDATER = False
+DEFAULT_RESET_TF_ON_TIME_JUMP = True
 
 try:
     DEFAULT_CONFIG_PATH = os.path.join(
@@ -70,6 +71,11 @@ def launch_setup(context, *args, **kwargs):
     graph_path = _resolve_str(context, "graph_output_path", config.get("graph_output_path", DEFAULT_GRAPH_PATH))
     use_sim_time = _resolve_bool(context, "use_sim_time", config.get("use_sim_time", DEFAULT_USE_SIM_TIME))
     run_updater = _resolve_bool(context, "run_updater", config.get("run_updater", DEFAULT_RUN_UPDATER))
+    reset_tf_on_time_jump = _resolve_bool(
+        context,
+        "reset_tf_on_time_jump",
+        config.get("reset_tf_on_time_jump", DEFAULT_RESET_TF_ON_TIME_JUMP),
+    )
     edge_distance_threshold = _resolve_float(
         context,
         "edge_distance_threshold",
@@ -86,6 +92,7 @@ def launch_setup(context, *args, **kwargs):
             "graph_output_path": graph_path,
             "use_sim_time": use_sim_time,
             "edge_distance_threshold": edge_distance_threshold,
+            "reset_tf_on_time_jump": reset_tf_on_time_jump,
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
             "depth_anything_checkpoint": depth_ckpt,
@@ -109,6 +116,7 @@ def launch_setup(context, *args, **kwargs):
                 "graph_output_path": graph_path,
                 "use_sim_time": use_sim_time,
                 "edge_distance_threshold": edge_distance_threshold,
+                "reset_tf_on_time_jump": reset_tf_on_time_jump,
                 "groundingdino_checkpoint": grounding_ckpt,
                 "mobilesam_checkpoint": mobilesam_ckpt,
                 "depth_anything_checkpoint": depth_ckpt,
@@ -154,6 +162,11 @@ def generate_launch_description():
                 "run_updater",
                 default_value="",
                 description="Override the run_updater flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "reset_tf_on_time_jump",
+                default_value="",
+                description="Override the TF buffer reset-on-time-jump flag from the config file.",
             ),
             DeclareLaunchArgument(
                 "edge_distance_threshold",

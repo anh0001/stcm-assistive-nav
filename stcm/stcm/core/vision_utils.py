@@ -339,7 +339,7 @@ def filter(bboxes, conf_list, phrases ,conf_bound, yVal, precentWidth=0.5, prece
     - phrases (list): List of phrases corresponding to each bounding box.
     - conf_bound (float): Confidence score upper bound for filtering.
         range: 0.0-1.0
-    - yVal (float): Y-coordinate lower bound for filtering (if the bboxes center y coordinate is lower than yVal it gets removed) (% of screen) 
+    - yVal (float): Image-space y lower bound (normalized 0.0=top, 1.0=bottom). If bbox center y > yVal it gets removed.
         range: 0.0-1.0
         0 is top 1 is bottom
     - precentWidth (float, optional): Maximum width of bounding boxes as a percentage of image width. Default is 0.5 (50%).

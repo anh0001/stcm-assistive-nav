@@ -10,6 +10,7 @@ import numpy as np
 import ros2_numpy as ros_numpy
 from cv_bridge import CvBridge
 from rclpy.duration import Duration
+from rclpy.clock import JumpThreshold
 from rclpy.qos import qos_profile_sensor_data
 from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2
@@ -36,6 +37,7 @@ class ImageListener:
         projected_lidar_topic: str = "/lidar_points_projected",
         projected_lidar_frame: str | None = None,
         projected_lidar_timeout_sec: float = 2.0,
+        reset_tf_on_time_jump: bool = True,
     ) -> None:
         self._node = node
         self._lock = threading.Lock()
@@ -64,6 +66,8 @@ class ImageListener:
         self._cloud_missing_warned = False
         self._cloud_timeout_warned = False
         self._last_cloud_time: Optional[Time] = None
+        self._reset_tf_on_time_jump = bool(reset_tf_on_time_jump)
+        self._clock_jump_handle = None
 
         self.intrinsics: Optional[np.ndarray] = None
         self.fx = None
@@ -73,6 +77,7 @@ class ImageListener:
 
         self._tf_buffer = Buffer(cache_time=Duration(seconds=30.0))
         self._tf_listener = TransformListener(self._tf_buffer, node)
+        self._install_time_jump_callback()
 
         self._camera_info_ready = threading.Event()
         self._camera_info_sub = node.create_subscription(
@@ -133,6 +138,39 @@ class ImageListener:
         # Only need the intrinsics once
         self._node.destroy_subscription(self._camera_info_sub)
         self._camera_info_sub = None
+
+    def _install_time_jump_callback(self) -> None:
+        if not self._reset_tf_on_time_jump:
+            return
+        clock = self._node.get_clock()
+        if not hasattr(clock, "create_jump_callback"):
+            self._node.get_logger().warning(
+                "Clock jump callbacks are unavailable; TF buffer will not reset on time jumps."
+            )
+            return
+        threshold = JumpThreshold(
+            min_forward=None,
+            min_backward=Duration(seconds=-1.0),
+            on_clock_change=True,
+        )
+        self._clock_jump_handle = clock.create_jump_callback(
+            threshold, post_callback=self._on_time_jump
+        )
+
+    def _on_time_jump(self, time_jump) -> None:
+        delta = getattr(time_jump, "delta", None)
+        delta_ns = delta.nanoseconds if delta is not None else 0
+        clock_change = bool(getattr(time_jump, "clock_change", False))
+        if delta_ns < 0 or clock_change:
+            if hasattr(self._tf_buffer, "clear"):
+                self._tf_buffer.clear()
+                self._node.get_logger().warning("Cleared TF buffer after ROS time jump.")
+            else:
+                self._node.get_logger().warning(
+                    "TF buffer clear requested after time jump, but Buffer.clear() is unavailable."
+                )
+            self._last_cloud_time = None
+            self._lidar_depth_active = False
 
     def _record_projected_cloud_sample(self, stamp_msg) -> None:
         if not self.use_projected_lidar:

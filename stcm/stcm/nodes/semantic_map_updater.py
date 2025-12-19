@@ -35,6 +35,7 @@ class SemanticMapUpdater(Node):
     def __init__(self) -> None:
         super().__init__("semantic_map_updater")
 
+        self.use_sim_time = bool(self.get_parameter("use_sim_time").value)
         self.rgb_topic = self.declare_parameter("rgb_topic", "/head_camera/rgb/image_raw").value
         self.depth_topic = self.declare_parameter("depth_topic", "/head_camera/depth_registered/image_raw").value
         self.camera_info_topic = self.declare_parameter("camera_info_topic", "/head_camera/rgb/camera_info").value
@@ -47,6 +48,7 @@ class SemanticMapUpdater(Node):
         ).value
         self.projected_lidar_frame = self.declare_parameter("projected_lidar_frame", "").value
         self.pause_topic = self.declare_parameter("pause_topic", "").value
+        self.reset_tf_on_time_jump = bool(self.declare_parameter("reset_tf_on_time_jump", True).value)
 
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
         thresholds = self.declare_parameter("target_label_thresholds", [2.0, 2.0, 0.6]).value
@@ -54,6 +56,12 @@ class SemanticMapUpdater(Node):
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
+        self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
+        self.filter_y_val = float(self.declare_parameter("filter_y_val", 0.8).value)
+        self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.8).value)
+        self.filter_percent_height = float(self.declare_parameter("filter_percent_height", 0.8).value)
+        self.filter_percent_area = float(self.declare_parameter("filter_percent_area", 0.01).value)
+        self.filter_enabled = bool(self.declare_parameter("filter_enabled", True).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.5).value)
         self.edge_distance_threshold = float(self.declare_parameter("edge_distance_threshold", 3.0).value)
         self.graph_input_path = Path(self.declare_parameter("graph_input_path", "graph.json").value)
@@ -80,6 +88,7 @@ class SemanticMapUpdater(Node):
             use_projected_lidar=self.use_projected_lidar,
             projected_lidar_topic=self.projected_lidar_topic,
             projected_lidar_frame=self.projected_lidar_frame,
+            reset_tf_on_time_jump=self.reset_tf_on_time_jump,
         )
 
         self.gdino = GroundingDINOObjectPredictor(
@@ -130,7 +139,15 @@ class SemanticMapUpdater(Node):
             img_pil, self.text_prompt, self.box_threshold, self.text_threshold
         )
         bboxes, gdino_conf, phrases, skip_detection = filter(
-            bboxes, gdino_conf, phrases, 1, 0.8, 0.8, 0.8, 0.01, True
+            bboxes,
+            gdino_conf,
+            phrases,
+            self.filter_conf_bound,
+            self.filter_y_val,
+            self.filter_percent_width,
+            self.filter_percent_height,
+            self.filter_percent_area,
+            self.filter_enabled,
         )
 
         if skip_detection:
