@@ -157,6 +157,11 @@ target_labels: ["table", "chair", "door"]
 target_label_thresholds: [2.0, 0.6, 2.0]  # merge radius in meters
 ```
 
+**Spatial Relationships** (optional, configure in YAML):
+```yaml
+edge_distance_threshold: 3.0  # max distance (meters) to connect objects in the graph
+```
+
 ## Launching ROS 2 nodes
 Edit `stcm/config/semantic_mapping_params.yaml` to configure topics, TF frames, object classes, and checkpoints. Then launch:
 
@@ -201,6 +206,11 @@ Then run tests from the **repository root**:
 ```bash
 python stcm/test/test_gdino_sam.py stcm/imgs/irvl-clutter-test.png
 python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
+```
+
+To retroactively add spatial edges to an existing graph:
+```bash
+python3 stcm/tools/add_edges_to_graph.py semantic_graph.json --output semantic_graph_with_edges.json --distance 3.0
 ```
 
 These scripts import the `stcm.core` modules directly and are useful for quick sanity checks outside of ROS.

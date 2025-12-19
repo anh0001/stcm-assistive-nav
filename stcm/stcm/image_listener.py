@@ -177,12 +177,12 @@ class ImageListener:
             )
             self._cloud_timeout_warned = True
 
-    def _lookup_tf(self, target_frame: str, source_frame: str) -> Optional[np.ndarray]:
+    def _lookup_tf(self, target_frame: str, source_frame: str, stamp: Time | None = None) -> Optional[np.ndarray]:
         try:
             transform = self._tf_buffer.lookup_transform(
                 target_frame,
                 source_frame,
-                Time(),
+                stamp or Time(),
                 timeout=Duration(seconds=0.2),
             )
         except (LookupException, ConnectivityException, ExtrapolationException) as exc:
@@ -208,8 +208,9 @@ class ImageListener:
             else:
                 self._handle_projected_lidar_unavailable("missing")
 
-        rt_camera = self._lookup_tf(self.base_frame, self.camera_frame)
-        rt_base = self._lookup_tf(self.world_frame, self.base_frame)
+        frame_stamp = Time.from_msg(rgb.header.stamp)
+        rt_camera = self._lookup_tf(self.base_frame, self.camera_frame, frame_stamp)
+        rt_base = self._lookup_tf(self.world_frame, self.base_frame, frame_stamp)
 
         if rt_camera is None or rt_base is None:
             return
@@ -241,8 +242,9 @@ class ImageListener:
             self._node.get_logger().debug("RGB-Cloud callback: waiting for camera info")
             return
 
-        rt_camera = self._lookup_tf(self.base_frame, self.camera_frame)
-        rt_base = self._lookup_tf(self.world_frame, self.base_frame)
+        frame_stamp = Time.from_msg(rgb.header.stamp)
+        rt_camera = self._lookup_tf(self.base_frame, self.camera_frame, frame_stamp)
+        rt_base = self._lookup_tf(self.world_frame, self.base_frame, frame_stamp)
 
         if rt_camera is None or rt_base is None:
             self._node.get_logger().debug("RGB-Cloud callback: TF lookup failed")
@@ -333,7 +335,8 @@ class ImageListener:
             return None
 
         if cloud_frame != self.camera_frame:
-            transform = self._lookup_tf(self.camera_frame, cloud_frame)
+            cloud_stamp = Time.from_msg(cloud.header.stamp)
+            transform = self._lookup_tf(self.camera_frame, cloud_frame, cloud_stamp)
             if transform is None:
                 return None
             xyz = (transform[:3, :3] @ xyz.T).T

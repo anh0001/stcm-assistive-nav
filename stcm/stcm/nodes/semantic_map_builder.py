@@ -18,7 +18,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from ..core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
-from ..map_utils import is_nearby_in_map, pose_in_map_frame, save_graph_json
+from ..map_utils import is_nearby_in_map, pose_in_map_frame, save_graph_json, update_graph_edges
 
 
 class SemanticMapBuilder(Node):
@@ -51,6 +51,7 @@ class SemanticMapBuilder(Node):
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.0).value)
+        self.edge_distance_threshold = float(self.declare_parameter("edge_distance_threshold", 3.0).value)
         self.graph_path = Path(self.declare_parameter("graph_output_path", "graph.json").value)
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
@@ -228,6 +229,7 @@ class SemanticMapBuilder(Node):
         self._update_graph(
             masks.cpu().numpy(), phrases, rt_camera, rt_base, depth_image, frames["intrinsics"]
         )
+        update_graph_edges(self.graph, self.edge_distance_threshold)
         self._publish_segmentation(img_pil, image_pil_bboxes, gdino_conf, phrases, masks, frames)
         self._publish_graph_markers()
         self.iteration += 1

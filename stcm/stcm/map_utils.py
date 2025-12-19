@@ -207,6 +207,41 @@ def is_nearby_in_map(pose_list, node_pose, threshold=0.5):
         return pose_list, False
 
 
+def update_graph_edges(graph, edge_distance_threshold=3.0):
+    """
+    Create edges between nodes based on spatial proximity.
+
+    Args:
+        graph: NetworkX graph with nodes containing 'pose' attribute
+        edge_distance_threshold: Maximum distance in meters to create an edge between nodes
+
+    Returns:
+        Updated graph with edges representing spatial relationships
+    """
+    nodes_list = list(graph.nodes(data=True))
+
+    for i, (node1_id, node1_data) in enumerate(nodes_list):
+        pose1 = node1_data.get("pose")
+        if pose1 is None or len(pose1) < 2:
+            continue
+        pose1 = np.array(pose1[:2], dtype=float)
+
+        for j in range(i + 1, len(nodes_list)):
+            node2_id, node2_data = nodes_list[j]
+            pose2 = node2_data.get("pose")
+            if pose2 is None or len(pose2) < 2:
+                continue
+            pose2 = np.array(pose2[:2], dtype=float)
+
+            distance = np.linalg.norm(pose1 - pose2)
+
+            if distance <= edge_distance_threshold:
+                if not graph.has_edge(node1_id, node2_id):
+                    graph.add_edge(node1_id, node2_id, distance=float(distance))
+
+    return graph
+
+
 def save_graph_json(graph, file="graph.json"):
     '''
     input graph \n

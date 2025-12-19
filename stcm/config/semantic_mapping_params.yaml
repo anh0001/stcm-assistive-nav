@@ -46,6 +46,13 @@ box_threshold: 0.55
 text_threshold: 0.55
 
 # ============================================================================
+# SPATIAL RELATIONSHIPS - Edge creation between objects
+# ============================================================================
+# Maximum distance in meters to create edges between nodes (spatial relationships)
+# Objects within this distance will be connected in the graph
+edge_distance_threshold: 3.0
+
+# ============================================================================
 # OUTPUT AND TIMING
 # ============================================================================
 # Where to save the semantic graph JSON file

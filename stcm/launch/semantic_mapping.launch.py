@@ -50,6 +50,13 @@ def _resolve_bool(context, arg_name, fallback):
     return _parse_bool(fallback)
 
 
+def _resolve_float(context, arg_name, fallback):
+    override = LaunchConfiguration(arg_name).perform(context)
+    if override:
+        return float(override)
+    return float(fallback)
+
+
 def launch_setup(context, *args, **kwargs):
     config_path = LaunchConfiguration("config_file").perform(context)
     config = _load_config(config_path)
@@ -63,6 +70,11 @@ def launch_setup(context, *args, **kwargs):
     graph_path = _resolve_str(context, "graph_output_path", config.get("graph_output_path", DEFAULT_GRAPH_PATH))
     use_sim_time = _resolve_bool(context, "use_sim_time", config.get("use_sim_time", DEFAULT_USE_SIM_TIME))
     run_updater = _resolve_bool(context, "run_updater", config.get("run_updater", DEFAULT_RUN_UPDATER))
+    edge_distance_threshold = _resolve_float(
+        context,
+        "edge_distance_threshold",
+        config.get("edge_distance_threshold", 3.0),
+    )
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
@@ -73,6 +85,7 @@ def launch_setup(context, *args, **kwargs):
             "text_prompt": text_prompt,
             "graph_output_path": graph_path,
             "use_sim_time": use_sim_time,
+            "edge_distance_threshold": edge_distance_threshold,
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
             "depth_anything_checkpoint": depth_ckpt,
@@ -95,6 +108,7 @@ def launch_setup(context, *args, **kwargs):
                 "graph_input_path": config.get("graph_input_path", graph_path),
                 "graph_output_path": graph_path,
                 "use_sim_time": use_sim_time,
+                "edge_distance_threshold": edge_distance_threshold,
                 "groundingdino_checkpoint": grounding_ckpt,
                 "mobilesam_checkpoint": mobilesam_ckpt,
                 "depth_anything_checkpoint": depth_ckpt,
@@ -140,6 +154,11 @@ def generate_launch_description():
                 "run_updater",
                 default_value="",
                 description="Override the run_updater flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "edge_distance_threshold",
+                default_value="",
+                description="Override the edge distance threshold from the config file.",
             ),
             DeclareLaunchArgument(
                 "groundingdino_checkpoint",

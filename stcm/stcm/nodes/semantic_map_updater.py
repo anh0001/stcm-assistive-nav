@@ -25,6 +25,7 @@ from ..map_utils import (
     pose_in_map_frame,
     read_graph_json,
     save_graph_json,
+    update_graph_edges,
 )
 
 
@@ -54,6 +55,7 @@ class SemanticMapUpdater(Node):
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.5).value)
+        self.edge_distance_threshold = float(self.declare_parameter("edge_distance_threshold", 3.0).value)
         self.graph_input_path = Path(self.declare_parameter("graph_input_path", "graph.json").value)
         self.graph_output_path = Path(self.declare_parameter("graph_output_path", "graph_updated.json").value)
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
@@ -164,6 +166,7 @@ class SemanticMapUpdater(Node):
 
         self._remove_missing_nodes(depth_image, rt_camera, rt_base, detected_poses, intrinsics)
         self._add_new_nodes(mask_array, phrases, rt_camera, rt_base, depth_image, intrinsics)
+        update_graph_edges(self.graph, self.edge_distance_threshold)
 
         annotated = annotate(overlay_masks(img_pil, masks), image_pil_bboxes, gdino_conf, phrases)
         msg = ros_numpy.msgify(Image, np.array(annotated), encoding="rgb8")
