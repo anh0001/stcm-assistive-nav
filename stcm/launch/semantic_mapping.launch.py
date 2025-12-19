@@ -5,6 +5,7 @@ import yaml
 from ament_index_python.packages import PackageNotFoundError, get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.logging import get_logger
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -62,15 +63,23 @@ def launch_setup(context, *args, **kwargs):
     config_path = LaunchConfiguration("config_file").perform(context)
     config = _load_config(config_path)
 
-    def _node_params():
+    def _node_params(drop_keys=None):
         params = dict(config)
         params.pop("run_updater", None)
+        if drop_keys:
+            for key in drop_keys:
+                params.pop(key, None)
         return params
 
     text_prompt = _resolve_str(context, "text_prompt", config.get("text_prompt", DEFAULT_TEXT_PROMPT))
     graph_path = _resolve_str(context, "graph_output_path", config.get("graph_output_path", DEFAULT_GRAPH_PATH))
     use_sim_time = _resolve_bool(context, "use_sim_time", config.get("use_sim_time", DEFAULT_USE_SIM_TIME))
     run_updater = _resolve_bool(context, "run_updater", config.get("run_updater", DEFAULT_RUN_UPDATER))
+    offline_sequential = _resolve_bool(
+        context,
+        "offline_sequential",
+        config.get("offline_sequential", False),
+    )
     reset_tf_on_time_jump = _resolve_bool(
         context,
         "reset_tf_on_time_jump",
@@ -84,6 +93,17 @@ def launch_setup(context, *args, **kwargs):
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
+    rosbag_path = _resolve_str(context, "rosbag_path", config.get("rosbag_path", ""))
+    rosbag_storage_id = _resolve_str(
+        context,
+        "rosbag_storage_id",
+        config.get("rosbag_storage_id", "sqlite3"),
+    )
+
+    if offline_sequential and run_updater:
+        logger = get_logger("semantic_mapping.launch")
+        logger.warning("offline_sequential is enabled; disabling run_updater for this launch.")
+        run_updater = False
 
     builder_params = _node_params()
     builder_params.update(
@@ -96,6 +116,9 @@ def launch_setup(context, *args, **kwargs):
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
             "depth_anything_checkpoint": depth_ckpt,
+            "offline_sequential": offline_sequential,
+            "rosbag_path": rosbag_path,
+            "rosbag_storage_id": rosbag_storage_id,
         }
     )
 
@@ -108,7 +131,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if run_updater:
-        updater_params = _node_params()
+        updater_params = _node_params(drop_keys=["offline_sequential", "rosbag_path", "rosbag_storage_id"])
         updater_params.update(
             {
                 "text_prompt": text_prompt,
@@ -164,6 +187,11 @@ def generate_launch_description():
                 description="Override the run_updater flag from the config file.",
             ),
             DeclareLaunchArgument(
+                "offline_sequential",
+                default_value="",
+                description="Override the offline_sequential flag from the config file.",
+            ),
+            DeclareLaunchArgument(
                 "reset_tf_on_time_jump",
                 default_value="",
                 description="Override the TF buffer reset-on-time-jump flag from the config file.",
@@ -187,6 +215,16 @@ def generate_launch_description():
                 "depth_anything_checkpoint",
                 default_value="",
                 description="Override the Depth-Anything model path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "rosbag_path",
+                default_value="",
+                description="Override the rosbag path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "rosbag_storage_id",
+                default_value="",
+                description="Override the rosbag storage id from the config file.",
             ),
             OpaqueFunction(function=launch_setup),
         ]

@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 
+from collections import deque
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
 import torch
 import ros2_numpy as ros_numpy
+import rosbag2_py
 import rclpy
 from PIL import Image as PILImg
+from rclpy.duration import Duration
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from rclpy.serialization import deserialize_message
+from rclpy.time import Time
+from rosidl_runtime_py.utilities import get_message
+from sensor_msgs.msg import CameraInfo, Image, PointCloud2
+from tf2_msgs.msg import TFMessage
+from tf2_ros import Buffer, ConnectivityException, ExtrapolationException, LookupException
 from visualization_msgs.msg import Marker, MarkerArray
 
 from ..core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
@@ -25,6 +33,7 @@ from ..map_utils import (
     save_graph_json,
     update_graph_edges,
 )
+from ..ros_utils import ros_qt_to_rt
 
 
 class SemanticMapBuilder(Node):
@@ -38,6 +47,7 @@ class SemanticMapBuilder(Node):
         self.depth_topic = self.declare_parameter("depth_topic", "/head_camera/depth_registered/image_raw").value
         self.camera_info_topic = self.declare_parameter("camera_info_topic", "/head_camera/rgb/camera_info").value
         self.camera_frame = self.declare_parameter("camera_frame", "head_camera_rgb_optical_frame").value
+        self._rgb_frame_override = self.camera_frame.strip() if self.camera_frame else None
         self.base_frame = self.declare_parameter("base_frame", "base_link").value
         self.world_frame = self.declare_parameter("world_frame", "map").value
         self.use_projected_lidar = bool(self.declare_parameter("use_projected_lidar", False).value)
@@ -71,26 +81,36 @@ class SemanticMapBuilder(Node):
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
+        self.offline_sequential = bool(self.declare_parameter("offline_sequential", False).value)
+        self.rosbag_path = self.declare_parameter("rosbag_path", "").value
+        self.rosbag_storage_id = self.declare_parameter("rosbag_storage_id", "sqlite3").value
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = nx.Graph()
         self.iteration = 0
+        self._tf_buffer: Optional[Buffer] = None
+        self._intrinsics: Optional[Dict[str, float]] = None
+        self._intrinsics_warned = False
+        self._cloud_field_warning_emitted = False
 
-        self.listener = ImageListener(
-            self,
-            rgb_topic=self.rgb_topic,
-            depth_topic=self.depth_topic,
-            camera_info_topic=self.camera_info_topic,
-            base_frame=self.base_frame,
-            camera_frame=self.camera_frame,
-            world_frame=self.world_frame,
-            slop_seconds=self.synchronizer_slop,
-            use_projected_lidar=self.use_projected_lidar,
-            projected_lidar_topic=self.projected_lidar_topic,
-            projected_lidar_frame=self.projected_lidar_frame,
-            projected_lidar_timeout_sec=self.projected_lidar_timeout,
-            reset_tf_on_time_jump=self.reset_tf_on_time_jump,
-        )
+        self.listener = None
+        self.timer = None
+        if not self.offline_sequential:
+            self.listener = ImageListener(
+                self,
+                rgb_topic=self.rgb_topic,
+                depth_topic=self.depth_topic,
+                camera_info_topic=self.camera_info_topic,
+                base_frame=self.base_frame,
+                camera_frame=self.camera_frame,
+                world_frame=self.world_frame,
+                slop_seconds=self.synchronizer_slop,
+                use_projected_lidar=self.use_projected_lidar,
+                projected_lidar_topic=self.projected_lidar_topic,
+                projected_lidar_frame=self.projected_lidar_frame,
+                projected_lidar_timeout_sec=self.projected_lidar_timeout,
+                reset_tf_on_time_jump=self.reset_tf_on_time_jump,
+            )
 
         self.gdino = GroundingDINOObjectPredictor(
             checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
@@ -101,7 +121,10 @@ class SemanticMapBuilder(Node):
 
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
-        self.timer = self.create_timer(self.processing_period, self._process_frame)
+        if not self.offline_sequential:
+            self.timer = self.create_timer(self.processing_period, self._process_frame)
+        else:
+            self.get_logger().info("Offline sequential mode enabled; using rosbag2 reader.")
 
         self.get_logger().info(f"Semantic map builder ready (labels: {', '.join(self.distance_thresholds.keys())})")
 
@@ -199,16 +222,23 @@ class SemanticMapBuilder(Node):
         return filtered_boxes, filtered_masks, filtered_scores, canonical_phrases
 
     def _process_frame(self) -> None:
+        if self.listener is None:
+            return
+
         frames = self.listener.get_latest_frames()
         if frames is None:
             self.get_logger().debug("No frames available from listener")
             return
 
+        self._process_frame_data(frames)
+
+    def _process_frame_data(self, frames) -> None:
         self.get_logger().info("Processing frame - running detection")
         rgb_image = frames["rgb"].astype(np.uint8)
-        depth_image = frames["depth"]
-        rt_camera = frames["rt_camera"]
-        rt_base = frames["rt_base"]
+        depth_image = frames.get("depth")
+        rt_camera = frames.get("rt_camera")
+        rt_base = frames.get("rt_base")
+        intrinsics = frames.get("intrinsics")
         projected_cloud = frames.get("projected_cloud")
         rt_projected = frames.get("rt_projected")
 
@@ -242,7 +272,7 @@ class SemanticMapBuilder(Node):
         image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
         # Convert PyTorch tensor to numpy for np.any() and indexing
-        keep_index_np = keep_index.numpy() if hasattr(keep_index, 'numpy') else keep_index
+        keep_index_np = keep_index.numpy() if hasattr(keep_index, "numpy") else keep_index
         if not np.any(keep_index_np):
             return
         masks = masks[keep_index]
@@ -256,20 +286,482 @@ class SemanticMapBuilder(Node):
             return
         image_pil_bboxes, masks, gdino_conf, phrases = filtered
 
-        self._update_graph(
-            masks.cpu().numpy(),
-            phrases,
-            rt_camera,
-            rt_base,
-            depth_image,
-            frames["intrinsics"],
-            projected_cloud=projected_cloud,
-            rt_projected=rt_projected,
-        )
-        update_graph_edges(self.graph, self.edge_distance_threshold)
+        graph_updated = False
+        if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None and rt_base is not None:
+            self._update_graph(
+                masks.cpu().numpy(),
+                phrases,
+                rt_camera,
+                rt_base,
+                depth_image,
+                intrinsics,
+                projected_cloud=projected_cloud,
+                rt_projected=rt_projected,
+            )
+            graph_updated = True
+        elif depth_image is not None and rt_camera is not None and rt_base is not None:
+            if intrinsics is None and not self._intrinsics_warned:
+                self.get_logger().warning("Camera intrinsics missing; using defaults for graph projection.")
+                self._intrinsics_warned = True
+            self._update_graph(
+                masks.cpu().numpy(),
+                phrases,
+                rt_camera,
+                rt_base,
+                depth_image,
+                intrinsics,
+                projected_cloud=None,
+                rt_projected=None,
+            )
+            graph_updated = True
+        else:
+            missing = []
+            if rt_base is None:
+                missing.append("rt_base")
+            if self.use_projected_lidar:
+                if projected_cloud is None:
+                    missing.append("projected_cloud")
+                if rt_projected is None:
+                    missing.append("rt_projected")
+                if projected_cloud is None and depth_image is None:
+                    missing.append("depth_image")
+            else:
+                if depth_image is None:
+                    missing.append("depth_image")
+                if rt_camera is None:
+                    missing.append("rt_camera")
+            if missing:
+                self.get_logger().warning(f"Skipping graph update due to missing data: {', '.join(missing)}")
+
+        if graph_updated:
+            update_graph_edges(self.graph, self.edge_distance_threshold)
+            self.iteration += 1
         self._publish_segmentation(img_pil, image_pil_bboxes, gdino_conf, phrases, masks, frames)
         self._publish_graph_markers()
-        self.iteration += 1
+
+    @staticmethod
+    def _time_from_header(msg) -> int:
+        stamp = msg.header.stamp
+        return int(stamp.sec) * 1_000_000_000 + int(stamp.nanosec)
+
+    def _update_intrinsics_from_msg(self, msg: CameraInfo) -> None:
+        intrinsics = np.array(msg.k).reshape(3, 3)
+        self._intrinsics = {
+            "fx": float(intrinsics[0, 0]),
+            "fy": float(intrinsics[1, 1]),
+            "px": float(intrinsics[0, 2]),
+            "py": float(intrinsics[1, 2]),
+        }
+        self._intrinsics_warned = False
+
+    def _add_tf_message(self, msg: TFMessage, is_static: bool) -> None:
+        if self._tf_buffer is None:
+            return
+        for transform in msg.transforms:
+            try:
+                if is_static:
+                    self._tf_buffer.set_transform_static(transform, "offline_bag")
+                else:
+                    self._tf_buffer.set_transform(transform, "offline_bag")
+            except Exception as exc:
+                self.get_logger().warning(f"Failed to insert TF transform: {exc}")
+
+    def _lookup_tf(self, target_frame: str, source_frame: str, stamp: Time) -> Optional[np.ndarray]:
+        if self._tf_buffer is None:
+            return None
+        try:
+            transform = self._tf_buffer.lookup_transform(
+                target_frame,
+                source_frame,
+                stamp,
+                timeout=Duration(seconds=0.2),
+            )
+        except (LookupException, ConnectivityException, ExtrapolationException) as exc:
+            try:
+                transform = self._tf_buffer.lookup_transform(
+                    target_frame,
+                    source_frame,
+                    Time(),
+                    timeout=Duration(seconds=0.2),
+                )
+                self.get_logger().warning(
+                    f"TF lookup failed at {stamp.nanoseconds} ({source_frame} -> {target_frame}): {exc}. Using latest."
+                )
+            except (LookupException, ConnectivityException, ExtrapolationException) as exc_latest:
+                self.get_logger().warning(
+                    f"TF lookup failed ({source_frame} -> {target_frame}): {exc_latest}"
+                )
+                return None
+
+        translation = transform.transform.translation
+        rotation = transform.transform.rotation
+        trans = [translation.x, translation.y, translation.z]
+        quat = [rotation.x, rotation.y, rotation.z, rotation.w]
+        return ros_qt_to_rt(quat, trans)
+
+    @staticmethod
+    def _select_nearest_message(queue, target_stamp_ns: int) -> Optional[Tuple[int, object, int]]:
+        best_stamp = None
+        best_msg = None
+        best_diff = None
+        for stamp_ns, msg in queue:
+            diff = abs(stamp_ns - target_stamp_ns)
+            if best_diff is None or diff < best_diff or (diff == best_diff and stamp_ns < best_stamp):
+                best_stamp = stamp_ns
+                best_msg = msg
+                best_diff = diff
+        if best_msg is None:
+            return None
+        return best_stamp, best_msg, int(best_diff)
+
+    @staticmethod
+    def _trim_queue(queue, cutoff_ns: int) -> None:
+        while len(queue) > 1 and queue[1][0] <= cutoff_ns:
+            queue.popleft()
+
+    def _parse_depth_image(self, depth_msg: Image) -> Optional[np.ndarray]:
+        if depth_msg.encoding == "32FC1":
+            depth_cv = ros_numpy.numpify(depth_msg)
+            depth_cv[np.isnan(depth_cv)] = 0.0
+            return depth_cv
+        if depth_msg.encoding == "16UC1":
+            depth_cv = ros_numpy.numpify(depth_msg).astype(np.float32)
+            depth_cv /= 1000.0
+            return depth_cv
+        self.get_logger().error("Unsupported depth type: %s", depth_msg.encoding)
+        return None
+
+    def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
+        type_map = {
+            1: np.int8,
+            2: np.uint8,
+            3: np.int16,
+            4: np.uint16,
+            5: np.int32,
+            6: np.uint32,
+            7: np.float32,
+            8: np.float64,
+        }
+        names = []
+        formats = []
+        offsets = []
+        for field in cloud.fields:
+            np_dtype = type_map.get(field.datatype)
+            if np_dtype is None:
+                self.get_logger().warning(
+                    "Unknown datatype %s for field %s", field.datatype, field.name
+                )
+                continue
+            count = field.count if field.count > 0 else 1
+            dtype_entry = np_dtype if count == 1 else np.dtype((np_dtype, count))
+            names.append(field.name)
+            formats.append(dtype_entry)
+            offsets.append(field.offset)
+
+        if not names:
+            return None
+
+        dtype = np.dtype(
+            {"names": names, "formats": formats, "offsets": offsets, "itemsize": cloud.point_step}
+        )
+        try:
+            cloud_array = np.frombuffer(cloud.data, dtype=dtype)
+            if cloud.is_bigendian:
+                cloud_array = cloud_array.byteswap().newbyteorder()
+            return cloud_array
+        except Exception as exc:
+            self.get_logger().error(f"Failed to parse PointCloud2: {exc}")
+            return None
+
+    def _extract_cloud_xyz(self, cloud_array, field_names):
+        field_check = set(field_names) if field_names else set()
+
+        if {"x", "y", "z"}.issubset(field_check):
+            points = np.stack((cloud_array["x"], cloud_array["y"], cloud_array["z"]), axis=1)
+            return points.astype(np.float32, copy=False)
+        if {"x_lidar", "y_lidar", "z_lidar"}.issubset(field_check):
+            points = np.stack(
+                (cloud_array["x_lidar"], cloud_array["y_lidar"], cloud_array["z_lidar"]),
+                axis=1,
+            )
+            return points.astype(np.float32, copy=False)
+        return None
+
+    def _project_cloud_to_depth(
+        self,
+        cloud_array: np.ndarray,
+        cloud_frame: Optional[str],
+        cloud_stamp: Time,
+        width: int,
+        height: int,
+    ) -> Optional[np.ndarray]:
+        field_names = cloud_array.dtype.names or ()
+
+        if "u" not in field_names or "v" not in field_names:
+            if not self._cloud_field_warning_emitted:
+                self.get_logger().error(
+                    "Projected cloud missing required 'u'/'v' fields. Available fields: %s", list(field_names)
+                )
+                self._cloud_field_warning_emitted = True
+            return None
+
+        xyz = self._extract_cloud_xyz(cloud_array, field_names)
+        if xyz is None:
+            if not self._cloud_field_warning_emitted:
+                self.get_logger().error("Projected cloud missing XYZ data.")
+                self._cloud_field_warning_emitted = True
+            return None
+
+        if not cloud_frame:
+            self.get_logger().error("Projected cloud frame is unset.")
+            return None
+
+        if cloud_frame != self.camera_frame:
+            transform = self._lookup_tf(self.camera_frame, cloud_frame, cloud_stamp)
+            if transform is None:
+                return None
+            xyz = (transform[:3, :3] @ xyz.T).T
+            xyz += transform[:3, 3]
+
+        depth_vals = xyz[:, 2].astype(np.float32, copy=False)
+        u_coords = np.asarray(cloud_array["u"], dtype=np.float32)
+        v_coords = np.asarray(cloud_array["v"], dtype=np.float32)
+
+        valid = (
+            np.isfinite(depth_vals)
+            & (depth_vals > 0.0)
+            & np.isfinite(u_coords)
+            & np.isfinite(v_coords)
+        )
+        if not np.any(valid):
+            return None
+
+        depth_vals = depth_vals[valid]
+        u_coords = u_coords[valid]
+        v_coords = v_coords[valid]
+
+        u_idx = np.rint(u_coords).astype(np.int32)
+        v_idx = np.rint(v_coords).astype(np.int32)
+        inside = (
+            (u_idx >= 0)
+            & (u_idx < width)
+            & (v_idx >= 0)
+            & (v_idx < height)
+        )
+        if not np.any(inside):
+            return None
+
+        u_idx = u_idx[inside]
+        v_idx = v_idx[inside]
+        depth_vals = depth_vals[inside]
+
+        depth_img = np.full((height, width), np.inf, dtype=np.float32)
+        np.minimum.at(depth_img, (v_idx, u_idx), depth_vals)
+        depth_img[~np.isfinite(depth_img)] = 0.0
+        depth_img[depth_img == np.inf] = 0.0
+        return depth_img
+
+    def _build_offline_frames(
+        self,
+        rgb_msg: Image,
+        rgb_stamp_ns: int,
+        pending_depth,
+        pending_cloud,
+        slop_ns: int,
+    ):
+        rgb_image = ros_numpy.numpify(rgb_msg)
+        if rgb_image is None:
+            return None
+
+        if self._intrinsics is None and not self._intrinsics_warned:
+            self.get_logger().warning("CameraInfo not seen yet; graph updates may be skipped.")
+            self._intrinsics_warned = True
+
+        frame_stamp = Time.from_msg(rgb_msg.header.stamp)
+        rt_camera = self._lookup_tf(self.base_frame, self.camera_frame, frame_stamp)
+        rt_base = self._lookup_tf(self.world_frame, self.base_frame, frame_stamp)
+
+        projected_cloud = None
+        rt_projected = None
+        depth_image = None
+
+        if self.use_projected_lidar and pending_cloud:
+            selection = self._select_nearest_message(pending_cloud, rgb_stamp_ns)
+            if selection is not None:
+                cloud_stamp_ns, cloud_msg, diff_ns = selection
+                if slop_ns > 0 and diff_ns > slop_ns:
+                    self.get_logger().warning(
+                        "Projected LiDAR delta %.3fs exceeds slop %.3fs",
+                        diff_ns / 1e9,
+                        slop_ns / 1e9,
+                    )
+                projected_cloud = self._parse_pointcloud2_all_fields(cloud_msg)
+                if projected_cloud is not None:
+                    cloud_frame = self.projected_lidar_frame or cloud_msg.header.frame_id
+                    rt_projected = None
+                    if cloud_frame:
+                        rt_projected = self._lookup_tf(
+                            self.base_frame,
+                            cloud_frame,
+                            Time.from_msg(cloud_msg.header.stamp),
+                        )
+                    depth_image = self._project_cloud_to_depth(
+                        projected_cloud,
+                        cloud_frame,
+                        Time.from_msg(cloud_msg.header.stamp),
+                        rgb_msg.width,
+                        rgb_msg.height,
+                    )
+            self._trim_queue(pending_cloud, rgb_stamp_ns - slop_ns)
+
+        if depth_image is None and self.depth_topic:
+            selection = self._select_nearest_message(pending_depth, rgb_stamp_ns)
+            if selection is not None:
+                depth_stamp_ns, depth_msg, diff_ns = selection
+                if slop_ns > 0 and diff_ns > slop_ns:
+                    self.get_logger().warning(
+                        "Depth delta %.3fs exceeds slop %.3fs",
+                        diff_ns / 1e9,
+                        slop_ns / 1e9,
+                    )
+                depth_image = self._parse_depth_image(depth_msg)
+            self._trim_queue(pending_depth, rgb_stamp_ns - slop_ns)
+
+        return {
+            "rgb": rgb_image,
+            "depth": depth_image,
+            "frame_id": self._rgb_frame_override or rgb_msg.header.frame_id,
+            "stamp": rgb_msg.header.stamp,
+            "rt_camera": rt_camera,
+            "rt_base": rt_base,
+            "projected_cloud": projected_cloud,
+            "rt_projected": rt_projected,
+            "intrinsics": self._intrinsics,
+        }
+
+    def _drain_offline_queue(
+        self,
+        pending_rgb,
+        pending_depth,
+        pending_cloud,
+        current_time_ns: int,
+        slop_ns: int,
+        final: bool = False,
+    ) -> int:
+        processed = 0
+        while pending_rgb:
+            rgb_stamp_ns, rgb_msg = pending_rgb[0]
+            if not final and current_time_ns is not None and rgb_stamp_ns + slop_ns > current_time_ns:
+                break
+            frames = self._build_offline_frames(
+                rgb_msg, rgb_stamp_ns, pending_depth, pending_cloud, slop_ns
+            )
+            pending_rgb.popleft()
+            if frames is None:
+                continue
+            self._process_frame_data(frames)
+            processed += 1
+        return processed
+
+    def run_offline_bag(self) -> None:
+        if not self.rosbag_path:
+            self.get_logger().error("offline_sequential is set but rosbag_path is empty.")
+            return
+        bag_path = Path(self.rosbag_path).expanduser()
+        if not bag_path.exists():
+            self.get_logger().error(f"Rosbag path does not exist: {bag_path}")
+            return
+
+        self._tf_buffer = Buffer(cache_time=Duration(seconds=30.0))
+        self._intrinsics = None
+        self._intrinsics_warned = False
+        self._cloud_field_warning_emitted = False
+
+        reader = rosbag2_py.SequentialReader()
+        storage_id = self.rosbag_storage_id or "sqlite3"
+        storage_options = rosbag2_py.StorageOptions(uri=str(bag_path), storage_id=storage_id)
+        converter_options = rosbag2_py.ConverterOptions(
+            input_serialization_format="cdr",
+            output_serialization_format="cdr",
+        )
+        try:
+            reader.open(storage_options, converter_options)
+        except Exception as exc:
+            self.get_logger().error(f"Failed to open rosbag: {exc}")
+            return
+
+        topic_types = {topic.name: topic.type for topic in reader.get_all_topics_and_types()}
+        tf_topic = "/tf"
+        tf_static_topic = "/tf_static"
+
+        required_topics = {self.rgb_topic, self.camera_info_topic, tf_topic, tf_static_topic}
+        optional_topics = {self.depth_topic, self.projected_lidar_topic}
+        type_cache = {}
+        for topic in required_topics | optional_topics:
+            if not topic:
+                continue
+            type_name = topic_types.get(topic)
+            if type_name is None:
+                if topic in required_topics:
+                    self.get_logger().warning(f"Topic '{topic}' not found in rosbag.")
+                continue
+            try:
+                type_cache[topic] = get_message(type_name)
+            except (AttributeError, ModuleNotFoundError) as exc:
+                self.get_logger().warning(f"Failed to load message type for '{topic}': {exc}")
+
+        if self.rgb_topic not in type_cache:
+            self.get_logger().error(f"RGB topic '{self.rgb_topic}' missing; offline processing aborted.")
+            return
+
+        pending_rgb = deque()
+        pending_depth = deque()
+        pending_cloud = deque()
+        slop_ns = int(self.synchronizer_slop * 1e9)
+        current_time_ns = None
+        processed_frames = 0
+
+        while reader.has_next() and rclpy.ok():
+            topic, data, timestamp = reader.read_next()
+            current_time_ns = timestamp
+            msg_type = type_cache.get(topic)
+            if msg_type is None:
+                continue
+            msg = deserialize_message(data, msg_type)
+
+            if topic == tf_topic:
+                self._add_tf_message(msg, is_static=False)
+            elif topic == tf_static_topic:
+                self._add_tf_message(msg, is_static=True)
+            elif topic == self.camera_info_topic:
+                self._update_intrinsics_from_msg(msg)
+            elif topic == self.rgb_topic:
+                pending_rgb.append((self._time_from_header(msg), msg))
+            elif topic == self.depth_topic:
+                pending_depth.append((self._time_from_header(msg), msg))
+            elif topic == self.projected_lidar_topic:
+                pending_cloud.append((self._time_from_header(msg), msg))
+
+            processed_frames += self._drain_offline_queue(
+                pending_rgb,
+                pending_depth,
+                pending_cloud,
+                current_time_ns,
+                slop_ns,
+                final=False,
+            )
+
+        if pending_rgb:
+            processed_frames += self._drain_offline_queue(
+                pending_rgb,
+                pending_depth,
+                pending_cloud,
+                current_time_ns,
+                slop_ns,
+                final=True,
+            )
+
+        self.get_logger().info(f"Offline rosbag processing complete. Frames processed: {processed_frames}")
 
     def _update_graph(
         self,
@@ -388,7 +880,10 @@ def main(args=None):
     rclpy.init(args=args)
     node = SemanticMapBuilder()
     try:
-        rclpy.spin(node)
+        if node.offline_sequential:
+            node.run_offline_bag()
+        else:
+            rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:

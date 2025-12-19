@@ -2,6 +2,16 @@
 # `ros2 launch stcm semantic_mapping.launch.py`.
 
 # ============================================================================
+# OFFLINE ROSBAG SEQUENTIAL MODE
+# ============================================================================
+# Enable deterministic single-thread processing from a rosbag2 file.
+offline_sequential: true
+# Path to the rosbag2 directory (required when offline_sequential is true).
+rosbag_path: "/media/STREAM/ranger_recording_20251215_163827_uncompressed"
+# Storage plugin for rosbag2 ("sqlite3" default, use "mcap" if applicable).
+rosbag_storage_id: "sqlite3"
+
+# ============================================================================
 # CAMERA TOPICS - Adjust to match your RGB-D camera driver
 # Find your topics: ros2 topic list | grep image
 # ============================================================================
@@ -31,6 +41,7 @@ projected_lidar_frame: "lidar_link"
 # This should be 2-3x your RGB camera period to allow for sync delays.
 projected_lidar_timeout_sec: 3.0
 # Maximum time difference (in seconds) for synchronizing RGB and projected LiDAR messages.
+# In offline sequential mode, this is the pairing window for RGB/depth or RGB/LiDAR.
 # Increase this if RGB camera has irregular frame rate.
 # Your RGB camera varies by ~760ms, so use 2.0s to ensure sync success.
 synchronizer_slop_sec: 2.0

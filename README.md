@@ -186,6 +186,19 @@ You can still override individual values at launch time (`text_prompt:=...`, `gr
 
 All parameters are configured in the YAML file (topics, TF frames, detection settings, output paths).
 
+For deterministic offline runs (single-thread sequential rosbag reader), enable:
+```yaml
+offline_sequential: true
+rosbag_path: "/path/to/rosbag2_dir"
+```
+Or override at launch time:
+```bash
+ros2 launch stcm semantic_mapping.launch.py \
+  config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml \
+  offline_sequential:=true \
+  rosbag_path:=/path/to/rosbag2_dir
+```
+
 Run the updater separately once you have an initial graph:
 
 ```bash
