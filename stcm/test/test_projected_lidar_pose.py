@@ -128,9 +128,7 @@ class ProjectedLidarPoseExporter(Node):
 
         self.timer = self.create_timer(self.processing_period, self._process_frame)
         self.get_logger().info(
-            "Exporter ready (rgb: %s, output: %s)",
-            self.rgb_topic,
-            self.output_dir,
+            f"Exporter ready (rgb: {self.rgb_topic}, output: {self.output_dir})"
         )
 
     def _prepare_output_dir(self, output_subdir: str) -> Path:
@@ -249,7 +247,7 @@ class ProjectedLidarPoseExporter(Node):
             stamp_ns = int(time.time() * 1e9)
         output_path = self.output_dir / f"gdino_sam_{stamp_ns}.png"
         annotated.save(output_path)
-        self.get_logger().info("Saved detection image: %s", output_path)
+        self.get_logger().info(f"Saved detection image: {output_path}")
 
 
 def test_pose_in_map_frame_from_projected():
