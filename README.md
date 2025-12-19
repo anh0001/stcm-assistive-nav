@@ -143,7 +143,7 @@ Set `export STCM_CKPT_DIR=/data/ckpts` when using a custom directory. GroundingD
 - RGB image (e.g., `/camera/color/image_raw`)
 - Depth image (e.g., `/camera/aligned_depth_to_color/image_raw`)
 - Camera info (e.g., `/camera/color/camera_info`)
-- Optional: enable `use_projected_lidar: true` plus `projected_lidar_topic` if you want to replace the depth image with the fused `/lidar_points_projected` cloud. Override `projected_lidar_frame` when the PointCloud2 header lacks the desired frame.
+- Optional: enable `use_projected_lidar: true` plus `projected_lidar_topic` to use `/lidar_points_projected` instead of `depth_topic`. The PointCloud2 must include `u`/`v` pixel fields and XYZ in the lidar frame so SAM masks can pick the matching points; override `projected_lidar_frame` when the header lacks the desired frame. When `use_projected_lidar: false`, the node uses `depth_topic` (including Depth Anything outputs).
 
 **TF Transforms** (verify with `ros2 run tf2_tools view_frames`):
 - `camera_frame → base_frame → world_frame` (e.g., `camera_optical_frame → base_link → map`)

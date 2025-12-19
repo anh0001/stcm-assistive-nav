@@ -23,6 +23,7 @@ from ..map_utils import (
     get_fov_points_in_map,
     is_nearby_in_map,
     pose_in_map_frame,
+    pose_in_map_frame_from_projected,
     read_graph_json,
     save_graph_json,
     update_graph_edges,
@@ -132,6 +133,8 @@ class SemanticMapUpdater(Node):
         rt_camera = frames["rt_camera"]
         rt_base = frames["rt_base"]
         intrinsics = frames["intrinsics"]
+        projected_cloud = frames.get("projected_cloud")
+        rt_projected = frames.get("rt_projected")
 
         img_pil = PILImg.fromarray(rgb_image[:, :, (2, 1, 0)])
 
@@ -174,15 +177,33 @@ class SemanticMapUpdater(Node):
             label = phrases[idx]
             if label not in detected_poses:
                 continue
-            pose = pose_in_map_frame(
-                rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-            )
+            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
+                pose = pose_in_map_frame_from_projected(
+                    projected_cloud,
+                    rt_projected,
+                    rt_base,
+                    segment=mask[0],
+                    rt_camera=rt_camera,
+                )
+            else:
+                pose = pose_in_map_frame(
+                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
+                )
             if pose is None:
                 continue
             detected_poses[label].append(pose)
 
         self._remove_missing_nodes(depth_image, rt_camera, rt_base, detected_poses, intrinsics)
-        self._add_new_nodes(mask_array, phrases, rt_camera, rt_base, depth_image, intrinsics)
+        self._add_new_nodes(
+            mask_array,
+            phrases,
+            rt_camera,
+            rt_base,
+            depth_image,
+            intrinsics,
+            projected_cloud,
+            rt_projected,
+        )
         update_graph_edges(self.graph, self.edge_distance_threshold)
 
         annotated = annotate(overlay_masks(img_pil, masks), image_pil_bboxes, gdino_conf, phrases)
@@ -215,15 +236,34 @@ class SemanticMapUpdater(Node):
         for node_name in nodes_to_remove:
             self.graph.remove_node(node_name)
 
-    def _add_new_nodes(self, masks, phrases, rt_camera, rt_base, depth_image, intrinsics):
+    def _add_new_nodes(
+        self,
+        masks,
+        phrases,
+        rt_camera,
+        rt_base,
+        depth_image,
+        intrinsics,
+        projected_cloud=None,
+        rt_projected=None,
+    ):
         label_iter = {label: 0 for label in self.distance_thresholds}
         for idx, mask in enumerate(masks):
             label = phrases[idx]
             if label not in self.distance_thresholds:
                 continue
-            pose = pose_in_map_frame(
-                rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-            )
+            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
+                pose = pose_in_map_frame_from_projected(
+                    projected_cloud,
+                    rt_projected,
+                    rt_base,
+                    segment=mask[0],
+                    rt_camera=rt_camera,
+                )
+            else:
+                pose = pose_in_map_frame(
+                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
+                )
             if pose is None:
                 continue
             pose_history, is_nearby = is_nearby_in_map(

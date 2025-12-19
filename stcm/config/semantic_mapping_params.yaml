@@ -20,14 +20,20 @@ world_frame: "map"
 
 # ============================================================================
 # OPTIONAL CAMERA-LIDAR FUSION
-# Enable to replace the depth image with the fused `/lidar_points_projected` cloud.
+# Enable to use `/lidar_points_projected` instead of `depth_topic`.
+# The projected cloud must include u/v pixel fields plus XYZ in the lidar frame; SAM masks filter those points.
 # `projected_lidar_frame` overrides the PointCloud2 header frame (leave blank to use header).
 # ============================================================================
 use_projected_lidar: true
 projected_lidar_topic: "/lidar_points_projected"
 projected_lidar_frame: "lidar_link"
 # Seconds to wait for projected lidar frames before falling back to the depth topic.
-projected_lidar_timeout_sec: 2.0
+# This should be 2-3x your RGB camera period to allow for sync delays.
+projected_lidar_timeout_sec: 3.0
+# Maximum time difference (in seconds) for synchronizing RGB and projected LiDAR messages.
+# Increase this if RGB camera has irregular frame rate.
+# Your RGB camera varies by ~760ms, so use 2.0s to ensure sync success.
+synchronizer_slop_sec: 2.0
 
 # ============================================================================
 # OBJECT DETECTION - What to detect and track

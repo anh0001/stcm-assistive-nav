@@ -68,6 +68,9 @@ class ImageListener:
         self._last_cloud_time: Optional[Time] = None
         self._reset_tf_on_time_jump = bool(reset_tf_on_time_jump)
         self._clock_jump_handle = None
+        self.projected_cloud: Optional[np.ndarray] = None
+        self.projected_cloud_frame: Optional[str] = None
+        self.RT_projected: Optional[np.ndarray] = None
 
         self.intrinsics: Optional[np.ndarray] = None
         self.fx = None
@@ -288,7 +291,18 @@ class ImageListener:
             self._node.get_logger().debug("RGB-Cloud callback: TF lookup failed")
             return
 
-        depth_cv = self._project_cloud_to_depth(cloud, rgb.width, rgb.height)
+        cloud_array = self._parse_pointcloud2_all_fields(cloud)
+        if cloud_array is None:
+            self._node.get_logger().debug("RGB-Cloud callback: cloud parse failed")
+            return
+
+        cloud_frame = self.projected_lidar_frame or cloud.header.frame_id
+        cloud_stamp = Time.from_msg(cloud.header.stamp)
+        rt_cloud = None
+        if cloud_frame:
+            rt_cloud = self._lookup_tf(self.base_frame, cloud_frame, cloud_stamp)
+
+        depth_cv = self._project_cloud_to_depth(cloud_array, cloud_frame, cloud_stamp, rgb.width, rgb.height)
         if depth_cv is None:
             self._node.get_logger().debug("RGB-Cloud callback: cloud projection failed")
             return
@@ -305,51 +319,62 @@ class ImageListener:
             self.width = depth_cv.shape[1]
             self.RT_camera = rt_camera
             self.RT_base = rt_base
-        self._record_projected_cloud_sample(rgb.header.stamp)
+            self.projected_cloud = cloud_array
+            self.projected_cloud_frame = cloud_frame
+            self.RT_projected = rt_cloud.copy() if rt_cloud is not None else None
+        self._record_projected_cloud_sample(cloud.header.stamp)
 
     def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
         """Parse PointCloud2 message preserving ALL fields including custom u/v."""
-        import struct
-
-        # Build numpy dtype from PointCloud2 fields
-        dtype_list = []
+        type_map = {
+            1: np.int8,
+            2: np.uint8,
+            3: np.int16,
+            4: np.uint16,
+            5: np.int32,
+            6: np.uint32,
+            7: np.float32,
+            8: np.float64,
+        }
+        names = []
+        formats = []
+        offsets = []
         for field in cloud.fields:
-            # Map PointCloud2 datatypes to numpy dtypes
-            type_map = {
-                1: np.int8, 2: np.uint8,
-                3: np.int16, 4: np.uint16,
-                5: np.int32, 6: np.uint32,
-                7: np.float32, 8: np.float64
-            }
             np_dtype = type_map.get(field.datatype)
             if np_dtype is None:
-                self._node.get_logger().warn(f"Unknown datatype {field.datatype} for field {field.name}")
+                self._node.get_logger().warning(
+                    "Unknown datatype %s for field %s", field.datatype, field.name
+                )
                 continue
+            count = field.count if field.count > 0 else 1
+            dtype_entry = np_dtype if count == 1 else np.dtype((np_dtype, count))
+            names.append(field.name)
+            formats.append(dtype_entry)
+            offsets.append(field.offset)
 
-            dtype_list.append((field.name, np_dtype))
-
-        if not dtype_list:
+        if not names:
             return None
 
-        # Create structured array from raw data
-        dtype = np.dtype(dtype_list)
+        dtype = np.dtype(
+            {"names": names, "formats": formats, "offsets": offsets, "itemsize": cloud.point_step}
+        )
         try:
-            # Reshape raw data into structured array
             cloud_array = np.frombuffer(cloud.data, dtype=dtype)
+            if cloud.is_bigendian:
+                cloud_array = cloud_array.byteswap().newbyteorder()
             return cloud_array
         except Exception as exc:
             self._node.get_logger().error(f"Failed to parse PointCloud2: {exc}")
             return None
 
-    def _project_cloud_to_depth(self, cloud: PointCloud2, width: int, height: int) -> Optional[np.ndarray]:
-        # Parse PointCloud2 with all fields preserved
-        cloud_array = self._parse_pointcloud2_all_fields(cloud)
-        if cloud_array is None:
-            if not self._cloud_field_warning_emitted:
-                self._node.get_logger().error("Unable to parse projected cloud")
-                self._cloud_field_warning_emitted = True
-            return None
-
+    def _project_cloud_to_depth(
+        self,
+        cloud_array: np.ndarray,
+        cloud_frame: Optional[str],
+        cloud_stamp: Time,
+        width: int,
+        height: int,
+    ) -> Optional[np.ndarray]:
         field_names = cloud_array.dtype.names or ()
 
         if "u" not in field_names or "v" not in field_names:
@@ -367,13 +392,11 @@ class ImageListener:
                 self._cloud_field_warning_emitted = True
             return None
 
-        cloud_frame = self.projected_lidar_frame or cloud.header.frame_id
         if not cloud_frame:
             self._node.get_logger().error("Projected cloud frame is unset.")
             return None
 
         if cloud_frame != self.camera_frame:
-            cloud_stamp = Time.from_msg(cloud.header.stamp)
             transform = self._lookup_tf(self.camera_frame, cloud_frame, cloud_stamp)
             if transform is None:
                 return None
@@ -446,6 +469,7 @@ class ImageListener:
         with self._lock:
             if self.im is None or self.depth is None:
                 return None
+            projected_ready = self._projected_cloud_is_recent()
             return {
                 "rgb": self.im.copy(),
                 "depth": self.depth.copy(),
@@ -453,6 +477,9 @@ class ImageListener:
                 "stamp": self.rgb_frame_stamp,
                 "rt_camera": self.RT_camera.copy(),
                 "rt_base": self.RT_base.copy(),
+                "projected_cloud": self.projected_cloud if projected_ready else None,
+                "projected_cloud_frame": self.projected_cloud_frame if projected_ready else None,
+                "rt_projected": self.RT_projected.copy() if projected_ready and self.RT_projected is not None else None,
                 "height": self.height,
                 "width": self.width,
                 "intrinsics": {

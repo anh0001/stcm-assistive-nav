@@ -18,7 +18,13 @@ from visualization_msgs.msg import Marker, MarkerArray
 from ..core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
-from ..map_utils import is_nearby_in_map, pose_in_map_frame, save_graph_json, update_graph_edges
+from ..map_utils import (
+    is_nearby_in_map,
+    pose_in_map_frame,
+    pose_in_map_frame_from_projected,
+    save_graph_json,
+    update_graph_edges,
+)
 
 
 class SemanticMapBuilder(Node):
@@ -42,6 +48,7 @@ class SemanticMapBuilder(Node):
         self.projected_lidar_timeout = float(
             self.declare_parameter("projected_lidar_timeout_sec", 2.0).value
         )
+        self.synchronizer_slop = float(self.declare_parameter("synchronizer_slop_sec", 0.1).value)
         self.reset_tf_on_time_jump = bool(self.declare_parameter("reset_tf_on_time_jump", True).value)
 
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
@@ -77,6 +84,7 @@ class SemanticMapBuilder(Node):
             base_frame=self.base_frame,
             camera_frame=self.camera_frame,
             world_frame=self.world_frame,
+            slop_seconds=self.synchronizer_slop,
             use_projected_lidar=self.use_projected_lidar,
             projected_lidar_topic=self.projected_lidar_topic,
             projected_lidar_frame=self.projected_lidar_frame,
@@ -201,6 +209,8 @@ class SemanticMapBuilder(Node):
         depth_image = frames["depth"]
         rt_camera = frames["rt_camera"]
         rt_base = frames["rt_base"]
+        projected_cloud = frames.get("projected_cloud")
+        rt_projected = frames.get("rt_projected")
 
         img_pil = PILImg.fromarray(rgb_image[:, :, (2, 1, 0)])
 
@@ -247,23 +257,58 @@ class SemanticMapBuilder(Node):
         image_pil_bboxes, masks, gdino_conf, phrases = filtered
 
         self._update_graph(
-            masks.cpu().numpy(), phrases, rt_camera, rt_base, depth_image, frames["intrinsics"]
+            masks.cpu().numpy(),
+            phrases,
+            rt_camera,
+            rt_base,
+            depth_image,
+            frames["intrinsics"],
+            projected_cloud=projected_cloud,
+            rt_projected=rt_projected,
         )
         update_graph_edges(self.graph, self.edge_distance_threshold)
         self._publish_segmentation(img_pil, image_pil_bboxes, gdino_conf, phrases, masks, frames)
         self._publish_graph_markers()
         self.iteration += 1
 
-    def _update_graph(self, masks, phrases, rt_camera, rt_base, depth_image, intrinsics):
+    def _update_graph(
+        self,
+        masks,
+        phrases,
+        rt_camera,
+        rt_base,
+        depth_image,
+        intrinsics,
+        projected_cloud=None,
+        rt_projected=None,
+    ):
+        # Log transform chain once at startup
+        if not hasattr(self, '_debug_logged'):
+            depth_source = "PROJECTED LIDAR" if (self.use_projected_lidar and rt_projected is not None) else "RGB-D DEPTH"
+            self.get_logger().info(f"Transform chain: camera→base→map | Depth source: {depth_source}")
+            self._debug_logged = True
+
         label_iter = {label: 0 for label in self.distance_thresholds}
         for idx, mask in enumerate(masks):
             label = phrases[idx]
             if label not in self.distance_thresholds:
                 continue
-            pose = pose_in_map_frame(
-                rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-            )
+            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
+                pose = pose_in_map_frame_from_projected(
+                    projected_cloud,
+                    rt_projected,
+                    rt_base,
+                    segment=mask[0],
+                    rt_camera=rt_camera,
+                )
+                depth_method = "LiDAR"
+            else:
+                pose = pose_in_map_frame(
+                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
+                )
+                depth_method = "RGB-D"
             if pose is None:
+                self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
 
             pose_history, is_nearby = is_nearby_in_map(
@@ -283,6 +328,7 @@ class SemanticMapBuilder(Node):
                 robot_pose=rt_base.tolist(),
                 category=label,
             )
+            self.get_logger().info(f"Added '{label}' at [{pose[0]:.2f}, {pose[1]:.2f}, {pose[2]:.2f}] ({depth_method})")
             label_iter[label] += 1
 
     def _publish_segmentation(self, img_pil, boxes, scores, phrases, masks, frames):

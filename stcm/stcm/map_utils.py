@@ -43,6 +43,118 @@ def compute_xyz(depth_img, fx, fy, px, py, height, width):
     return xyz_img
 
 
+def _cloud_field_names(cloud_array):
+    if isinstance(cloud_array, dict):
+        return set(cloud_array.keys())
+    return set(cloud_array.dtype.names or ())
+
+
+def _extract_cloud_xyz(cloud_array):
+    field_names = _cloud_field_names(cloud_array)
+    if {"x", "y", "z"}.issubset(field_names):
+        points = np.stack((cloud_array["x"], cloud_array["y"], cloud_array["z"]), axis=1)
+        return points.astype(np.float32, copy=False)
+    if {"x_lidar", "y_lidar", "z_lidar"}.issubset(field_names):
+        points = np.stack(
+            (cloud_array["x_lidar"], cloud_array["y_lidar"], cloud_array["z_lidar"]),
+            axis=1,
+        )
+        return points.astype(np.float32, copy=False)
+    return None
+
+
+def pose_in_map_frame_from_projected(
+    projected_cloud,
+    rt_cloud,
+    rt_base,
+    segment=None,
+    mask_threshold=0.5,
+    rt_camera=None,
+):
+    if projected_cloud is None or rt_cloud is None or rt_base is None:
+        return None
+
+    field_names = _cloud_field_names(projected_cloud)
+    if "u" not in field_names or "v" not in field_names:
+        return None
+
+    xyz = _extract_cloud_xyz(projected_cloud)
+    if xyz is None:
+        return None
+
+    u_coords = np.asarray(projected_cloud["u"], dtype=np.float32)
+    v_coords = np.asarray(projected_cloud["v"], dtype=np.float32)
+
+    valid = np.isfinite(u_coords) & np.isfinite(v_coords)
+    if xyz.shape[0] != u_coords.shape[0]:
+        return None
+    valid &= np.isfinite(xyz).all(axis=1)
+    valid &= ~(np.all(xyz == 0.0, axis=1))
+    if not np.any(valid):
+        return None
+
+    xyz = xyz[valid]
+    u_coords = u_coords[valid]
+    v_coords = v_coords[valid]
+
+    u_idx = np.rint(u_coords).astype(np.int32)
+    v_idx = np.rint(v_coords).astype(np.int32)
+
+    if segment is not None:
+        height, width = segment.shape[:2]
+        inside = (u_idx >= 0) & (u_idx < width) & (v_idx >= 0) & (v_idx < height)
+        if not np.any(inside):
+            return None
+        xyz = xyz[inside]
+        u_idx = u_idx[inside]
+        v_idx = v_idx[inside]
+
+        mask = segment[v_idx, u_idx] > mask_threshold
+        if not np.any(mask):
+            return None
+        xyz = xyz[mask]
+        u_idx = u_idx[mask]
+        v_idx = v_idx[mask]
+    elif xyz.size == 0:
+        return None
+
+    if xyz.size == 0:
+        return None
+
+    width = int(np.max(u_idx)) + 1 if segment is None else width
+    linear_idx = v_idx * width + u_idx
+    if rt_camera is not None:
+        rt_camera_inv = np.linalg.inv(rt_camera)
+        rt_cloud_to_camera = rt_camera_inv @ rt_cloud
+        xyz_camera = np.dot(rt_cloud_to_camera[:3, :3], xyz.T).T + rt_cloud_to_camera[:3, 3]
+        depth_vals = xyz_camera[:, 2]
+        depth_valid = np.isfinite(depth_vals) & (depth_vals > 0.0)
+        if not np.any(depth_valid):
+            return None
+        xyz = xyz[depth_valid]
+        linear_idx = linear_idx[depth_valid]
+        depth_vals = depth_vals[depth_valid]
+    else:
+        depth_vals = np.linalg.norm(xyz, axis=1)
+
+    order = np.lexsort((depth_vals, linear_idx))
+    unique_pixels, first_idx = np.unique(linear_idx[order], return_index=True)
+    if unique_pixels.size == 0:
+        return None
+    keep = order[first_idx]
+    xyz = xyz[keep]
+
+    # Transform: lidar → base_link → map
+    xyz_base = np.dot(rt_cloud[:3, :3], xyz.T).T
+    xyz_base += rt_cloud[:3, 3]
+
+    xyz_map = np.dot(rt_base[:3, :3], xyz_base.T).T
+    xyz_map += rt_base[:3, 3]
+
+    mean_pose = np.mean(xyz_map, axis=0)
+    return mean_pose.tolist()
+
+
 def pose_to_map_pixel(map_metadata, pose):
     pose_x = pose[0]
     pose_y = pose[1]
