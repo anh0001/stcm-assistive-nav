@@ -85,16 +85,6 @@
             },
             "problemMatcher": [],
             "detail": "Test depth estimation on sample image"
-        },
-        {
-            "label": "Test Projected Lidar Pose",
-            "type": "shell",
-            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 stcm/test/test_projected_lidar_pose.py",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "detail": "Test projected lidar pose on the system Python user base"
         }
     ]
 }
