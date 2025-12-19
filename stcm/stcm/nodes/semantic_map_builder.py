@@ -64,6 +64,12 @@ class SemanticMapBuilder(Node):
         labels = self.declare_parameter("target_labels", ["table", "door", "chair"]).value
         thresholds = self.declare_parameter("target_label_thresholds", [2.0, 2.0, 0.6]).value
         self.distance_thresholds = self._build_threshold_map(labels, thresholds)
+        if len(labels) != len(thresholds):
+            self.get_logger().warning(
+                "target_label_thresholds length does not match target_labels; "
+                "extra labels will reuse the last threshold."
+            )
+        self.get_logger().info(f"Target label merge radii: {self.distance_thresholds}")
         self._label_lookup = self._build_label_lookup(self.distance_thresholds.keys())
         self._unknown_phrase_cache: set[str] = set()
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value

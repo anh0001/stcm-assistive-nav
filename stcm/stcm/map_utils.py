@@ -305,6 +305,7 @@ def pose_in_map_frame(RT_camera, RT_base, depth_array, segment=None, intrinsics=
 
 def is_nearby_in_map(pose_list, node_pose, threshold=0.5):
     if len(pose_list) == 0:
+        pose_list.append(node_pose)
         return pose_list, False
     pose_array = np.array(pose_list)
     node_pose_array = np.array([node_pose])
