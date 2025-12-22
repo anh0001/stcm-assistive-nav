@@ -59,6 +59,13 @@ def _resolve_float(context, arg_name, fallback):
     return float(fallback)
 
 
+def _resolve_int(context, arg_name, fallback):
+    override = LaunchConfiguration(arg_name).perform(context)
+    if override:
+        return int(override)
+    return int(fallback)
+
+
 def launch_setup(context, *args, **kwargs):
     config_path = LaunchConfiguration("config_file").perform(context)
     config = _load_config(config_path)
@@ -79,6 +86,11 @@ def launch_setup(context, *args, **kwargs):
         context,
         "offline_sequential",
         config.get("offline_sequential", False),
+    )
+    offline_frame_stride = _resolve_int(
+        context,
+        "offline_frame_stride",
+        config.get("offline_frame_stride", 1),
     )
     reset_tf_on_time_jump = _resolve_bool(
         context,
@@ -117,6 +129,7 @@ def launch_setup(context, *args, **kwargs):
             "mobilesam_checkpoint": mobilesam_ckpt,
             "depth_anything_checkpoint": depth_ckpt,
             "offline_sequential": offline_sequential,
+            "offline_frame_stride": offline_frame_stride,
             "rosbag_path": rosbag_path,
             "rosbag_storage_id": rosbag_storage_id,
         }
@@ -131,7 +144,14 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if run_updater:
-        updater_params = _node_params(drop_keys=["offline_sequential", "rosbag_path", "rosbag_storage_id"])
+        updater_params = _node_params(
+            drop_keys=[
+                "offline_sequential",
+                "offline_frame_stride",
+                "rosbag_path",
+                "rosbag_storage_id",
+            ]
+        )
         updater_params.update(
             {
                 "text_prompt": text_prompt,
@@ -190,6 +210,11 @@ def generate_launch_description():
                 "offline_sequential",
                 default_value="",
                 description="Override the offline_sequential flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "offline_frame_stride",
+                default_value="",
+                description="Override the offline_frame_stride value from the config file.",
             ),
             DeclareLaunchArgument(
                 "reset_tf_on_time_jump",

@@ -56,6 +56,7 @@ Key parameters (set via the launch file or `ros2 param set`):
 - `target_labels` / `target_label_thresholds`: object classes of interest and per-class merge radius.
 - `text_prompt`, `box_threshold`, `text_threshold`: detection prompt and thresholds.
 - `graph_output_path` / `graph_input_path`: where semantic graphs are stored.
+- `offline_sequential`, `rosbag_path`, `offline_frame_stride`: enable rosbag playback and process every Nth RGB frame offline.
 
 Run the updater separately once you have an initial graph:
 

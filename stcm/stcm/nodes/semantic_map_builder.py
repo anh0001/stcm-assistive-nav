@@ -97,10 +97,15 @@ class SemanticMapBuilder(Node):
         self.offline_sequential = bool(self.declare_parameter("offline_sequential", False).value)
         self.rosbag_path = self.declare_parameter("rosbag_path", "").value
         self.rosbag_storage_id = self.declare_parameter("rosbag_storage_id", "sqlite3").value
+        self.offline_frame_stride = int(self.declare_parameter("offline_frame_stride", 1).value)
+        if self.offline_frame_stride < 1:
+            self.get_logger().warning("offline_frame_stride < 1; defaulting to 1.")
+            self.offline_frame_stride = 1
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = nx.Graph()
         self.iteration = 0
+        self._offline_frame_counter = 0
         self._tf_buffer: Optional[Buffer] = None
         self._intrinsics: Optional[Dict[str, float]] = None
         self._intrinsics_warned = False
@@ -772,6 +777,14 @@ class SemanticMapBuilder(Node):
             "intrinsics": self._intrinsics,
         }
 
+    def _should_process_offline_frame(self) -> bool:
+        if self.offline_frame_stride <= 1:
+            self._offline_frame_counter += 1
+            return True
+        should_process = self._offline_frame_counter % self.offline_frame_stride == 0
+        self._offline_frame_counter += 1
+        return should_process
+
     def _drain_offline_queue(
         self,
         pending_rgb,
@@ -786,10 +799,15 @@ class SemanticMapBuilder(Node):
             rgb_stamp_ns, rgb_msg = pending_rgb[0]
             if not final and current_time_ns is not None and rgb_stamp_ns + slop_ns > current_time_ns:
                 break
+            should_process = self._should_process_offline_frame()
+            pending_rgb.popleft()
+            if not should_process:
+                self._trim_queue(pending_depth, rgb_stamp_ns - slop_ns)
+                self._trim_queue(pending_cloud, rgb_stamp_ns - slop_ns)
+                continue
             frames = self._build_offline_frames(
                 rgb_msg, rgb_stamp_ns, pending_depth, pending_cloud, slop_ns
             )
-            pending_rgb.popleft()
             if frames is None:
                 continue
             self._process_frame_data(frames)
@@ -805,6 +823,11 @@ class SemanticMapBuilder(Node):
             self.get_logger().error(f"Rosbag path does not exist: {bag_path}")
             return
 
+        self._offline_frame_counter = 0
+        if self.offline_frame_stride > 1:
+            self.get_logger().info(
+                f"Offline stride enabled: processing every {self.offline_frame_stride} RGB frames."
+            )
         self._tf_buffer = Buffer(cache_time=Duration(seconds=30.0))
         self._intrinsics = None
         self._intrinsics_warned = False
