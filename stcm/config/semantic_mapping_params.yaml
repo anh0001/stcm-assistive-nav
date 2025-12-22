@@ -83,8 +83,8 @@ target_label_thresholds:
   - 1.0  # elevator sliding door
 
 # Detection confidence thresholds (0.0-1.0)
-box_threshold: 0.3
-text_threshold: 0.3
+box_threshold: 0.55
+text_threshold: 0.55
 
 # ============================================================================
 # DETECTION FILTERING - Additional pruning before segmentation
