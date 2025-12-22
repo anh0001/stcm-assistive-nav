@@ -4,7 +4,7 @@
   <name>stcm_planner</name>
   <version>0.0.0</version>
   <description>The STCM planner package.</description>
-  <maintainer email="nwzantout@gmail.com">docker</maintainer>
+  <maintainer email="anhrisn@gmail.com">docker</maintainer>
   <license>MIT</license>
 
   <test_depend>ament_copyright</test_depend>
