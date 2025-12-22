@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 import re
 import argparse
 
-from language_planner.prompts import get_prompt
-from language_planner.llm_backend.llm_query_langchain import LanguageModel, NavQueryRunMode, SystemMode
-from language_planner.llm_backend.llm_query_langchain import LLMQueryHandler
-from language_planner.mapping.grid_map import GridMapHandler
-from language_planner.code_parsing.code_parser import CodeParser
+from stcm_planner.prompts import get_prompt
+from stcm_planner.llm_backend.llm_query_langchain import LanguageModel, NavQueryRunMode, SystemMode
+from stcm_planner.llm_backend.llm_query_langchain import LLMQueryHandler
+from stcm_planner.mapping.grid_map import GridMapHandler
+from stcm_planner.code_parsing.code_parser import CodeParser
 
 class LanguagePlannerBackend:
 
@@ -123,5 +123,4 @@ class LanguagePlannerBackend:
         waypoints, ids = self.parse_code(output_code, object_dict, object_id_map)
 
         return waypoints, ids, filtered_objects_out, output_code
-
 

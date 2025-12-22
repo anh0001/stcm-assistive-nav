@@ -24,7 +24,7 @@ from prompts import (
     get_obj_retrieval_prompt, 
     get_tool_call_example_1,
     get_tool_call_example_2)
-from language_planner.llm_backend.tools import AgentToolbox
+from stcm_planner.llm_backend.tools import AgentToolbox
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.utils import secret_from_env
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage

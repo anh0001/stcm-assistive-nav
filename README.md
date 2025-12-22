@@ -199,6 +199,25 @@ ros2 launch stcm semantic_mapping.launch.py \
   rosbag_path:=/path/to/rosbag2_dir
 ```
 
+## Semantic Graph Simulator (RViz)
+
+Use the semantic graph JSON to drive a 2D RViz simulation with the language planner.
+
+```bash
+colcon build --packages-select stcm_planner
+source install/setup.bash
+ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=/tmp/semantic_graph.json
+```
+
+In RViz, add MarkerArray for `/semantic_graph_sim/nodes` and Marker displays for
+`/semantic_graph_sim/path` and `/semantic_graph_sim/robot`. Send queries with:
+
+```bash
+ros2 run stcm_planner language_query_publisher
+```
+
+The query publisher sends commands on `/stcm_planner_query`.
+
 Run the updater separately once you have an initial graph:
 
 ```bash

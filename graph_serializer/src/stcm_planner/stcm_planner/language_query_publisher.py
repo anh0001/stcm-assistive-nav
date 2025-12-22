@@ -6,7 +6,7 @@ from std_msgs.msg import String
 class LanguagePublisher(Node):
     def __init__(self):
         super().__init__('language_publisher')
-        self.publisher_ = self.create_publisher(String, '/language_planner_query', 10)
+        self.publisher_ = self.create_publisher(String, '/stcm_planner_query', 10)
         self.timer_ = self.create_timer(0.1, self.publish_input)
         self.get_logger().info("LanguagePublisher node has been started. Type your query below.")
 
