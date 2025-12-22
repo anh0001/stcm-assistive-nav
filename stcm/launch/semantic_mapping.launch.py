@@ -105,6 +105,11 @@ def launch_setup(context, *args, **kwargs):
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
+    use_depth_anything_fallback = _resolve_bool(
+        context,
+        "use_depth_anything_fallback",
+        config.get("use_depth_anything_fallback", True),
+    )
     rosbag_path = _resolve_str(context, "rosbag_path", config.get("rosbag_path", ""))
     rosbag_storage_id = _resolve_str(
         context,
@@ -128,6 +133,7 @@ def launch_setup(context, *args, **kwargs):
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
             "depth_anything_checkpoint": depth_ckpt,
+            "use_depth_anything_fallback": use_depth_anything_fallback,
             "offline_sequential": offline_sequential,
             "offline_frame_stride": offline_frame_stride,
             "rosbag_path": rosbag_path,
@@ -163,6 +169,7 @@ def launch_setup(context, *args, **kwargs):
                 "groundingdino_checkpoint": grounding_ckpt,
                 "mobilesam_checkpoint": mobilesam_ckpt,
                 "depth_anything_checkpoint": depth_ckpt,
+                "use_depth_anything_fallback": use_depth_anything_fallback,
             }
         )
 
@@ -240,6 +247,11 @@ def generate_launch_description():
                 "depth_anything_checkpoint",
                 default_value="",
                 description="Override the Depth-Anything model path from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "use_depth_anything_fallback",
+                default_value="",
+                description="Override the Depth-Anything fallback flag from the config file.",
             ),
             DeclareLaunchArgument(
                 "rosbag_path",

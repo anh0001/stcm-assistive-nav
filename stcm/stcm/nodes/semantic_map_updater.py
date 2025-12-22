@@ -80,6 +80,9 @@ class SemanticMapUpdater(Node):
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
+        self.use_depth_anything_fallback = bool(
+            self.declare_parameter("use_depth_anything_fallback", True).value
+        )
         self.depth_anything_max_depth = float(
             self.declare_parameter("depth_anything_max_depth", 5.0).value
         )
@@ -175,6 +178,8 @@ class SemanticMapUpdater(Node):
         depth_reference: np.ndarray | None,
         stamp,
     ) -> np.ndarray | None:
+        if not self.use_depth_anything_fallback:
+            return None
         if not self.depth_anything_checkpoint:
             return None
         if self._depth_anything_failed:

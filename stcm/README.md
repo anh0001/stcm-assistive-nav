@@ -57,6 +57,7 @@ Key parameters (set via the launch file or `ros2 param set`):
 - `text_prompt`, `box_threshold`, `text_threshold`: detection prompt and thresholds.
 - `graph_output_path` / `graph_input_path`: where semantic graphs are stored.
 - `offline_sequential`, `rosbag_path`, `offline_frame_stride`: enable rosbag playback and process every Nth RGB frame offline.
+- `use_depth_anything_fallback`: disable Depth Anything when you only want projected LiDAR/RGB-D depth.
 
 Run the updater separately once you have an initial graph:
 

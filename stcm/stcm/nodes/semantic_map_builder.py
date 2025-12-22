@@ -91,6 +91,9 @@ class SemanticMapBuilder(Node):
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
+        self.use_depth_anything_fallback = bool(
+            self.declare_parameter("use_depth_anything_fallback", True).value
+        )
         self.depth_anything_max_depth = float(
             self.declare_parameter("depth_anything_max_depth", 5.0).value
         )
@@ -253,6 +256,8 @@ class SemanticMapBuilder(Node):
         depth_reference: np.ndarray | None,
         stamp,
     ) -> np.ndarray | None:
+        if not self.use_depth_anything_fallback:
+            return None
         if not self.depth_anything_checkpoint:
             return None
         if self._depth_anything_failed:
@@ -386,7 +391,9 @@ class SemanticMapBuilder(Node):
             self.use_projected_lidar and projected_cloud is not None and rt_projected is not None
         )
         depth_ready = depth_image is not None
-        fallback_ready = bool(self.depth_anything_checkpoint) and rt_camera is not None
+        fallback_ready = (
+            self.use_depth_anything_fallback and bool(self.depth_anything_checkpoint) and rt_camera is not None
+        )
 
         if projected_ready and rt_base is not None:
             self._update_graph(

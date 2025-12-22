@@ -147,6 +147,8 @@ mobilesam_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/mobilesam/vit
 # model/config files. If a .pth file is provided, the fallback uses the default
 # HF model instead.
 depth_anything_checkpoint: "LiheYoung/depth-anything-small-hf"
+# Allow Depth-Anything fallback when projected LiDAR/depth is unavailable.
+use_depth_anything_fallback: false
 # Scale (meters) used to map Depth Anything relative depth when no metric depth
 # is available for calibration.
 depth_anything_max_depth: 5.0
