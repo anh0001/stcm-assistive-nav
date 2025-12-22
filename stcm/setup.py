@@ -33,7 +33,7 @@ setup(
     install_requires=read_requirements(),
     zip_safe=False,
     maintainer="Anhar Risnumawan",
-    maintainer_email="anhar@example.com",
+    maintainer_email="anhrisn@gmail.com",
     description="Semantic Topological Cognitive Mapping package for ROS 2 Humble.",
     license="MIT",
     tests_require=["pytest"],

@@ -3,7 +3,7 @@
   <name>stcm</name>
   <version>0.1.0</version>
   <description>Semantic Topological Cognitive Mapping utilities for ROS 2 Humble</description>
-  <maintainer email="anhar@example.com">Anhar Risnumawan</maintainer>
+  <maintainer email="anhrisn@gmail.com">Anhar Risnumawan</maintainer>
   <license>MIT</license>
 
   <exec_depend>rclpy</exec_depend>

@@ -18,7 +18,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='docker',
-    maintainer_email='nwzantout@gmail.com',
+    maintainer_email='anhrisn@gmail.com',
     description='The STCM planner package.',
     license='MIT',
     tests_require=['pytest'],
