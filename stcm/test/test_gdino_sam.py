@@ -28,7 +28,7 @@ def main(argv):
         print("Usage: python test_gdino_sam.py <image_path>")
         return
     image_path = argv[1]
-    text_prompt =  'objects . brown cardboard box . door with a handle .'
+    text_prompt =  'objects . dark thermos bottle .'
 
     try:
         logging.info("Initialize object detectors")

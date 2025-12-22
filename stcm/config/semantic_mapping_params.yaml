@@ -50,13 +50,37 @@ synchronizer_slop_sec: 2.0
 # OBJECT DETECTION - What to detect and track
 # ============================================================================
 # Space-separated list; end each object with " ." (space + period)
-text_prompt: "tables . chairs . door lift . trash bins . bottles . white drinking cups . metallic desk . drinking faucets . brown cardboard box ."
+text_prompt: >-
+  tables . armless chairs . dark thermos bottle . white drinking cups .
+  metallic desk . metallic water fountain . brown cardboard box .
+  green emergency exit sign . five indoor trash bins aligned against a wall .
+  dark elevator sliding door, door surface only .
 
 # List of object classes matching the text_prompt
-target_labels: ["table", "chair", "door lift", "trash bin", "bottle", "cup", "desk", "faucet", "cardboard box"]
+target_labels:
+  - "table"
+  - "chair"
+  - "bottle"
+  - "cup"
+  - "desk"
+  - "water fountain"
+  - "cardboard box"
+  - "emergency exit sign"
+  - "trash bins"
+  - "elevator sliding door"
 
 # Per-class merge radius in meters (larger values for bigger objects)
-target_label_thresholds: [2.0, 0.6, 2.0, 1.0, 0.5, 0.5, 2.0, 0.5, 1.0]
+target_label_thresholds:
+  - 2.0  # table
+  - 0.6  # chair
+  - 0.3  # bottle
+  - 0.5  # cup
+  - 2.0  # desk
+  - 0.5  # water fountain
+  - 1.0  # cardboard box
+  - 0.3  # emergency exit sign
+  - 2.0  # trash bins
+  - 1.0  # elevator sliding door
 
 # Detection confidence thresholds (0.0-1.0)
 box_threshold: 0.55

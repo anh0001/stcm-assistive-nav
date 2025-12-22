@@ -69,7 +69,7 @@
         {
             "label": "Test GroundingDINO + MobileSAM",
             "type": "shell",
-            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 stcm/test/test_gdino_sam.py stcm/imgs/image00.png",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 stcm/test/test_gdino_sam.py stcm/imgs/image007.png",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
