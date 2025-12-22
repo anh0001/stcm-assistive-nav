@@ -23,7 +23,11 @@ from tf2_msgs.msg import TFMessage
 from tf2_ros import Buffer, ConnectivityException, ExtrapolationException, LookupException
 from visualization_msgs.msg import Marker, MarkerArray
 
-from ..core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
+from ..core.perception import (
+    DepthAnythingPredictor,
+    GroundingDINOObjectPredictor,
+    SegmentAnythingPredictor,
+)
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
@@ -87,6 +91,9 @@ class SemanticMapBuilder(Node):
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
+        self.depth_anything_max_depth = float(
+            self.declare_parameter("depth_anything_max_depth", 5.0).value
+        )
         self.offline_sequential = bool(self.declare_parameter("offline_sequential", False).value)
         self.rosbag_path = self.declare_parameter("rosbag_path", "").value
         self.rosbag_storage_id = self.declare_parameter("rosbag_storage_id", "sqlite3").value
@@ -98,6 +105,10 @@ class SemanticMapBuilder(Node):
         self._intrinsics: Optional[Dict[str, float]] = None
         self._intrinsics_warned = False
         self._cloud_field_warning_emitted = False
+        self._depth_anything = None
+        self._depth_anything_failed = False
+        self._depth_anything_cache = None
+        self._depth_anything_cache_stamp = None
 
         self.listener = None
         self.timer = None
@@ -199,6 +210,81 @@ class SemanticMapBuilder(Node):
             return None
         return Path(value).expanduser()
 
+    @staticmethod
+    def _stamp_key(stamp) -> tuple[int, int] | None:
+        if stamp is None:
+            return None
+        return (int(stamp.sec), int(stamp.nanosec))
+
+    def _scale_depth_anything(self, depth_raw: np.ndarray, depth_reference: np.ndarray | None) -> np.ndarray | None:
+        depth_raw = depth_raw.astype(np.float32, copy=False)
+        valid_raw = np.isfinite(depth_raw) & (depth_raw > 0.0)
+        if not np.any(valid_raw):
+            return None
+
+        if depth_reference is not None:
+            ref_valid = np.isfinite(depth_reference) & (depth_reference > 0.0)
+            if np.any(ref_valid):
+                raw_median = np.median(depth_raw[valid_raw])
+                ref_median = np.median(depth_reference[ref_valid])
+                if raw_median > 0.0 and np.isfinite(ref_median):
+                    scale = ref_median / raw_median
+                    if np.isfinite(scale) and scale > 0.0:
+                        scaled = depth_raw * scale
+                        scaled = np.where(valid_raw, scaled, 0.0)
+                        return scaled.astype(np.float32)
+
+        max_val = np.max(depth_raw[valid_raw])
+        if not np.isfinite(max_val) or max_val <= 0.0:
+            return None
+        max_depth = self.depth_anything_max_depth if self.depth_anything_max_depth > 0.0 else 5.0
+        scaled = (depth_raw / max_val) * max_depth
+        scaled = np.where(valid_raw, scaled, 0.0)
+        return scaled.astype(np.float32)
+
+    def _get_depth_anything_depth(
+        self,
+        img_pil: PILImg.Image,
+        depth_reference: np.ndarray | None,
+        stamp,
+    ) -> np.ndarray | None:
+        if not self.depth_anything_checkpoint:
+            return None
+        if self._depth_anything_failed:
+            return None
+
+        stamp_key = self._stamp_key(stamp)
+        if (
+            stamp_key is not None
+            and self._depth_anything_cache_stamp == stamp_key
+            and self._depth_anything_cache is not None
+        ):
+            return self._depth_anything_cache
+
+        if self._depth_anything is None:
+            ckpt = self._expanduser_if_set(self.depth_anything_checkpoint) or self.depth_anything_checkpoint
+            try:
+                self._depth_anything = DepthAnythingPredictor(ckpt)
+            except Exception as exc:
+                self.get_logger().error(f"Depth Anything initialization failed: {exc}")
+                self._depth_anything_failed = True
+                return None
+
+        try:
+            _, depth_raw = self._depth_anything.predict(img_pil)
+        except Exception as exc:
+            self.get_logger().error(f"Depth Anything prediction failed: {exc}")
+            self._depth_anything_failed = True
+            return None
+
+        scaled = self._scale_depth_anything(depth_raw, depth_reference)
+        if scaled is None:
+            return None
+        if stamp_key is not None:
+            self._depth_anything_cache_stamp = stamp_key
+            self._depth_anything_cache = scaled
+        return scaled
+
     def _filter_to_target_labels(self, boxes, masks, scores, phrases):
         valid_indices = []
         canonical_phrases = []
@@ -291,7 +377,13 @@ class SemanticMapBuilder(Node):
         image_pil_bboxes, masks, gdino_conf, phrases = filtered
 
         graph_updated = False
-        if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None and rt_base is not None:
+        projected_ready = (
+            self.use_projected_lidar and projected_cloud is not None and rt_projected is not None
+        )
+        depth_ready = depth_image is not None
+        fallback_ready = bool(self.depth_anything_checkpoint) and rt_camera is not None
+
+        if projected_ready and rt_base is not None:
             self._update_graph(
                 masks.cpu().numpy(),
                 phrases,
@@ -301,9 +393,11 @@ class SemanticMapBuilder(Node):
                 intrinsics,
                 projected_cloud=projected_cloud,
                 rt_projected=rt_projected,
+                img_pil=img_pil,
+                stamp=frames.get("stamp"),
             )
             graph_updated = True
-        elif depth_image is not None and rt_camera is not None and rt_base is not None:
+        elif rt_base is not None and rt_camera is not None and (depth_ready or fallback_ready):
             if intrinsics is None and not self._intrinsics_warned:
                 self.get_logger().warning("Camera intrinsics missing; using defaults for graph projection.")
                 self._intrinsics_warned = True
@@ -316,24 +410,22 @@ class SemanticMapBuilder(Node):
                 intrinsics,
                 projected_cloud=None,
                 rt_projected=None,
+                img_pil=img_pil,
+                stamp=frames.get("stamp"),
             )
             graph_updated = True
         else:
             missing = []
             if rt_base is None:
                 missing.append("rt_base")
-            if self.use_projected_lidar:
-                if projected_cloud is None:
-                    missing.append("projected_cloud")
-                if rt_projected is None:
-                    missing.append("rt_projected")
-                if projected_cloud is None and depth_image is None:
-                    missing.append("depth_image")
-            else:
-                if depth_image is None:
-                    missing.append("depth_image")
-                if rt_camera is None:
-                    missing.append("rt_camera")
+            if self.use_projected_lidar and projected_cloud is None:
+                missing.append("projected_cloud")
+            if self.use_projected_lidar and rt_projected is None:
+                missing.append("rt_projected")
+            if depth_image is None and not fallback_ready:
+                missing.append("depth_image")
+            if rt_camera is None:
+                missing.append("rt_camera")
             if missing:
                 self.get_logger().warning(f"Skipping graph update due to missing data: {', '.join(missing)}")
 
@@ -342,6 +434,47 @@ class SemanticMapBuilder(Node):
             self.iteration += 1
         self._publish_segmentation(img_pil, image_pil_bboxes, gdino_conf, phrases, masks, frames)
         self._publish_graph_markers()
+
+    def _pose_from_sources(
+        self,
+        mask,
+        rt_camera,
+        rt_base,
+        depth_image,
+        intrinsics,
+        projected_cloud,
+        rt_projected,
+        img_pil,
+        stamp,
+    ):
+        pose = None
+        depth_method = None
+
+        if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
+            pose = pose_in_map_frame_from_projected(
+                projected_cloud,
+                rt_projected,
+                rt_base,
+                segment=mask[0],
+                rt_camera=rt_camera,
+            )
+            depth_method = "LiDAR"
+
+        if pose is None and depth_image is not None and rt_camera is not None:
+            pose = pose_in_map_frame(
+                rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
+            )
+            depth_method = "RGB-D"
+
+        if pose is None and rt_camera is not None and img_pil is not None:
+            depth_anything = self._get_depth_anything_depth(img_pil, depth_image, stamp)
+            if depth_anything is not None:
+                pose = pose_in_map_frame(
+                    rt_camera, rt_base, depth_anything, segment=mask[0], intrinsics=intrinsics
+                )
+                depth_method = "Depth Anything"
+
+        return pose, depth_method
 
     @staticmethod
     def _time_from_header(msg) -> int:
@@ -781,10 +914,17 @@ class SemanticMapBuilder(Node):
         intrinsics,
         projected_cloud=None,
         rt_projected=None,
+        img_pil=None,
+        stamp=None,
     ):
         # Log transform chain once at startup
-        if not hasattr(self, '_debug_logged'):
-            depth_source = "PROJECTED LIDAR" if (self.use_projected_lidar and rt_projected is not None) else "RGB-D DEPTH"
+        if not hasattr(self, "_debug_logged"):
+            if self.use_projected_lidar and rt_projected is not None:
+                depth_source = "PROJECTED LIDAR"
+            elif depth_image is not None:
+                depth_source = "RGB-D DEPTH"
+            else:
+                depth_source = "DEPTH ANYTHING"
             self.get_logger().info(f"Transform chain: camera→base→map | Depth source: {depth_source}")
             self._debug_logged = True
 
@@ -793,20 +933,17 @@ class SemanticMapBuilder(Node):
             label = phrases[idx]
             if label not in self.distance_thresholds:
                 continue
-            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
-                pose = pose_in_map_frame_from_projected(
-                    projected_cloud,
-                    rt_projected,
-                    rt_base,
-                    segment=mask[0],
-                    rt_camera=rt_camera,
-                )
-                depth_method = "LiDAR"
-            else:
-                pose = pose_in_map_frame(
-                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-                )
-                depth_method = "RGB-D"
+            pose, depth_method = self._pose_from_sources(
+                mask,
+                rt_camera,
+                rt_base,
+                depth_image,
+                intrinsics,
+                projected_cloud,
+                rt_projected,
+                img_pil,
+                stamp,
+            )
             if pose is None:
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue

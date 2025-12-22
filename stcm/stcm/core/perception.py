@@ -124,15 +124,29 @@ class DepthAnythingPredictor(DepthPredictor):
         model: Pre-trained depth estimation model.
         logger: Logger instance for logging errors.
     """
-    def __init__(self):
+    def __init__(self, checkpoint_path: str | Path | None = None):
         """
         Initializes the DepthAnythingPredictor class.
         """
         super(DepthPredictor, self).__init__()
-        self.image_processor = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
-        self.model = AutoModelForDepthEstimation.from_pretrained("LiheYoung/depth-anything-small-hf")
-        self.model.to(device=self.device)
         self.logger = logging.getLogger(__name__)
+        model_id = "LiheYoung/depth-anything-small-hf"
+        if checkpoint_path:
+            ckpt_path = Path(checkpoint_path).expanduser()
+            if ckpt_path.is_dir():
+                model_id = str(ckpt_path)
+            elif ckpt_path.exists():
+                self.logger.warning(
+                    "Depth Anything checkpoint '%s' is a file; expected a directory or HF repo id. "
+                    "Using default model '%s'.",
+                    ckpt_path,
+                    model_id,
+                )
+            else:
+                model_id = str(checkpoint_path)
+        self.image_processor = AutoImageProcessor.from_pretrained(model_id)
+        self.model = AutoModelForDepthEstimation.from_pretrained(model_id)
+        self.model.to(device=self.device)
 
     def predict(self, img_pil):
         """

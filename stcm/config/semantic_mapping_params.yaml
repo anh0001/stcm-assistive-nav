@@ -83,8 +83,8 @@ target_label_thresholds:
   - 1.0  # elevator sliding door
 
 # Detection confidence thresholds (0.0-1.0)
-box_threshold: 0.55
-text_threshold: 0.55
+box_threshold: 0.3
+text_threshold: 0.3
 
 # ============================================================================
 # DETECTION FILTERING - Additional pruning before segmentation
@@ -141,7 +141,10 @@ groundingdino_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/gdino/gro
 # can hardcode a file like `./models/mobilesam/vit_t.pth`.
 mobilesam_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/mobilesam/vit_t.pth"
 
-# Optional Depth-Anything model directory or checkpoint. Provide the HuggingFace
-# repo ID (e.g., `LiheYoung/depth-anything-small-hf`) or a local directory that
-# was downloaded with `stcm_download_checkpoints`.
-depth_anything_checkpoint: "/home/anhar/codes/stcm-assistive-nav/models/depth_anything/depth_anything_vitb14.pth"
+# Optional Depth-Anything HuggingFace repo ID or a local directory containing HF
+# model/config files. If a .pth file is provided, the fallback uses the default
+# HF model instead.
+depth_anything_checkpoint: "LiheYoung/depth-anything-small-hf"
+# Scale (meters) used to map Depth Anything relative depth when no metric depth
+# is available for calibration.
+depth_anything_max_depth: 5.0

@@ -16,7 +16,11 @@ from shapely.geometry import Point, Polygon
 from std_msgs.msg import Int32
 from visualization_msgs.msg import Marker, MarkerArray
 
-from ..core.perception import GroundingDINOObjectPredictor, SegmentAnythingPredictor
+from ..core.perception import (
+    DepthAnythingPredictor,
+    GroundingDINOObjectPredictor,
+    SegmentAnythingPredictor,
+)
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
@@ -76,10 +80,17 @@ class SemanticMapUpdater(Node):
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
+        self.depth_anything_max_depth = float(
+            self.declare_parameter("depth_anything_max_depth", 5.0).value
+        )
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = read_graph_json(str(self.graph_input_path)) if self.graph_input_path.exists() else nx.Graph()
         self.pause = False
+        self._depth_anything = None
+        self._depth_anything_failed = False
+        self._depth_anything_cache = None
+        self._depth_anything_cache_stamp = None
 
         if self.pause_topic:
             self.create_subscription(Int32, self.pause_topic, self._pause_callback, 10)
@@ -125,6 +136,118 @@ class SemanticMapUpdater(Node):
         if not value:
             return None
         return Path(value).expanduser()
+
+    @staticmethod
+    def _stamp_key(stamp) -> tuple[int, int] | None:
+        if stamp is None:
+            return None
+        return (int(stamp.sec), int(stamp.nanosec))
+
+    def _scale_depth_anything(self, depth_raw: np.ndarray, depth_reference: np.ndarray | None) -> np.ndarray | None:
+        depth_raw = depth_raw.astype(np.float32, copy=False)
+        valid_raw = np.isfinite(depth_raw) & (depth_raw > 0.0)
+        if not np.any(valid_raw):
+            return None
+
+        if depth_reference is not None:
+            ref_valid = np.isfinite(depth_reference) & (depth_reference > 0.0)
+            if np.any(ref_valid):
+                raw_median = np.median(depth_raw[valid_raw])
+                ref_median = np.median(depth_reference[ref_valid])
+                if raw_median > 0.0 and np.isfinite(ref_median):
+                    scale = ref_median / raw_median
+                    if np.isfinite(scale) and scale > 0.0:
+                        scaled = depth_raw * scale
+                        scaled = np.where(valid_raw, scaled, 0.0)
+                        return scaled.astype(np.float32)
+
+        max_val = np.max(depth_raw[valid_raw])
+        if not np.isfinite(max_val) or max_val <= 0.0:
+            return None
+        max_depth = self.depth_anything_max_depth if self.depth_anything_max_depth > 0.0 else 5.0
+        scaled = (depth_raw / max_val) * max_depth
+        scaled = np.where(valid_raw, scaled, 0.0)
+        return scaled.astype(np.float32)
+
+    def _get_depth_anything_depth(
+        self,
+        img_pil: PILImg.Image,
+        depth_reference: np.ndarray | None,
+        stamp,
+    ) -> np.ndarray | None:
+        if not self.depth_anything_checkpoint:
+            return None
+        if self._depth_anything_failed:
+            return None
+
+        stamp_key = self._stamp_key(stamp)
+        if (
+            stamp_key is not None
+            and self._depth_anything_cache_stamp == stamp_key
+            and self._depth_anything_cache is not None
+        ):
+            return self._depth_anything_cache
+
+        if self._depth_anything is None:
+            ckpt = self._expanduser_if_set(self.depth_anything_checkpoint) or self.depth_anything_checkpoint
+            try:
+                self._depth_anything = DepthAnythingPredictor(ckpt)
+            except Exception as exc:
+                self.get_logger().error(f"Depth Anything initialization failed: {exc}")
+                self._depth_anything_failed = True
+                return None
+
+        try:
+            _, depth_raw = self._depth_anything.predict(img_pil)
+        except Exception as exc:
+            self.get_logger().error(f"Depth Anything prediction failed: {exc}")
+            self._depth_anything_failed = True
+            return None
+
+        scaled = self._scale_depth_anything(depth_raw, depth_reference)
+        if scaled is None:
+            return None
+        if stamp_key is not None:
+            self._depth_anything_cache_stamp = stamp_key
+            self._depth_anything_cache = scaled
+        return scaled
+
+    def _pose_from_sources(
+        self,
+        mask,
+        rt_camera,
+        rt_base,
+        depth_image,
+        intrinsics,
+        projected_cloud,
+        rt_projected,
+        img_pil,
+        stamp,
+    ):
+        pose = None
+
+        if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
+            pose = pose_in_map_frame_from_projected(
+                projected_cloud,
+                rt_projected,
+                rt_base,
+                segment=mask[0],
+                rt_camera=rt_camera,
+            )
+
+        if pose is None and depth_image is not None and rt_camera is not None:
+            pose = pose_in_map_frame(
+                rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
+            )
+
+        if pose is None and rt_camera is not None and img_pil is not None:
+            depth_anything = self._get_depth_anything_depth(img_pil, depth_image, stamp)
+            if depth_anything is not None:
+                pose = pose_in_map_frame(
+                    rt_camera, rt_base, depth_anything, segment=mask[0], intrinsics=intrinsics
+                )
+
+        return pose
 
     def _process_frame(self) -> None:
         if self.pause:
@@ -183,18 +306,17 @@ class SemanticMapUpdater(Node):
             label = phrases[idx]
             if label not in detected_poses:
                 continue
-            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
-                pose = pose_in_map_frame_from_projected(
-                    projected_cloud,
-                    rt_projected,
-                    rt_base,
-                    segment=mask[0],
-                    rt_camera=rt_camera,
-                )
-            else:
-                pose = pose_in_map_frame(
-                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-                )
+            pose = self._pose_from_sources(
+                mask,
+                rt_camera,
+                rt_base,
+                depth_image,
+                intrinsics,
+                projected_cloud,
+                rt_projected,
+                img_pil,
+                frames.get("stamp"),
+            )
             if pose is None:
                 continue
             detected_poses[label].append(pose)
@@ -209,6 +331,8 @@ class SemanticMapUpdater(Node):
             intrinsics,
             projected_cloud,
             rt_projected,
+            img_pil,
+            frames.get("stamp"),
         )
         update_graph_edges(self.graph, self.edge_distance_threshold)
 
@@ -252,24 +376,25 @@ class SemanticMapUpdater(Node):
         intrinsics,
         projected_cloud=None,
         rt_projected=None,
+        img_pil=None,
+        stamp=None,
     ):
         label_iter = {label: 0 for label in self.distance_thresholds}
         for idx, mask in enumerate(masks):
             label = phrases[idx]
             if label not in self.distance_thresholds:
                 continue
-            if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
-                pose = pose_in_map_frame_from_projected(
-                    projected_cloud,
-                    rt_projected,
-                    rt_base,
-                    segment=mask[0],
-                    rt_camera=rt_camera,
-                )
-            else:
-                pose = pose_in_map_frame(
-                    rt_camera, rt_base, depth_image, segment=mask[0], intrinsics=intrinsics
-                )
+            pose = self._pose_from_sources(
+                mask,
+                rt_camera,
+                rt_base,
+                depth_image,
+                intrinsics,
+                projected_cloud,
+                rt_projected,
+                img_pil,
+                stamp,
+            )
             if pose is None:
                 continue
             pose_history, is_nearby = is_nearby_in_map(
