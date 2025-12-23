@@ -1,5 +1,5 @@
 # numerics
-numpy==1.24.2  # Pinned because ros2-numpy wheels hard-require this exact version
+# numpy<2.0.0 is installed by setup_stcm_env.sh (ros2_numpy built from source supports numpy 1.24+)
 networkx
 tqdm
 
@@ -30,7 +30,7 @@ chardet
 absl-py
 
 # ROS helper
-ros2-numpy==0.0.5  # Latest release; metadata pins numpy==1.24.2 so keep them in sync
+# ros2_numpy is built from Box-Robotics source as a git submodule (see ros2_numpy/ directory)
 transforms3d>=0.4.1  # Override Ubuntu's ROS dependency to avoid the removed np.float alias
 
 # NOTE: torch, torchvision, and groundingdino are installed separately

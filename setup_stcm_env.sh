@@ -52,31 +52,22 @@ print("CUDA available:", torch.cuda.is_available())
 print("CUDA runtime:", torch.version.cuda)
 PYTORCH_CHECK
 
-echo -e "\n${YELLOW}Step 3: Installing STCM Python dependencies (ros2-numpy requires numpy==1.24.2)${NC}"
-pip_user -r "$SCRIPT_DIR/stcm/requirements.txt"
-"$PYTHON_BIN" - <<'NUMPY_ROS2_CHECK'
+echo -e "\n${YELLOW}Step 3: Installing STCM Python dependencies (numpy < 2.0.0, excluding ros2-numpy)${NC}"
+pip_user -r <(grep -v -E '^[[:space:]]*(numpy|ros2-numpy)([=<>]|$)' "$SCRIPT_DIR/stcm/requirements.txt")
+pip_user --upgrade "numpy<2.0.0"
+"$PYTHON_BIN" - <<'NUMPY_CHECK'
 import sys
 import numpy
-import importlib.metadata
-from importlib.metadata import PackageNotFoundError
+from packaging.version import Version
 
-expected_numpy = "1.24.2"
-expected_ros2_numpy = "0.0.5"
+max_numpy = Version("2.0.0")
+numpy_version = Version(numpy.__version__)
 
-numpy_version = numpy.__version__
-try:
-    ros2_numpy_version = importlib.metadata.version("ros2-numpy")
-except PackageNotFoundError:
-    sys.exit("ros2-numpy is missing; pip likely bailed with a resolver error. Fix the install and rerun.")
+print("NumPy version:", numpy.__version__)
 
-print("NumPy pinned to:", numpy_version)
-print("ros2-numpy version:", ros2_numpy_version)
-
-if numpy_version != expected_numpy:
-    sys.exit(f"Expected numpy {expected_numpy} but found {numpy_version}. Please rerun setup.")
-if ros2_numpy_version != expected_ros2_numpy:
-    sys.exit(f"Expected ros2-numpy {expected_ros2_numpy} but found {ros2_numpy_version}. Please rerun setup.")
-NUMPY_ROS2_CHECK
+if numpy_version >= max_numpy:
+    sys.exit(f"Expected numpy < {max_numpy} but found {numpy.__version__}. Please rerun setup.")
+NUMPY_CHECK
 
 echo -e "\n${YELLOW}Step 4: Installing GroundingDINO${NC}"
 if [ -d "$HOME/GroundingDINO" ]; then
@@ -94,14 +85,14 @@ echo -e "\n${YELLOW}Step 6: Installing ROS 2 dependencies via rosdep${NC}"
 set +u  # ROS setup scripts reference unset vars such as AMENT_TRACE_SETUP_FILES
 source /opt/ros/humble/setup.bash
 set -u
-rosdep install --from-paths "$SCRIPT_DIR/stcm" --ignore-src -y
+rosdep install --from-paths "$SCRIPT_DIR/stcm" "$SCRIPT_DIR/stcm_planner" --ignore-src -y
 
 echo -e "\n${YELLOW}Step 7: Cleaning previous colcon build artifacts (safe if absent)${NC}"
 rm -rf "$SCRIPT_DIR/build" "$SCRIPT_DIR/install" "$SCRIPT_DIR/log"
 
-echo -e "\n${YELLOW}Step 8: Building ROS 2 package${NC}"
+echo -e "\n${YELLOW}Step 8: Building ROS 2 packages (ros2_numpy, stcm, stcm_planner)${NC}"
 cd "$SCRIPT_DIR"
-colcon build --packages-select stcm
+colcon build --packages-select ros2_numpy stcm stcm_planner
 
 echo -e "\n${YELLOW}Step 9: Verifying imports${NC}"
 "$PYTHON_BIN" - <<'VERIFY'
