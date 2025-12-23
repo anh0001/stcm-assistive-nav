@@ -18,7 +18,7 @@
         {
             "label": "Clean Build STCM Package",
             "type": "shell",
-            "command": "rm -rf build/stcm install/stcm log/ && export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && colcon build --packages-select stcm --symlink-install",
+            "command": "rm -rf build/stcm install/stcm log/ && export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && colcon build --symlink-install",
             "options": {
                 "cwd": "${workspaceFolder}"
             },

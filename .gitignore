@@ -57,3 +57,7 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+# Environment variables (contains API keys)
+.env
+.env.local
