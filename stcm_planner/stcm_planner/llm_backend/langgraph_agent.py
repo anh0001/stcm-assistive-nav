@@ -8,7 +8,7 @@ from typing import Union, Literal, Any
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 from pydantic import BaseModel, Field
 from langchain_core.language_models.chat_models import BaseChatModel
-from prompts import get_critic_prompt
+from stcm_planner.prompts import get_critic_prompt
 from langchain.prompts import ChatPromptTemplate
 from langgraph.managed.is_last_step import RemainingSteps
 

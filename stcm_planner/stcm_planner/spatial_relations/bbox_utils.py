@@ -2,7 +2,7 @@ import numpy as np
 from shapely.geometry import Polygon
 from scipy.spatial import ConvexHull
 from numba import jit
-from spatial_relations.polygon_intersection import intersect_polygons, polygon_area
+from .polygon_intersection import intersect_polygons, polygon_area
 
 BBOX_FACES = np.array([
     [0, 3, 2, 1],

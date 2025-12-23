@@ -12,11 +12,9 @@ from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 import re
 from langchain_core.messages import BaseMessage
-import sys
 import os
 from time import time, sleep
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from prompts import (
+from stcm_planner.prompts import (
     get_caption_prompt, 
     get_object_extraction_prompt, 
     get_tool_caption_prompt,
@@ -31,8 +29,18 @@ from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AI
 from langgraph.graph import MessagesState
 from mistralai import Mistral
 
-from llm_backend.langgraph_agent import build_graph, build_actor_critic_graph, ActorCriticState, CriticStructuredOutput
-from llm_backend.enums import SystemMode, LanguageModel, NavQueryRunMode, ObjectQueryType
+from stcm_planner.llm_backend.langgraph_agent import (
+    build_graph,
+    build_actor_critic_graph,
+    ActorCriticState,
+    CriticStructuredOutput,
+)
+from stcm_planner.llm_backend.enums import (
+    SystemMode,
+    LanguageModel,
+    NavQueryRunMode,
+    ObjectQueryType,
+)
 
 class LLMQueryHandler:
 
@@ -99,6 +107,7 @@ class LLMQueryHandler:
                 model_name="gpt-4o"
             )
         elif model == LanguageModel.GPT4O_MINI:
+            from langchain_openai import ChatOpenAI
             self.llm = ChatOpenAI(
                 api_key=os.environ.get("OPENAI_API_KEY"),
                 model_name="gpt-4o-mini"
