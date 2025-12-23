@@ -1,6 +1,5 @@
 import numpy as np
 from shapely.geometry import Polygon
-from shapely import distance
 from scipy.spatial import ConvexHull
 from numba import jit
 from spatial_relations.polygon_intersection import intersect_polygons, polygon_area
@@ -346,4 +345,4 @@ def get_bbox_horiz_distance(obj1, obj2):
     poly1 = Polygon(bbox1)
     poly2 = Polygon(bbox2)
 
-    return distance(poly1, poly2)
+    return poly1.distance(poly2)

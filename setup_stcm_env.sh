@@ -30,9 +30,11 @@ PYTHON_BIN="$(command -v python3)"
 DEFAULT_USERBASE="$HOME/.local/stcm_sys_py310"
 export PYTHONUSERBASE="${PYTHONUSERBASE:-$DEFAULT_USERBASE}"
 mkdir -p "$PYTHONUSERBASE"
+export PATH="$PYTHONUSERBASE/bin:$PATH"
 
 echo -e "${YELLOW}Using PYTHONUSERBASE=${PYTHONUSERBASE}${NC}"
 echo -e "${YELLOW}Add 'export PYTHONUSERBASE=${PYTHONUSERBASE}' to your shell profile for future terminals.${NC}"
+echo -e "${YELLOW}Add 'export PATH=${PYTHONUSERBASE}/bin:\\$PATH' so user-installed tools are on PATH.${NC}"
 
 pip_user() {
     "$PYTHON_BIN" -m pip install --user "$@"
@@ -78,7 +80,28 @@ if ros2_numpy_version != expected_ros2_numpy:
     sys.exit(f"Expected ros2-numpy {expected_ros2_numpy} but found {ros2_numpy_version}. Please rerun setup.")
 NUMPY_ROS2_CHECK
 
-echo -e "\n${YELLOW}Step 4: Installing GroundingDINO${NC}"
+echo -e "\n${YELLOW}Step 4: Installing STCM Planner core Python dependencies${NC}"
+pip_user \
+    spacy \
+    numba \
+    scipy \
+    langchain==0.2.17 \
+    langchain-core==0.2.43 \
+    langchain-community==0.2.19 \
+    langgraph==0.2.39 \
+    typing_extensions
+"$PYTHON_BIN" -m spacy download en_core_web_sm
+
+echo -e "\n${YELLOW}Step 5: Installing STCM Planner provider dependencies${NC}"
+pip_user \
+    langchain-openai==0.1.20 \
+    langchain-google-genai==1.0.10 \
+    langchain-mistralai==0.1.13 \
+    langchain-ollama==0.1.3 \
+    google-generativeai==0.7.2 \
+    mistralai==0.4.2
+
+echo -e "\n${YELLOW}Step 6: Installing GroundingDINO${NC}"
 if [ -d "$HOME/GroundingDINO" ]; then
     echo -e "${YELLOW}Existing GroundingDINO repo detected. Pulling latest...${NC}"
     git -C "$HOME/GroundingDINO" pull --ff-only
@@ -87,29 +110,35 @@ else
 fi
 pip_user --no-build-isolation "$HOME/GroundingDINO"
 
-echo -e "\n${YELLOW}Step 5: Installing MobileSAM${NC}"
+echo -e "\n${YELLOW}Step 7: Installing MobileSAM${NC}"
 pip_user git+https://github.com/ChaoningZhang/MobileSAM.git
 
-echo -e "\n${YELLOW}Step 6: Installing ROS 2 dependencies via rosdep${NC}"
+echo -e "\n${YELLOW}Step 8: Installing ROS 2 dependencies via rosdep${NC}"
 set +u  # ROS setup scripts reference unset vars such as AMENT_TRACE_SETUP_FILES
 source /opt/ros/humble/setup.bash
 set -u
-rosdep install --from-paths "$SCRIPT_DIR/stcm" --ignore-src -y
+rosdep install --from-paths "$SCRIPT_DIR/stcm" "$SCRIPT_DIR/stcm_planner" --ignore-src -y
 
-echo -e "\n${YELLOW}Step 7: Cleaning previous colcon build artifacts (safe if absent)${NC}"
+echo -e "\n${YELLOW}Step 9: Cleaning previous colcon build artifacts (safe if absent)${NC}"
 rm -rf "$SCRIPT_DIR/build" "$SCRIPT_DIR/install" "$SCRIPT_DIR/log"
 
-echo -e "\n${YELLOW}Step 8: Building ROS 2 package${NC}"
+echo -e "\n${YELLOW}Step 10: Building ROS 2 packages${NC}"
 cd "$SCRIPT_DIR"
-colcon build --packages-select stcm
+colcon build --packages-select stcm stcm_planner
 
-echo -e "\n${YELLOW}Step 9: Verifying imports${NC}"
+echo -e "\n${YELLOW}Step 11: Verifying imports${NC}"
 "$PYTHON_BIN" - <<'VERIFY'
 import torch
 from groundingdino.util.inference import load_model
 import mobile_sam
+import spacy
+import langchain
+import langgraph
+import mistralai
 print("Torch:", torch.__version__)
+spacy.load("en_core_web_sm")
 print("GroundingDINO + MobileSAM import OK")
+print("STCM Planner dependencies import OK")
 VERIFY
 
 echo -e "\n${GREEN}====================================${NC}"
@@ -119,11 +148,13 @@ cat <<EOF
 
 Next steps for each terminal:
 1. export PYTHONUSERBASE="$PYTHONUSERBASE"    # add to ~/.bashrc for convenience
-2. source /opt/ros/humble/setup.bash
-3. source $(dirname "$0")/install/setup.bash
+2. export PATH="$PYTHONUSERBASE/bin:$PATH"
+3. source /opt/ros/humble/setup.bash
+4. source $(dirname "$0")/install/setup.bash
 
 Optional helper alias:
     echo 'export PYTHONUSERBASE="$PYTHONUSERBASE"' >> ~/.bashrc
-    echo 'alias stcm_setup="export PYTHONUSERBASE=$PYTHONUSERBASE && source /opt/ros/humble/setup.bash && source $SCRIPT_DIR/install/setup.bash"' >> ~/.bashrc
+    echo 'export PATH="$PYTHONUSERBASE/bin:$PATH"' >> ~/.bashrc
+    echo 'alias stcm_setup="export PYTHONUSERBASE=$PYTHONUSERBASE && export PATH=$PYTHONUSERBASE/bin:$PATH && source /opt/ros/humble/setup.bash && source $SCRIPT_DIR/install/setup.bash"' >> ~/.bashrc
 
 EOF
