@@ -12,11 +12,9 @@ from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 import re
 from langchain_core.messages import BaseMessage
-import sys
 import os
 from time import time, sleep
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from prompts import (
+from stcm_planner.prompts import (
     get_caption_prompt, 
     get_object_extraction_prompt, 
     get_tool_caption_prompt,
@@ -29,10 +27,19 @@ from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.utils import secret_from_env
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from langgraph.graph import MessagesState
-from mistralai import Mistral
 
-from llm_backend.langgraph_agent import build_graph, build_actor_critic_graph, ActorCriticState, CriticStructuredOutput
-from llm_backend.enums import SystemMode, LanguageModel, NavQueryRunMode, ObjectQueryType
+from stcm_planner.llm_backend.langgraph_agent import (
+    build_graph,
+    build_actor_critic_graph,
+    ActorCriticState,
+    CriticStructuredOutput,
+)
+from stcm_planner.llm_backend.enums import (
+    SystemMode,
+    LanguageModel,
+    NavQueryRunMode,
+    ObjectQueryType,
+)
 
 class LLMQueryHandler:
 
@@ -91,17 +98,13 @@ class LLMQueryHandler:
                 num_predict=5096,
                 **kwargs
             )
-        elif model == LanguageModel.GPT4O:
+        elif model == LanguageModel.GPT4O or model == LanguageModel.GPT4O_MINI:
             #set "OPENAI_API_KEY" env variable
             from langchain_openai import ChatOpenAI
+            model_name = "gpt-4o" if model == LanguageModel.GPT4O else "gpt-4o-mini"
             self.llm = ChatOpenAI(
                 api_key=os.environ.get("OPENAI_API_KEY"),
-                model_name="gpt-4o"
-            )
-        elif model == LanguageModel.GPT4O_MINI:
-            self.llm = ChatOpenAI(
-                api_key=os.environ.get("OPENAI_API_KEY"),
-                model_name="gpt-4o-mini"
+                model_name=model_name
             )
         else:
             raise NotImplementedError(f"Model {model} not supported")
@@ -317,23 +320,48 @@ class LLMQueryHandler:
         prompt_suffix = f'''Targets={query_list} \n Scene objects={prompt_obj_dict} \n Output:\n
         '''
         prompt += prompt_suffix
-        client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+        try:
+            from mistralai import Mistral
+            client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+        except Exception:
+            try:
+                from mistralai.client import MistralClient
+                client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
+            except Exception as exc:
+                raise ImportError(
+                    "mistralai client import failed; install/upgrade mistralai or set a compatible version."
+                ) from exc
         tries = 3
         while tries > 0:
             try:
-                chat_response = client.chat.complete(
-                    model = "mistral-large-latest",
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": prompt,
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt_suffix,
-                        }
-                    ]
-                )
+                if hasattr(client, "chat") and hasattr(client.chat, "complete"):
+                    chat_response = client.chat.complete(
+                        model = "mistral-large-latest",
+                        messages = [
+                            {
+                                "role": "system",
+                                "content": prompt,
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt_suffix,
+                            }
+                        ]
+                    )
+                else:
+                    chat_response = client.chat(
+                        model = "mistral-large-latest",
+                        messages = [
+                            {
+                                "role": "system",
+                                "content": prompt,
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt_suffix,
+                            }
+                        ]
+                    )
                 tries = 0
                 print("model output", chat_response)
             except Exception as e:

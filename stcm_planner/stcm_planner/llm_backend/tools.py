@@ -7,8 +7,8 @@ import numpy as np
 from pprint import pprint
 import traceback
 from textwrap import dedent
-from spatial_relations.bbox_utils import *
-from llm_backend.enums import SystemMode
+from stcm_planner.spatial_relations.bbox_utils import *
+from stcm_planner.llm_backend.enums import SystemMode
 
 
 class AgentToolbox:

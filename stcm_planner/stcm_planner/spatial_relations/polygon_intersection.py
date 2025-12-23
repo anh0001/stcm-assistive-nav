@@ -1,7 +1,26 @@
 import numpy as np
-from numba import jit, float64
-from numba.typed.typedlist import List
-from numba.experimental import jitclass
+try:
+    from numba import jit, float64
+    from numba.typed.typedlist import List
+    from numba.experimental import jitclass
+except Exception:
+    float64 = np.float64
+    List = list
+
+    def jit(*args, **kwargs):
+        if args and callable(args[0]) and not kwargs:
+            return args[0]
+
+        def decorator(func):
+            return func
+
+        return decorator
+
+    def jitclass(_spec):
+        def decorator(cls):
+            return cls
+
+        return decorator
 
 @jit(nopython=True)
 def cut_polygon(polygon: np.ndarray, line: np.ndarray):
