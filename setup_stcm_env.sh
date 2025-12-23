@@ -69,7 +69,38 @@ if numpy_version >= max_numpy:
     sys.exit(f"Expected numpy < {max_numpy} but found {numpy.__version__}. Please rerun setup.")
 NUMPY_CHECK
 
-echo -e "\n${YELLOW}Step 4: Installing GroundingDINO${NC}"
+echo -e "\n${YELLOW}Step 4: Installing STCM Planner Python dependencies${NC}"
+pip_user \
+    spacy \
+    matplotlib \
+    scipy \
+    shapely \
+    numba \
+    langchain \
+    langchain-core \
+    langchain-openai \
+    langchain-google-genai \
+    langchain-mistralai \
+    langchain-ollama \
+    langgraph \
+    mistralai \
+    pydantic \
+    typing_extensions
+
+echo -e "\n${YELLOW}Step 5: Installing spaCy English model (en_core_web_sm)${NC}"
+if ! "$PYTHON_BIN" - <<'SPACY_CHECK'
+import spacy
+from spacy.util import is_package
+
+if not is_package("en_core_web_sm"):
+    raise SystemExit(1)
+print("spaCy model en_core_web_sm is already installed.")
+SPACY_CHECK
+then
+    "$PYTHON_BIN" -m spacy download en_core_web_sm
+fi
+
+echo -e "\n${YELLOW}Step 6: Installing GroundingDINO${NC}"
 if [ -d "$HOME/GroundingDINO" ]; then
     echo -e "${YELLOW}Existing GroundingDINO repo detected. Pulling latest...${NC}"
     git -C "$HOME/GroundingDINO" pull --ff-only
@@ -78,23 +109,23 @@ else
 fi
 pip_user --no-build-isolation "$HOME/GroundingDINO"
 
-echo -e "\n${YELLOW}Step 5: Installing MobileSAM${NC}"
+echo -e "\n${YELLOW}Step 7: Installing MobileSAM${NC}"
 pip_user git+https://github.com/ChaoningZhang/MobileSAM.git
 
-echo -e "\n${YELLOW}Step 6: Installing ROS 2 dependencies via rosdep${NC}"
+echo -e "\n${YELLOW}Step 8: Installing ROS 2 dependencies via rosdep${NC}"
 set +u  # ROS setup scripts reference unset vars such as AMENT_TRACE_SETUP_FILES
 source /opt/ros/humble/setup.bash
 set -u
 rosdep install --from-paths "$SCRIPT_DIR/stcm" "$SCRIPT_DIR/stcm_planner" --ignore-src -y
 
-echo -e "\n${YELLOW}Step 7: Cleaning previous colcon build artifacts (safe if absent)${NC}"
+echo -e "\n${YELLOW}Step 9: Cleaning previous colcon build artifacts (safe if absent)${NC}"
 rm -rf "$SCRIPT_DIR/build" "$SCRIPT_DIR/install" "$SCRIPT_DIR/log"
 
-echo -e "\n${YELLOW}Step 8: Building ROS 2 packages (ros2_numpy, stcm, stcm_planner)${NC}"
+echo -e "\n${YELLOW}Step 10: Building ROS 2 packages (ros2_numpy, stcm, stcm_planner)${NC}"
 cd "$SCRIPT_DIR"
 colcon build --packages-select ros2_numpy stcm stcm_planner
 
-echo -e "\n${YELLOW}Step 9: Verifying imports${NC}"
+echo -e "\n${YELLOW}Step 11: Verifying imports${NC}"
 "$PYTHON_BIN" - <<'VERIFY'
 import torch
 from groundingdino.util.inference import load_model
@@ -102,6 +133,17 @@ import mobile_sam
 print("Torch:", torch.__version__)
 print("GroundingDINO + MobileSAM import OK")
 VERIFY
+
+echo -e "\n${YELLOW}Step 12: Verifying stcm_planner imports${NC}"
+set +u  # ROS setup scripts reference unset vars such as AMENT_TRACE_SETUP_FILES
+source /opt/ros/humble/setup.bash
+source "$SCRIPT_DIR/install/setup.bash"
+set -u
+"$PYTHON_BIN" - <<'VERIFY_PLANNER'
+from stcm_planner.spatial_relations import bbox_utils, polygon_intersection
+from stcm_planner.llm_backend import llm_query_langchain
+print("stcm_planner import OK")
+VERIFY_PLANNER
 
 echo -e "\n${GREEN}====================================${NC}"
 echo -e "${GREEN}Installation completed successfully!${NC}"
