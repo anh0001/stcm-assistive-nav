@@ -85,6 +85,16 @@
             },
             "problemMatcher": [],
             "detail": "Test depth estimation on sample image"
+        },
+        {
+            "label": "Run Semantic Graph Simulator",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=./output/semantic_graph.json -p model:=gpt-4o -p run_mode:=use_tools",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Run semantic graph simulator with GPT-4o in use_tools mode on display :77"
         }
     ]
 }

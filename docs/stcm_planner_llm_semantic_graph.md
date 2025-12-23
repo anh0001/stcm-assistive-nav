@@ -27,7 +27,7 @@ source install/setup.bash
 
 ros2 run stcm_planner semantic_graph_simulator --ros-args \
   -p graph_path:=/output/semantic_graph.json \
-  -p model:=mistral \
+  -p model:=gpt-4o \
   -p run_mode:=use_tools
 ```
 
