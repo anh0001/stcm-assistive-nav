@@ -89,9 +89,12 @@ class LLMQueryHandler:
                 rate_limiter = self.rate_limiter,
                 max_retries=10
             )
-        elif model == LanguageModel.LLAMA or model == LanguageModel.R1_QWEN2:
+        elif model in [LanguageModel.LLAMA, LanguageModel.R1_QWEN2,
+                       LanguageModel.QWEN2_7B, LanguageModel.QWEN2_14B,
+                       LanguageModel.QWEN2_32B, LanguageModel.QWEN2_72B]:
             # install ollama here: https://github.com/ollama/ollama
-            # Run in a separate terminal as `ollama run llama3.1:8b` or `ollama run deepseek-r1:7b`
+            # Run in a separate terminal as `ollama serve` (or it auto-starts)
+            # Pull models: ollama pull llama3.1:8b, ollama pull deepseek-r1:7b, ollama pull qwen2.5:14b
             from langchain_ollama import ChatOllama
             self.llm = ChatOllama(
                 model=model.value,
@@ -127,7 +130,8 @@ class LLMQueryHandler:
             res = re.sub(r"<think>(.*?)</think>", "", input.content, flags=re.DOTALL)
             input.content = res
             return input
-        
+
+        # R1 models use thinking tags; standard Qwen models typically don't, but we keep this flexible
         if self.model == LanguageModel.R1_QWEN2:
             return RunnableLambda(remove_think_tag)
         else:

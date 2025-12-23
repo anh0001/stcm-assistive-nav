@@ -105,6 +105,81 @@
             },
             "problemMatcher": [],
             "detail": "Run language query publisher node using the system Python runtime + isolated user base"
+        },
+        {
+            "label": "Install Qwen Models",
+            "type": "shell",
+            "command": "bash scripts/install_qwen.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Run the Qwen installation script to install Ollama and pull Qwen models"
+        },
+        {
+            "label": "Check Ollama Status",
+            "type": "shell",
+            "command": "if pgrep -x 'ollama' > /dev/null; then echo '✓ Ollama is running (PID: '$(pgrep -x ollama)')'; ollama --version 2>/dev/null || echo 'Version: unknown'; else echo '✗ Ollama is not running. Start it with: ollama serve'; fi",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Check if Ollama service is running and display version"
+        },
+        {
+            "label": "List Qwen Models",
+            "type": "shell",
+            "command": "if command -v ollama >/dev/null 2>&1; then echo 'Installed Qwen models:' && ollama list | grep -E '(qwen|deepseek-r1|NAME)' || echo 'No Qwen models found'; else echo '✗ Ollama not installed. Run: Install Qwen Models task'; fi",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "List all installed Qwen and DeepSeek-R1 models"
+        },
+        {
+            "label": "Start Ollama Server",
+            "type": "shell",
+            "command": "if pgrep -x 'ollama' > /dev/null; then echo '✓ Ollama is already running (PID: '$(pgrep -x ollama)')'; else echo 'Starting Ollama server...'; nohup ollama serve > /tmp/ollama.log 2>&1 & sleep 2 && echo '✓ Ollama started (PID: '$(pgrep -x ollama)') - Logs: /tmp/ollama.log'; fi",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Start Ollama server in background if not already running"
+        },
+        {
+            "label": "Test Qwen Model (Interactive)",
+            "type": "shell",
+            "command": "MODEL=\"${input:qwenModel}\" && if command -v ollama >/dev/null 2>&1; then echo \"Testing $MODEL...\" && ollama run $MODEL 'Say hello in one sentence.'; else echo '✗ Ollama not installed'; fi",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Run a quick test query against a selected Qwen model interactively"
+        },
+        {
+            "label": "Pull Qwen Model",
+            "type": "shell",
+            "command": "MODEL=\"${input:qwenModel}\" && if command -v ollama >/dev/null 2>&1; then echo \"Pulling $MODEL...\" && ollama pull $MODEL; else echo '✗ Ollama not installed. Run: Install Qwen Models task'; fi",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Pull a specific Qwen model using Ollama"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "qwenModel",
+            "type": "pickString",
+            "description": "Select Qwen model",
+            "options": [
+                "deepseek-r1:7b",
+                "qwen2.5:7b",
+                "qwen2.5:14b",
+                "qwen2.5:32b",
+                "qwen2.5:72b"
+            ],
+            "default": "qwen2.5:14b"
         }
     ]
 }
