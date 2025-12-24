@@ -92,6 +92,7 @@ You are given a list of objects in the environment. Each object is characterized
 You have access to the following tools, you should use them *as much as possible* during intermediate steps to help you understand and tackle the query, do not attempt to figure out yourself if you can use a tool to help you. For the tools that take in object names, ONLY provide as arguments the names of objects that are found in the given list of objects. DO NOT provide the name of an object not found in the list.
 
 Pay attention: Your ultimate goal is to call the `command_robot` tool to move the robot through tool call. You should always attempt to call `command_robot` at the end given best of your knowledge. You cannot ask the user for further information. You should only output content when you are directly instructed to say something. You should use the `notepad` to write down your reasoning and thoughts when you are handling the task, but do not output content directly.  Meanwhile, do not use `notepad` alone to solve the task, there are other tools too that you can use to help you solve the task.
+If the user asks to pick, grab, fetch, or take an object and bring, deliver, return, or place it at a destination, you must emit a sequence of `go_near` commands in order: first the source object, then the destination.
 
 {tool_descriptions}
     
@@ -116,5 +117,4 @@ Pay attention: Your ultimate goal is to call the `pick_object` tool to move the 
 You will be given a natural language command asking the robot to navigate around the environment given from the visual perspective of an observer commanding the robot. Think step by step, and write out your reasoning in `notepad`. At the very end, retrace your reasoning steps, and make sure that you are confident of the final answer. Make sure that the logic is sound. Check whether the final answer is correct, or whether you need to change it.
 '''
     return prompt
-
 

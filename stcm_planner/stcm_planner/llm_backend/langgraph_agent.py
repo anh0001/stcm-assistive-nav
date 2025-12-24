@@ -1,4 +1,6 @@
 
+import ast
+import re
 from langgraph.graph import MessagesState
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import MessagesState
@@ -12,7 +14,135 @@ from stcm_planner.prompts import get_critic_prompt
 from langchain.prompts import ChatPromptTemplate
 from langgraph.managed.is_last_step import RemainingSteps
 
+
+def _parse_int_args(arg_str: str) -> list[int]:
+    args = []
+    for part in arg_str.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            args.append(int(part))
+        except ValueError:
+            try:
+                args.append(int(float(part)))
+            except ValueError:
+                continue
+    return args
+
+
+def _commands_from_text(content: str) -> list[list]:
+    commands = []
+    if not content:
+        return commands
+    for match in re.finditer(r"go_near\(([^)]*)\)", content):
+        args = _parse_int_args(match.group(1))
+        if args:
+            commands.append(["go_near", [args[0]]])
+    for match in re.finditer(r"go_between\(([^)]*)\)", content):
+        args = _parse_int_args(match.group(1))
+        if len(args) >= 2:
+            commands.append(["go_between", [args[0], args[1]]])
+    return commands
+
+
+def _extract_object_list_and_query(messages: list[AnyMessage]) -> tuple[list, str] | tuple[None, None]:
+    for msg in reversed(messages):
+        if not isinstance(msg, HumanMessage):
+            continue
+        content = msg.content or ""
+        if "Object List:" not in content or "User Input:" not in content:
+            continue
+        obj_index = content.find("Object List:")
+        user_index = content.find("User Input:", obj_index)
+        if obj_index == -1 or user_index == -1:
+            continue
+        obj_str = content[obj_index + len("Object List:"):user_index].strip()
+        query = content[user_index + len("User Input:"):].strip()
+        obj_str = obj_str.strip().strip('"')
+        query = query.strip().strip('"')
+        try:
+            objects = ast.literal_eval(obj_str)
+        except Exception:
+            continue
+        return objects, query
+    return None, None
+
+
+def _find_query_matches(query: str, objects: list) -> list[tuple[int, int]]:
+    matches = []
+    q = query.lower()
+    for obj in objects:
+        if not isinstance(obj, (list, tuple)) or len(obj) < 2:
+            continue
+        obj_id = obj[0]
+        obj_name = str(obj[1]).strip().lower()
+        if not obj_name:
+            continue
+        pos = q.find(obj_name)
+        if pos == -1:
+            continue
+        try:
+            obj_id_int = int(obj_id)
+        except Exception:
+            continue
+        matches.append((pos, obj_id_int))
+    matches.sort(key=lambda item: item[0])
+    deduped = []
+    seen = set()
+    for pos, obj_id_int in matches:
+        if obj_id_int in seen:
+            continue
+        seen.add(obj_id_int)
+        deduped.append((pos, obj_id_int))
+    return deduped
+
+
+def _infer_commands_from_query(query: str, objects: list) -> list[list]:
+    matches = _find_query_matches(query, objects)
+    if not matches:
+        return []
+    q = query.lower()
+    pick_terms = ("pick", "pick up", "pickup", "grab", "fetch", "take", "get")
+    bring_terms = ("bring", "deliver", "return", "place", "put", "drop", "carry")
+    wants_pick = any(term in q for term in pick_terms)
+    wants_bring = any(term in q for term in bring_terms)
+    if wants_pick and wants_bring and len(matches) >= 2:
+        source = matches[0][1]
+        dest = matches[-1][1]
+        if source == dest:
+            return [["go_near", [source]]]
+        return [["go_near", [source]], ["go_near", [dest]]]
+    if wants_pick or "go to" in q or "navigate" in q:
+        return [["go_near", [matches[0][1]]]]
+    return []
+
+
+def _infer_command_list(messages: list[AnyMessage], content: str) -> list[list]:
+    commands = _commands_from_text(content)
+    if commands:
+        return commands
+    objects, query = _extract_object_list_and_query(messages)
+    if not objects or not query:
+        return []
+    return _infer_commands_from_query(query, objects)
+
+
+def _should_finish_after_tool(messages: list[AnyMessage]) -> bool:
+    if not messages:
+        return False
+    last_msg = messages[-1]
+    if not isinstance(last_msg, ToolMessage):
+        return False
+    content = (last_msg.content or "").lower()
+    return (
+        "now say 'done'" in content
+        or "robot has executed" in content
+        or "object has been picked" in content
+    )
+
 def build_graph(tools, llm_with_tools, save_graph_png=False):
+    tool_names = {tool.name for tool in tools}
 
     def tool_condition(
         state: MessagesState
@@ -38,6 +168,9 @@ def build_graph(tools, llm_with_tools, save_graph_png=False):
             return "instruct_retry"
 
     def assistant(state: MessagesState):
+        if _should_finish_after_tool(state["messages"]):
+            return {"messages": [AIMessage(content="done")]}
+
         response = llm_with_tools.invoke(state["messages"])
         parsed = False
         # if no tool call, but has content that resembles a tool call, manually parse it
@@ -67,13 +200,25 @@ def build_graph(tools, llm_with_tools, save_graph_png=False):
                     print("**********")
                     print("Manually parsed tool call! at msg: ", response)
                     print("**********")
-                    return {"messages": [response]}
-                else:   
-                    return {"messages": [response]}
-            
-            except Exception as e:
-                return {"messages": [response]}
-                
+            except Exception:
+                parsed = False
+
+        if len(response.tool_calls) == 0 and not parsed:
+            inferred = _infer_command_list(state["messages"], response.content)
+            if inferred:
+                if "command_robot" in tool_names:
+                    response.tool_calls.append(
+                        {"name": "command_robot", "args": {"list_of_commands": inferred}, "id": "0"}
+                    )
+                elif (
+                    "pick_object" in tool_names
+                    and len(inferred) == 1
+                    and inferred[0][0] == "go_near"
+                    and inferred[0][1]
+                ):
+                    response.tool_calls.append(
+                        {"name": "pick_object", "args": {"object_id": inferred[0][1][0]}, "id": "0"}
+                    )
 
         return {"messages": [response]}
     
@@ -117,6 +262,7 @@ class CriticStructuredOutput(BaseModel):
     feedback: str = Field(description="feedback for the actor, what's wrong, what's right")
 
 def build_actor_critic_graph(tools, actor_with_tools, critic_llm, save_graph_png=False):
+    tool_names = {tool.name for tool in tools}
 
     def tool_condition(
         state: ActorCriticState
@@ -152,6 +298,9 @@ def build_actor_critic_graph(tools, actor_with_tools, critic_llm, save_graph_png
             return "assistant"
     
     def assistant(state: ActorCriticState):
+        if _should_finish_after_tool(state["messages"]):
+            return {"messages": [AIMessage(content="done")]}
+
         response = actor_with_tools.invoke(state["messages"])
         # print(state["messages"][-1])
         # print("Actor Output:", response)
@@ -183,13 +332,25 @@ def build_actor_critic_graph(tools, actor_with_tools, critic_llm, save_graph_png
                     print("**********")
                     print("Manually parsed tool call! at msg: ", response)
                     print("**********")
-                    return {"messages": [response]}
-                else:   
-                    return {"messages": [response]}
-            
-            except Exception as e:
-                return {"messages": [response]}
-                
+            except Exception:
+                parsed = False
+
+        if len(response.tool_calls) == 0 and not parsed:
+            inferred = _infer_command_list(state["messages"], response.content)
+            if inferred:
+                if "command_robot" in tool_names:
+                    response.tool_calls.append(
+                        {"name": "command_robot", "args": {"list_of_commands": inferred}, "id": "0"}
+                    )
+                elif (
+                    "pick_object" in tool_names
+                    and len(inferred) == 1
+                    and inferred[0][0] == "go_near"
+                    and inferred[0][1]
+                ):
+                    response.tool_calls.append(
+                        {"name": "pick_object", "args": {"object_id": inferred[0][1][0]}, "id": "0"}
+                    )
 
         return {"messages": [response]}
     

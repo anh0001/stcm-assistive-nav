@@ -162,50 +162,75 @@ class AgentToolbox:
     
 
     class CommandRobotSchema(BaseModel):
-        """Command the robot to move sequentially based on the list of commands, each command should be a tuple of (str, tuple), where the first element, str, is either "go_near" or "go_between" and the second element, tuple, is the object index(es) associated with the command. The object index(es) should be of length 1 for "go_near" and length 2 for "go_between"
+        """Command the robot to move sequentially based on the list of commands.
+
+        Each command should be a tuple of (str, tuple), where the first element, str, is
+        either "go_near" or "go_between" and the second element, tuple, is the object
+        index(es) associated with the command. The object index(es) should be of length 1
+        for "go_near" and length 2 for "go_between". If you are sending JSON tool
+        arguments, you may represent tuples as lists (e.g. ["go_near", [1]]).
         """
 
-        list_of_commands: list = Field(..., description="A list of commands to execute sequentially, for example, if you want to command the robot to go near object 1 and then go between object 2 and object 3, the list should be [('go_near', (1,)), ('go_between', (2, 3))]")
+        list_of_commands: list = Field(
+            ...,
+            description=(
+                "A list of commands to execute sequentially. "
+                "Example: [('go_near', (1,)), ('go_between', (2, 3))]. "
+                "JSON form: [['go_near', [1]], ['go_between', [2, 3]]]."
+            ),
+        )
 
     def command_robot(self, list_of_commands: list[tuple]) -> str:
         parsed_commands = []
+        if isinstance(list_of_commands, dict):
+            list_of_commands = [list_of_commands]
         for cmd in list_of_commands:
+            normalized = None
             if isinstance(cmd, dict):
-                if "name" in cmd and "args" in cmd:
+                if "str" in cmd and "tuple" in cmd:
+                    name = cmd["str"]
+                    args = cmd["tuple"]
+                elif "name" in cmd and "args" in cmd:
                     name = cmd["name"]
                     args = cmd["args"]
-                    if isinstance(args, dict):
-                        if "object_id" in args:
-                            args = [args["object_id"]]
-                        elif "object_ids" in args:
-                            args = args["object_ids"]
-                        elif len(args) == 1:
-                            args = next(iter(args.values()))
-                    if not isinstance(args, (list, tuple)):
-                        args = [args]
-                    cmd = (name, tuple(args))
+                elif "command" in cmd:
+                    name = cmd["command"]
+                    args = cmd.get("args", cmd.get("object_ids", cmd.get("object_id")))
                 elif len(cmd) == 1:
                     name, args = next(iter(cmd.items()))
-                    if not isinstance(args, (list, tuple)):
-                        args = [args]
-                    cmd = (name, tuple(args))
                 else:
                     return "Please provide a valid command list using ['go_near', [id]] or ['go_between', [id1, id2]]"
+                if isinstance(args, dict):
+                    if "object_id" in args:
+                        args = [args["object_id"]]
+                    elif "object_ids" in args:
+                        args = args["object_ids"]
+                    elif "tuple" in args:
+                        args = args["tuple"]
+                    elif len(args) == 1:
+                        args = next(iter(args.values()))
+                if not isinstance(args, (list, tuple)):
+                    args = [args]
+                normalized = (name, tuple(args))
             elif isinstance(cmd, list) and len(cmd) == 2:
                 args = cmd[1]
                 if not isinstance(args, (list, tuple)):
                     args = [args]
-                cmd = (cmd[0], tuple(args))
+                normalized = (cmd[0], tuple(args))
             elif isinstance(cmd, tuple) and len(cmd) == 2:
                 args = cmd[1]
                 if not isinstance(args, (list, tuple)):
                     args = [args]
-                cmd = (cmd[0], tuple(args))
+                normalized = (cmd[0], tuple(args))
             else:
                 return "Please provide a valid command list using ['go_near', [id]] or ['go_between', [id1, id2]]"
 
-            if cmd[0] not in {"go_near", "go_between"}:
-                return "Please provide a valid command, it should be either 'go_near' or 'go_between'"
+            cmd = normalized
+            valid_commands = {"go_near", "go_between", "pick_object"}
+            if cmd[0] not in valid_commands:
+                return "Please provide a valid command, it should be either 'go_near', 'go_between', or 'pick_object'"
+            if cmd[0] == "pick_object":
+                cmd = ("go_near", cmd[1])
             if cmd[0] == "go_near" and len(cmd[1]) != 1:
                 return "For 'go_near' command, please provide only one object index"
             if cmd[0] == "go_between" and len(cmd[1]) != 2:
