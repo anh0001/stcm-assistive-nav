@@ -97,6 +97,16 @@
             "detail": "Run semantic graph simulator with Qwen 2.5 14B (Ollama) in use_tools mode on display :77"
         },
         {
+            "label": "Launch RViz2 for Semantic Graph Simulator",
+            "type": "shell",
+            "command": "export DISPLAY=:77 && source /opt/ros/humble/setup.bash && source install/setup.bash && rviz2 -d ${workspaceFolder}/stcm_planner/rviz/semantic_graph_simulator.rviz",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Launch RViz2 with semantic graph simulator visualization config on display :77"
+        },
+        {
             "label": "Run Language Query Publisher",
             "type": "shell",
             "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm_planner language_query_publisher",
