@@ -123,6 +123,32 @@ class AgentToolbox:
         self.cmd = []
         self.notes = []
 
+    def _get_scene_bounds(self):
+        if isinstance(self.pcl, np.ndarray) and self.pcl.size > 0:
+            pts = np.asarray(self.pcl)
+        else:
+            pts_list = []
+            for obj in self.object_dict.values():
+                center = np.asarray(obj.get("centroid", []), dtype=float)
+                dims = np.asarray(obj.get("dimensions", [0.0, 0.0, 0.0]), dtype=float)
+                if center.size < 2:
+                    continue
+                half = dims[:2] / 2.0
+                pts_list.append([center[0] - half[0], center[1] - half[1]])
+                pts_list.append([center[0] + half[0], center[1] + half[1]])
+            if not pts_list:
+                return None
+            pts = np.asarray(pts_list, dtype=float)
+
+        if pts.ndim != 2 or pts.shape[1] < 2:
+            return None
+
+        x_min = float(np.nanmin(pts[:, 0]))
+        x_max = float(np.nanmax(pts[:, 0]))
+        y_min = float(np.nanmin(pts[:, 1]))
+        y_max = float(np.nanmax(pts[:, 1]))
+        return x_min, x_max, y_min, y_max
+
 
     class NotepadSchema(BaseModel):
         """Use this tool as a notepad to write down your thoughts step-by-step"""
@@ -139,19 +165,38 @@ class AgentToolbox:
         """Command the robot to move sequentially based on the list of commands, each command should be a tuple of (str, tuple), where the first element, str, is either "go_near" or "go_between" and the second element, tuple, is the object index(es) associated with the command. The object index(es) should be of length 1 for "go_near" and length 2 for "go_between"
         """
 
-        list_of_commands: list[tuple] = Field(..., description="A list of commands to execute sequentially, for example, if you want to command the robot to go near object 1 and then go between object 2 and object 3, the list should be [('go_near', (1,)), ('go_between', (2, 3))]")
+        list_of_commands: list = Field(..., description="A list of commands to execute sequentially, for example, if you want to command the robot to go near object 1 and then go between object 2 and object 3, the list should be [('go_near', (1,)), ('go_between', (2, 3))]")
 
     def command_robot(self, list_of_commands: list[tuple]) -> str:
-        # input validation
+        parsed_commands = []
         for cmd in list_of_commands:
+            if isinstance(cmd, dict) and len(cmd) == 1:
+                name, args = next(iter(cmd.items()))
+                if not isinstance(args, (list, tuple)):
+                    args = [args]
+                cmd = (name, tuple(args))
+            elif isinstance(cmd, list) and len(cmd) == 2:
+                args = cmd[1]
+                if not isinstance(args, (list, tuple)):
+                    args = [args]
+                cmd = (cmd[0], tuple(args))
+            elif isinstance(cmd, tuple) and len(cmd) == 2:
+                args = cmd[1]
+                if not isinstance(args, (list, tuple)):
+                    args = [args]
+                cmd = (cmd[0], tuple(args))
+            else:
+                return "Please provide a valid command list using ['go_near', [id]] or ['go_between', [id1, id2]]"
+
             if cmd[0] not in {"go_near", "go_between"}:
                 return "Please provide a valid command, it should be either 'go_near' or 'go_between'"
             if cmd[0] == "go_near" and len(cmd[1]) != 1:
                 return "For 'go_near' command, please provide only one object index"
             if cmd[0] == "go_between" and len(cmd[1]) != 2:
                 return "For 'go_between' command, please provide two object indices"
+            parsed_commands.append(cmd)
 
-        self.cmd = list_of_commands
+        self.cmd = parsed_commands
         return "The robot has executed the commands successfully, now say 'done'!"
 
 
@@ -418,23 +463,28 @@ class AgentToolbox:
             return f'{target_name} is not among the names in the list of objects. Please use a synonym that is found exactly in the list of objects.'
 
         left_objs = []
-        for target_obj_id in target_objs:
-
-
-            target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+        if self.freespace is None or np.size(self.freespace) == 0:
             anchor_center = np.array(self.object_dict[anchor_obj_id]["centroid"])
+            for target_obj_id in target_objs:
+                target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+                if target_center[0] < anchor_center[0]:
+                    left_objs.append(target_obj_id)
+        else:
+            for target_obj_id in target_objs:
+                target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+                anchor_center = np.array(self.object_dict[anchor_obj_id]["centroid"])
 
-            focal_point = (anchor_center + target_center) / 2
-            anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
-            
-            target_vec = (target_center - anchor_point)[:2]
-            target_vec /= np.linalg.norm(target_vec)
-            anchor_vec = (anchor_center - anchor_point)[:2]
-            anchor_vec /= np.linalg.norm(anchor_vec)
+                focal_point = (anchor_center + target_center) / 2
+                anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
+                
+                target_vec = (target_center - anchor_point)[:2]
+                target_vec /= np.linalg.norm(target_vec)
+                anchor_vec = (anchor_center - anchor_point)[:2]
+                anchor_vec /= np.linalg.norm(anchor_vec)
 
-            # < (anchor, target) > 0
-            if np.cross(anchor_vec, target_vec) > 0:
-                left_objs.append(target_obj_id)
+                # < (anchor, target) > 0
+                if np.cross(anchor_vec, target_vec) > 0:
+                    left_objs.append(target_obj_id)
 
         # Mapping back to LLM IDs
         left_objs = [self.inv_object_id_map[obj] for obj in left_objs]
@@ -463,23 +513,28 @@ class AgentToolbox:
             return f'{target_name} is not among the names in the list of objects. Please use a synonym that is found exactly in the list of objects.'
 
         right_objs = []
-        for target_obj_id in target_objs:
-
-
-            target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+        if self.freespace is None or np.size(self.freespace) == 0:
             anchor_center = np.array(self.object_dict[anchor_obj_id]["centroid"])
+            for target_obj_id in target_objs:
+                target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+                if target_center[0] > anchor_center[0]:
+                    right_objs.append(target_obj_id)
+        else:
+            for target_obj_id in target_objs:
+                target_center = np.array(self.object_dict[target_obj_id]["centroid"])
+                anchor_center = np.array(self.object_dict[anchor_obj_id]["centroid"])
 
-            focal_point = (anchor_center + target_center) / 2
-            anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
-            
-            target_vec = (target_center - anchor_point)[:2]
-            target_vec /= np.linalg.norm(target_vec)
-            anchor_vec = (anchor_center - anchor_point)[:2]
-            anchor_vec /= np.linalg.norm(anchor_vec)
+                focal_point = (anchor_center + target_center) / 2
+                anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
+                
+                target_vec = (target_center - anchor_point)[:2]
+                target_vec /= np.linalg.norm(target_vec)
+                anchor_vec = (anchor_center - anchor_point)[:2]
+                anchor_vec /= np.linalg.norm(anchor_vec)
 
-            # < (anchor, target) < 0
-            if np.cross(anchor_vec, target_vec) < 0:
-                right_objs.append(target_obj_id)
+                # < (anchor, target) < 0
+                if np.cross(anchor_vec, target_vec) < 0:
+                    right_objs.append(target_obj_id)
 
         # Mapping back to LLM IDs
         right_objs = [self.inv_object_id_map[obj] for obj in right_objs]  
@@ -731,18 +786,23 @@ class AgentToolbox:
         target_objs = [obj_id for obj_id, obj in self.object_dict.items() if target_name in obj["name"]]
 
         target_centers = np.array([self.object_dict[target_obj_id]["centroid"] for target_obj_id in target_objs])
+        if target_centers.size == 0:
+            sorted_target_ids = []
+        elif self.freespace is None or np.size(self.freespace) == 0:
+            order_indices = np.argsort(target_centers[:, 0])
+            sorted_target_ids = np.array(target_objs)[order_indices].tolist()
+        else:
+            focal_point = np.mean(target_centers, axis=0)
+            anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
+            
+            target_vec = (target_centers - anchor_point)[:, :2]
+            target_vec /= np.linalg.norm(target_vec, axis=-1, keepdims=True)
 
-        focal_point = np.mean(target_centers, axis=0)
-        anchor_point = self.freespace[np.argmin(np.linalg.norm(self.freespace - focal_point, axis=-1))]
-        
-        target_vec = (target_centers - anchor_point)[:, :2]
-        target_vec /= np.linalg.norm(target_vec, axis=-1, keepdims=True)
+            angles = np.arctan2(target_vec[:, 1], target_vec[:, 0])
+            angles[angles<0] += 2 * np.pi
+            order_indices = np.argsort(angles)[::-1]
 
-        angles = np.arctan2(target_vec[:, 1], target_vec[:, 0])
-        angles[angles<0] += 2 * np.pi
-        order_indices = np.argsort(angles)[::-1]
-
-        sorted_target_ids = np.array(target_objs)[order_indices].tolist()
+            sorted_target_ids = np.array(target_objs)[order_indices].tolist()
 
         # Mapping back to LLM IDs
         sorted_target_ids = [self.inv_object_id_map[obj] for obj in sorted_target_ids]
@@ -838,6 +898,8 @@ class AgentToolbox:
     def find_objects_near_room_corner(self, target_name: str) -> list[int]:
 
         target_objs = [obj_id for obj_id, obj in self.object_dict.items() if target_name in obj["name"]]
+        if not target_objs:
+            return f"No {target_name} found in the object list!"
 
         target_centers = np.array([self.object_dict[target_obj_id]["centroid"] for target_obj_id in target_objs])
         target_bboxes = np.array([get_bbox_coords_heading_xyzlwh(
@@ -845,16 +907,16 @@ class AgentToolbox:
                 self.object_dict[target_obj_id]["dimensions"],
                 self.object_dict[target_obj_id]["heading"]) for target_obj_id, target_center in zip(target_objs, target_centers)])
 
-        y_max = self.pcl[:, 1].max()
-        y_min = self.pcl[:, 1].min()
-        x_max = self.pcl[:, 0].max()
-        x_min = self.pcl[:, 0].min()
+        bounds = self._get_scene_bounds()
+        if bounds is None:
+            return f"No {target_name} found near a corner of the room!"
+        x_min, x_max, y_min, y_max = bounds
 
         corners = np.array([
-            [y_max, x_max],
-            [y_max, x_min],
-            [y_min, x_max],
-            [y_min, x_min],
+            [x_max, y_max],
+            [x_max, y_min],
+            [x_min, y_max],
+            [x_min, y_min],
         ])
 
         target_ids = []

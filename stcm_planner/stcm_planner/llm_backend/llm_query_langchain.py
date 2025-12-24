@@ -248,7 +248,7 @@ class LLMQueryHandler:
                 if map_pcl is not None:
                     self.toolbox.pcl = map_pcl
                 if freespace_pcl is not None:
-                    self.toolbox.pcl = freespace_pcl
+                    self.toolbox.freespace = freespace_pcl
                 if object_dict is not None:
                     self.toolbox.set_object_dict(object_dict)
 
@@ -257,7 +257,7 @@ class LLMQueryHandler:
                 if map_pcl is not None:
                     self.toolbox.pcl = map_pcl
                 if freespace_pcl is not None:
-                    self.toolbox.pcl = freespace_pcl
+                    self.toolbox.freespace = freespace_pcl
                 if object_dict is not None:
                     self.toolbox.set_object_dict(object_dict)
                 state = ActorCriticState(messages=nav_prompt, objects=objects, critic_approval=False)
