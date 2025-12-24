@@ -170,11 +170,27 @@ class AgentToolbox:
     def command_robot(self, list_of_commands: list[tuple]) -> str:
         parsed_commands = []
         for cmd in list_of_commands:
-            if isinstance(cmd, dict) and len(cmd) == 1:
-                name, args = next(iter(cmd.items()))
-                if not isinstance(args, (list, tuple)):
-                    args = [args]
-                cmd = (name, tuple(args))
+            if isinstance(cmd, dict):
+                if "name" in cmd and "args" in cmd:
+                    name = cmd["name"]
+                    args = cmd["args"]
+                    if isinstance(args, dict):
+                        if "object_id" in args:
+                            args = [args["object_id"]]
+                        elif "object_ids" in args:
+                            args = args["object_ids"]
+                        elif len(args) == 1:
+                            args = next(iter(args.values()))
+                    if not isinstance(args, (list, tuple)):
+                        args = [args]
+                    cmd = (name, tuple(args))
+                elif len(cmd) == 1:
+                    name, args = next(iter(cmd.items()))
+                    if not isinstance(args, (list, tuple)):
+                        args = [args]
+                    cmd = (name, tuple(args))
+                else:
+                    return "Please provide a valid command list using ['go_near', [id]] or ['go_between', [id1, id2]]"
             elif isinstance(cmd, list) and len(cmd) == 2:
                 args = cmd[1]
                 if not isinstance(args, (list, tuple)):
