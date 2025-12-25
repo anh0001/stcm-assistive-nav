@@ -168,6 +168,22 @@ filter_percent_area: 0.005
 filter_enabled: true
 ```
 
+**Instance Management (i-GNG)** (optional, configure in YAML):
+```yaml
+gng_enabled: true
+gng_per_label: true
+gng_max_nodes: 1000
+gng_lambda: 200
+gng_max_age: 200
+gng_eps_w: 0.05
+gng_eps_n: 0.0006
+gng_alpha: 0.95
+gng_beta: 0.9995
+gng_min_observations_to_commit: 3
+gng_cluster_merge_distance: 0.5
+gng_outlier_gate_meters: 0.0
+```
+
 **Spatial Relationships** (optional, configure in YAML):
 ```yaml
 edge_distance_threshold: 3.0  # max distance (meters) to connect objects in the graph

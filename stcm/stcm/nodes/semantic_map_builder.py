@@ -28,6 +28,7 @@ from ..core.perception import (
     GroundingDINOObjectPredictor,
     SegmentAnythingPredictor,
 )
+from ..core.gng_instance_manager import GngInstanceManager
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
@@ -87,6 +88,24 @@ class SemanticMapBuilder(Node):
         self.filter_enabled = bool(self.declare_parameter("filter_enabled", True).value)
         self.processing_period = float(self.declare_parameter("processing_period", 1.0).value)
         self.edge_distance_threshold = float(self.declare_parameter("edge_distance_threshold", 3.0).value)
+        self.gng_enabled = bool(self.declare_parameter("gng_enabled", False).value)
+        self.gng_per_label = bool(self.declare_parameter("gng_per_label", True).value)
+        self.gng_max_nodes = int(self.declare_parameter("gng_max_nodes", 1000).value)
+        self.gng_lambda = int(self.declare_parameter("gng_lambda", 200).value)
+        self.gng_max_age = int(self.declare_parameter("gng_max_age", 200).value)
+        self.gng_eps_w = float(self.declare_parameter("gng_eps_w", 0.05).value)
+        self.gng_eps_n = float(self.declare_parameter("gng_eps_n", 0.0006).value)
+        self.gng_alpha = float(self.declare_parameter("gng_alpha", 0.95).value)
+        self.gng_beta = float(self.declare_parameter("gng_beta", 0.9995).value)
+        self.gng_min_observations_to_commit = int(
+            self.declare_parameter("gng_min_observations_to_commit", 3).value
+        )
+        self.gng_cluster_merge_distance = float(
+            self.declare_parameter("gng_cluster_merge_distance", 0.5).value
+        )
+        self.gng_outlier_gate_meters = float(
+            self.declare_parameter("gng_outlier_gate_meters", 0.0).value
+        )
         self.graph_path = Path(self.declare_parameter("graph_output_path", "graph.json").value)
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
@@ -109,6 +128,7 @@ class SemanticMapBuilder(Node):
         self.graph = nx.Graph()
         self.iteration = 0
         self._offline_frame_counter = 0
+        self._gng_manager = None
         self._tf_buffer: Optional[Buffer] = None
         self._intrinsics: Optional[Dict[str, float]] = None
         self._intrinsics_warned = False
@@ -143,6 +163,27 @@ class SemanticMapBuilder(Node):
         self.sam = SegmentAnythingPredictor(
             checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
         )
+
+        if self.gng_enabled:
+            self._gng_manager = GngInstanceManager(
+                enabled=self.gng_enabled,
+                per_label=self.gng_per_label,
+                max_nodes=self.gng_max_nodes,
+                lambda_=self.gng_lambda,
+                max_age=self.gng_max_age,
+                eps_w=self.gng_eps_w,
+                eps_n=self.gng_eps_n,
+                alpha=self.gng_alpha,
+                beta=self.gng_beta,
+                min_observations_to_commit=self.gng_min_observations_to_commit,
+                cluster_merge_distance=self.gng_cluster_merge_distance,
+                outlier_gate_meters=self.gng_outlier_gate_meters,
+                logger=self.get_logger(),
+            )
+            if not self._gng_manager.enabled:
+                self.get_logger().warning(
+                    "gng_enabled was set, but GNG bindings are unavailable; falling back to distance merge."
+                )
 
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
@@ -399,6 +440,7 @@ class SemanticMapBuilder(Node):
             self._update_graph(
                 masks.cpu().numpy(),
                 phrases,
+                gdino_conf,
                 rt_camera,
                 rt_base,
                 depth_image,
@@ -416,6 +458,7 @@ class SemanticMapBuilder(Node):
             self._update_graph(
                 masks.cpu().numpy(),
                 phrases,
+                gdino_conf,
                 rt_camera,
                 rt_base,
                 depth_image,
@@ -938,6 +981,7 @@ class SemanticMapBuilder(Node):
         self,
         masks,
         phrases,
+        scores,
         rt_camera,
         rt_base,
         depth_image,
@@ -978,6 +1022,40 @@ class SemanticMapBuilder(Node):
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
 
+            if self._gng_manager is not None and self._gng_manager.enabled:
+                score = None
+                if scores is not None:
+                    score = scores[idx]
+                    if hasattr(score, "item"):
+                        score = float(score.item())
+                    else:
+                        score = float(score)
+                assignment = self._gng_manager.update(label, np.asarray(pose), score, stamp)
+                if assignment is None or not assignment.committed:
+                    continue
+                node_id = assignment.instance_id
+                pose_list = assignment.centroid.tolist()
+                if self.graph.has_node(node_id):
+                    node_data = self.graph.nodes[node_id]
+                    node_data["pose"] = pose_list
+                    node_data["robot_pose"] = rt_base.tolist()
+                    node_data["stability"] = assignment.stability
+                    continue
+                self.graph.add_node(
+                    node_id,
+                    id=node_id,
+                    instance_id=assignment.instance_id,
+                    pose=pose_list,
+                    robot_pose=rt_base.tolist(),
+                    category=label,
+                    stability=assignment.stability,
+                )
+                self.get_logger().info(
+                    f"Added '{label}' at [{pose_list[0]:.2f}, {pose_list[1]:.2f}, {pose_list[2]:.2f}] "
+                    f"({depth_method})"
+                )
+                continue
+
             pose_history, is_nearby = is_nearby_in_map(
                 self.pose_history[label],
                 pose,
@@ -995,7 +1073,9 @@ class SemanticMapBuilder(Node):
                 robot_pose=rt_base.tolist(),
                 category=label,
             )
-            self.get_logger().info(f"Added '{label}' at [{pose[0]:.2f}, {pose[1]:.2f}, {pose[2]:.2f}] ({depth_method})")
+            self.get_logger().info(
+                f"Added '{label}' at [{pose[0]:.2f}, {pose[1]:.2f}, {pose[2]:.2f}] ({depth_method})"
+            )
             label_iter[label] += 1
 
     def _publish_segmentation(self, img_pil, boxes, scores, phrases, masks, frames):
@@ -1046,6 +1126,8 @@ class SemanticMapBuilder(Node):
             self.marker_pub.publish(marker_array)
 
     def destroy_node(self):
+        if self._gng_manager is not None:
+            self._gng_manager.shutdown()
         save_graph_json(self.graph, file=str(self.graph_path))
         self.get_logger().info(f"Semantic graph saved to {self.graph_path.resolve()}")
         super().destroy_node()

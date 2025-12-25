@@ -102,6 +102,30 @@ def launch_setup(context, *args, **kwargs):
         "edge_distance_threshold",
         config.get("edge_distance_threshold", 3.0),
     )
+    gng_enabled = _resolve_bool(context, "gng_enabled", config.get("gng_enabled", False))
+    gng_per_label = _resolve_bool(context, "gng_per_label", config.get("gng_per_label", True))
+    gng_max_nodes = _resolve_int(context, "gng_max_nodes", config.get("gng_max_nodes", 1000))
+    gng_lambda = _resolve_int(context, "gng_lambda", config.get("gng_lambda", 200))
+    gng_max_age = _resolve_int(context, "gng_max_age", config.get("gng_max_age", 200))
+    gng_eps_w = _resolve_float(context, "gng_eps_w", config.get("gng_eps_w", 0.05))
+    gng_eps_n = _resolve_float(context, "gng_eps_n", config.get("gng_eps_n", 0.0006))
+    gng_alpha = _resolve_float(context, "gng_alpha", config.get("gng_alpha", 0.95))
+    gng_beta = _resolve_float(context, "gng_beta", config.get("gng_beta", 0.9995))
+    gng_min_obs = _resolve_int(
+        context,
+        "gng_min_observations_to_commit",
+        config.get("gng_min_observations_to_commit", 3),
+    )
+    gng_cluster_merge_distance = _resolve_float(
+        context,
+        "gng_cluster_merge_distance",
+        config.get("gng_cluster_merge_distance", 0.5),
+    )
+    gng_outlier_gate_meters = _resolve_float(
+        context,
+        "gng_outlier_gate_meters",
+        config.get("gng_outlier_gate_meters", 0.0),
+    )
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
@@ -129,6 +153,18 @@ def launch_setup(context, *args, **kwargs):
             "graph_output_path": graph_path,
             "use_sim_time": use_sim_time,
             "edge_distance_threshold": edge_distance_threshold,
+            "gng_enabled": gng_enabled,
+            "gng_per_label": gng_per_label,
+            "gng_max_nodes": gng_max_nodes,
+            "gng_lambda": gng_lambda,
+            "gng_max_age": gng_max_age,
+            "gng_eps_w": gng_eps_w,
+            "gng_eps_n": gng_eps_n,
+            "gng_alpha": gng_alpha,
+            "gng_beta": gng_beta,
+            "gng_min_observations_to_commit": gng_min_obs,
+            "gng_cluster_merge_distance": gng_cluster_merge_distance,
+            "gng_outlier_gate_meters": gng_outlier_gate_meters,
             "reset_tf_on_time_jump": reset_tf_on_time_jump,
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
@@ -164,10 +200,22 @@ def launch_setup(context, *args, **kwargs):
                 "graph_input_path": config.get("graph_input_path", graph_path),
                 "graph_output_path": graph_path,
                 "use_sim_time": use_sim_time,
-                "edge_distance_threshold": edge_distance_threshold,
-                "reset_tf_on_time_jump": reset_tf_on_time_jump,
-                "groundingdino_checkpoint": grounding_ckpt,
-                "mobilesam_checkpoint": mobilesam_ckpt,
+            "edge_distance_threshold": edge_distance_threshold,
+            "gng_enabled": gng_enabled,
+            "gng_per_label": gng_per_label,
+            "gng_max_nodes": gng_max_nodes,
+            "gng_lambda": gng_lambda,
+            "gng_max_age": gng_max_age,
+            "gng_eps_w": gng_eps_w,
+            "gng_eps_n": gng_eps_n,
+            "gng_alpha": gng_alpha,
+            "gng_beta": gng_beta,
+            "gng_min_observations_to_commit": gng_min_obs,
+            "gng_cluster_merge_distance": gng_cluster_merge_distance,
+            "gng_outlier_gate_meters": gng_outlier_gate_meters,
+            "reset_tf_on_time_jump": reset_tf_on_time_jump,
+            "groundingdino_checkpoint": grounding_ckpt,
+            "mobilesam_checkpoint": mobilesam_ckpt,
                 "depth_anything_checkpoint": depth_ckpt,
                 "use_depth_anything_fallback": use_depth_anything_fallback,
             }
@@ -232,6 +280,66 @@ def generate_launch_description():
                 "edge_distance_threshold",
                 default_value="",
                 description="Override the edge distance threshold from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_enabled",
+                default_value="",
+                description="Override the gng_enabled flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_per_label",
+                default_value="",
+                description="Override the gng_per_label flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_max_nodes",
+                default_value="",
+                description="Override the gng_max_nodes value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_lambda",
+                default_value="",
+                description="Override the gng_lambda value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_max_age",
+                default_value="",
+                description="Override the gng_max_age value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_eps_w",
+                default_value="",
+                description="Override the gng_eps_w value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_eps_n",
+                default_value="",
+                description="Override the gng_eps_n value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_alpha",
+                default_value="",
+                description="Override the gng_alpha value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_beta",
+                default_value="",
+                description="Override the gng_beta value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_min_observations_to_commit",
+                default_value="",
+                description="Override the gng_min_observations_to_commit value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_cluster_merge_distance",
+                default_value="",
+                description="Override the gng_cluster_merge_distance value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "gng_outlier_gate_meters",
+                default_value="",
+                description="Override the gng_outlier_gate_meters value from the config file.",
             ),
             DeclareLaunchArgument(
                 "groundingdino_checkpoint",

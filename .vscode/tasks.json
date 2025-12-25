@@ -175,6 +175,16 @@
             },
             "problemMatcher": [],
             "detail": "Pull a specific Qwen model using Ollama"
+        },
+        {
+            "label": "Build i-gng Package",
+            "type": "shell",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && python3 -m pip install --user pybind11 setuptools wheel && cd i-gng && python3 -m pip install --user -e . && cd .. && echo '✓ i-gng built and installed successfully'",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Build and install i-gng as a standalone Python package for GNG instance management features"
         }
     ],
     "inputs": [
