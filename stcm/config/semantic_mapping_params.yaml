@@ -116,19 +116,19 @@ gng_enabled: true
 # Maintain a separate GNG model per label (recommended).
 gng_per_label: true
 # GNG configuration values.
-gng_max_nodes: 1000      # Max instances to track per label
-gng_lambda: 200          # Add new node every N observations
+gng_max_nodes: 100       # Max instances to track per label
+gng_lambda: 10           # Add new node every N observations (reduced from 200 to prevent pause deadlocks)
 gng_max_age: 200         # Remove edges after N steps without use
 gng_eps_w: 0.05          # Winner node learning rate (how fast instances move)
 gng_eps_n: 0.0006        # Neighbor learning rate (slower than winner)
 gng_alpha: 0.95          # Error decay rate (close to 1.0 = retain longer)
 gng_beta: 0.9995         # Global error reduction per insertion step
 # Require at least N observations before committing a graph node.
-gng_min_observations_to_commit: 3
+gng_min_observations_to_commit: 2
 # Merge/associate components within this distance (meters).
 gng_cluster_merge_distance: 0.5
 # Ignore samples farther than this from existing instances (meters, 0 disables).
-gng_outlier_gate_meters: 0.0
+gng_outlier_gate_meters: 2.0
 
 # ============================================================================
 # SPATIAL RELATIONSHIPS - Edge creation between objects

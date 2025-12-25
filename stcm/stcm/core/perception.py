@@ -421,6 +421,10 @@ class SegmentAnythingPredictor(ObjectPredictor):
 
             # Check if prompt_bboxes is provided
             if prompt_bboxes is not None:
+                # Validate bounding boxes before processing
+                if len(prompt_bboxes) == 0:
+                    return None, torch.tensor([])
+
                 # Convert prompt bounding boxes to torch tensor
                 input_boxes = torch.tensor(prompt_bboxes, device=self.predictor.device)
                 transformed_boxes = self.predictor.transform.apply_boxes_torch(input_boxes, image.shape[:2])

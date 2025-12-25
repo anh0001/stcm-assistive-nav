@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import threading
 import time
 from typing import Dict, Optional
 
@@ -38,6 +39,7 @@ class ClusterState:
 class _LabelState:
     model: "GrowingNeuralGas"
     clusters: Dict[str, ClusterState]
+    sample_count: int = 0  # Track insertions to avoid querying cold models
 
 
 class GngInstanceManager:
@@ -152,15 +154,23 @@ class GngInstanceManager:
             state.model.insert(centroid_arr[None, :])
         else:
             state.model.insert(centroid_arr[None, :], probabilities=[prob])
-
-        nodes = state.model.nodes()
-        if not nodes:
+        
+        state.sample_count += 1
+        
+        # Skip querying GNG until it has warmed up with enough samples
+        # The GNG algorithm thread only checks pause requests every lambda iterations
+        # If we try to pause before it processes enough data, it will deadlock
+        min_samples_for_query = max(self._lambda * 2, 20)  # 2x lambda or 20, whichever is larger
+        if state.sample_count < min_samples_for_query:
+            # Not enough data yet - fall back to simple distance-based clustering
             cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
             cluster_state.observations += 1
             cluster_state.last_seen = stamp_sec
             if cluster_state.observations == 1:
                 cluster_state.first_seen = stamp_sec
-            cluster_state.centroid = self._blend_centroid(cluster_state.centroid, centroid_arr, prob)
+            cluster_state.centroid = self._blend_centroid(
+                cluster_state.centroid, centroid_arr, prob
+            )
             if not cluster_state.committed and self._min_obs > 0:
                 if cluster_state.observations >= self._min_obs:
                     cluster_state.committed = True
@@ -173,39 +183,108 @@ class GngInstanceManager:
                 committed=cluster_state.committed or self._min_obs <= 0,
             )
 
-        node_to_component, component_centroids = self._compute_components(nodes)
-        try:
-            winner_idx = state.model.predict(centroid_arr)
-            component_key = node_to_component.get(winner_idx)
-        except Exception:
-            component_key = None
-        if component_key is None:
-            component_key = self._nearest_component_key(component_centroids, centroid_arr)
-        if component_key is None:
+        # GNG queries must run while the background thread is paused.
+        # Use timeout to prevent deadlocks when GNG thread doesn't check pause requests
+        
+        # Wrapper to call pause with timeout using threading
+        pause_event = threading.Event()
+        pause_exception = [None]
+        
+        def pause_with_catch():
+            try:
+                state.model.pause()
+                pause_event.set()
+            except Exception as e:
+                pause_exception[0] = e
+                pause_event.set()
+        
+        pause_thread = threading.Thread(target=pause_with_catch, daemon=True)
+        pause_thread.start()
+        
+        # Wait up to 2 seconds for pause to complete
+        if not pause_event.wait(timeout=2.0):
+            if self._logger:
+                self._log_error(
+                    f"GNG pause timeout after 2.0s for label '{label}' (sample #{state.sample_count}). "
+                    f"Falling back to distance-based clustering."
+                )
+            # Fall back to simple clustering without querying GNG nodes
+            cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
+            cluster_state.observations += 1
+            cluster_state.last_seen = stamp_sec
+            cluster_state.centroid = self._blend_centroid(cluster_state.centroid, centroid_arr, prob)
+            stability = self._compute_stability(cluster_state)
+            return InstanceAssignment(
+                instance_id=cluster_state.instance_id,
+                label=label,
+                centroid=cluster_state.centroid.copy(),
+                stability=stability,
+                committed=True,  # Commit immediately when falling back
+            )
+        
+        if pause_exception[0] is not None:
+            if self._logger:
+                self._log_error(f"GNG pause failed for '{label}': {pause_exception[0]}")
             return None
-        component_centroid = component_centroids[component_key]
+        
+        try:
+            nodes = state.model.nodes()
+            if not nodes:
+                cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
+                cluster_state.observations += 1
+                cluster_state.last_seen = stamp_sec
+                if cluster_state.observations == 1:
+                    cluster_state.first_seen = stamp_sec
+                cluster_state.centroid = self._blend_centroid(
+                    cluster_state.centroid, centroid_arr, prob
+                )
+                if not cluster_state.committed and self._min_obs > 0:
+                    if cluster_state.observations >= self._min_obs:
+                        cluster_state.committed = True
+                stability = self._compute_stability(cluster_state)
+                return InstanceAssignment(
+                    instance_id=cluster_state.instance_id,
+                    label=label,
+                    centroid=cluster_state.centroid.copy(),
+                    stability=stability,
+                    committed=cluster_state.committed or self._min_obs <= 0,
+                )
 
-        cluster_state = self._assign_component(label, state, component_centroid, stamp_sec)
-        cluster_state.observations += 1
-        cluster_state.last_seen = stamp_sec
-        if cluster_state.observations == 1:
-            cluster_state.first_seen = stamp_sec
+            node_to_component, component_centroids = self._compute_components(nodes)
+            try:
+                winner_idx = state.model.predict(centroid_arr)
+                component_key = node_to_component.get(winner_idx)
+            except Exception:
+                component_key = None
+            if component_key is None:
+                component_key = self._nearest_component_key(component_centroids, centroid_arr)
+            if component_key is None:
+                return None
+            component_centroid = component_centroids[component_key]
 
-        cluster_state.centroid = self._blend_centroid(
-            cluster_state.centroid, component_centroid, prob
-        )
-        if not cluster_state.committed and self._min_obs > 0:
-            if cluster_state.observations >= self._min_obs:
-                cluster_state.committed = True
+            cluster_state = self._assign_component(label, state, component_centroid, stamp_sec)
+            cluster_state.observations += 1
+            cluster_state.last_seen = stamp_sec
+            if cluster_state.observations == 1:
+                cluster_state.first_seen = stamp_sec
 
-        stability = self._compute_stability(cluster_state)
-        return InstanceAssignment(
-            instance_id=cluster_state.instance_id,
-            label=label,
-            centroid=cluster_state.centroid.copy(),
-            stability=stability,
-            committed=cluster_state.committed or self._min_obs <= 0,
-        )
+            cluster_state.centroid = self._blend_centroid(
+                cluster_state.centroid, component_centroid, prob
+            )
+            if not cluster_state.committed and self._min_obs > 0:
+                if cluster_state.observations >= self._min_obs:
+                    cluster_state.committed = True
+
+            stability = self._compute_stability(cluster_state)
+            return InstanceAssignment(
+                instance_id=cluster_state.instance_id,
+                label=label,
+                centroid=cluster_state.centroid.copy(),
+                stability=stability,
+                committed=cluster_state.committed or self._min_obs <= 0,
+            )
+        finally:
+            state.model.run()
 
     def _get_state(self, label: str) -> Optional[_LabelState]:
         if not self.enabled:

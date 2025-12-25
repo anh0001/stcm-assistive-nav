@@ -410,18 +410,30 @@ class SemanticMapBuilder(Node):
         height = rgb_image.shape[0]
         image_pil_bboxes = self.gdino.bbox_to_scaled_xyxy(bboxes, width, height)
 
-        image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
+        self.get_logger().info(f"Running SAM segmentation on {len(image_pil_bboxes)} boxes...")
+        try:
+            image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
+            self.get_logger().info(f"SAM segmentation completed, got {len(masks)} masks")
+        except Exception as e:
+            self.get_logger().error(f"SAM segmentation failed: {e}")
+            return
+
+        self.get_logger().info("Filtering large boxes...")
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
         # Convert PyTorch tensor to numpy for np.any() and indexing
         keep_index_np = keep_index.numpy() if hasattr(keep_index, "numpy") else keep_index
         if not np.any(keep_index_np):
+            self.get_logger().info("All boxes filtered out as too large")
             return
         masks = masks[keep_index]
         gdino_conf = gdino_conf[keep_index]
         selected_idx = np.where(keep_index_np)[0]
         phrases = [phrases[i] for i in selected_idx]
+        self.get_logger().info(f"After large box filter: {len(phrases)} detections remain")
 
+        self.get_logger().info("Filtering to target labels...")
         filtered = self._filter_to_target_labels(image_pil_bboxes, masks, gdino_conf, phrases)
+        self.get_logger().info("Target label filtering complete")
         if filtered is None:
             self.get_logger().debug("Detections did not match any target_labels; skipping frame.")
             return
@@ -437,8 +449,12 @@ class SemanticMapBuilder(Node):
         )
 
         if projected_ready and rt_base is not None:
+            self.get_logger().info(f"Updating graph with {len(phrases)} detections (projected LiDAR mode)...")
+            self.get_logger().info("Converting masks to numpy...")
+            masks_numpy = masks.cpu().numpy()
+            self.get_logger().info(f"Masks converted: shape {masks_numpy.shape}")
             self._update_graph(
-                masks.cpu().numpy(),
+                masks_numpy,
                 phrases,
                 gdino_conf,
                 rt_camera,
@@ -451,6 +467,7 @@ class SemanticMapBuilder(Node):
                 stamp=frames.get("stamp"),
             )
             graph_updated = True
+            self.get_logger().info("Graph update complete")
         elif rt_base is not None and rt_camera is not None and (depth_ready or fallback_ready):
             if intrinsics is None and not self._intrinsics_warned:
                 self.get_logger().warning("Camera intrinsics missing; using defaults for graph projection.")
@@ -1003,10 +1020,14 @@ class SemanticMapBuilder(Node):
             self._debug_logged = True
 
         label_iter = {label: 0 for label in self.distance_thresholds}
+        self.get_logger().info(f"Processing {len(masks)} masks for graph update...")
         for idx, mask in enumerate(masks):
             label = phrases[idx]
+            self.get_logger().info(f"  Mask {idx+1}/{len(masks)}: label='{label}', shape={mask.shape}")
             if label not in self.distance_thresholds:
+                self.get_logger().info(f"    Skipping '{label}' (not in distance_thresholds)")
                 continue
+            self.get_logger().info(f"    Calculating 3D pose for '{label}'...")
             pose, depth_method = self._pose_from_sources(
                 mask,
                 rt_camera,
@@ -1018,11 +1039,13 @@ class SemanticMapBuilder(Node):
                 img_pil,
                 stamp,
             )
+            self.get_logger().info(f"    Pose calculation complete: pose={'valid' if pose is not None else 'None'}")
             if pose is None:
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
 
             if self._gng_manager is not None and self._gng_manager.enabled:
+                self.get_logger().info(f"    Running GNG update for '{label}'...")
                 score = None
                 if scores is not None:
                     score = scores[idx]
@@ -1030,8 +1053,15 @@ class SemanticMapBuilder(Node):
                         score = float(score.item())
                     else:
                         score = float(score)
-                assignment = self._gng_manager.update(label, np.asarray(pose), score, stamp)
+                self.get_logger().info(f"    Calling GNG manager.update() with pose={pose}, score={score}")
+                try:
+                    assignment = self._gng_manager.update(label, np.asarray(pose), score, stamp)
+                    self.get_logger().info(f"    GNG update complete: assignment={'committed' if assignment and assignment.committed else 'not committed'}")
+                except Exception as e:
+                    self.get_logger().error(f"    GNG update failed: {e}")
+                    continue
                 if assignment is None or not assignment.committed:
+                    self.get_logger().info(f"    Skipping '{label}' - not yet committed (needs {self.gng_min_observations_to_commit} observations)")
                     continue
                 node_id = assignment.instance_id
                 pose_list = assignment.centroid.tolist()
