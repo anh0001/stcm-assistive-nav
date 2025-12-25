@@ -128,7 +128,7 @@ gng_min_observations_to_commit: 2
 # Merge/associate components within this distance (meters).
 gng_cluster_merge_distance: 0.5
 # Ignore samples farther than this from existing instances (meters, 0 disables).
-gng_outlier_gate_meters: 2.0
+gng_outlier_gate_meters: 0.0
 
 # ============================================================================
 # SPATIAL RELATIONSHIPS - Edge creation between objects

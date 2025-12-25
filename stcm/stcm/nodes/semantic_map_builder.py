@@ -988,9 +988,13 @@ class SemanticMapBuilder(Node):
         self.get_logger().info("=" * 80)
         self.get_logger().info("ROSBAG PROCESSING COMPLETE")
         self.get_logger().info(f"Total frames processed: {processed_frames}")
-        self.get_logger().info(f"Graph saved to: {self.graph_path}")
         self.get_logger().info(f"Total nodes in graph: {self.graph.number_of_nodes()}")
         self.get_logger().info(f"Total edges in graph: {self.graph.number_of_edges()}")
+
+        # Save the graph immediately after processing
+        save_graph_json(self.graph, file=str(self.graph_path))
+        self.get_logger().info(f"Graph saved to: {self.graph_path}")
+
         self.get_logger().info("You can now stop the process with Ctrl+C")
         self.get_logger().info("=" * 80)
 
