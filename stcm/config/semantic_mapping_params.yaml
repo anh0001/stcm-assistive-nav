@@ -124,7 +124,7 @@ gng_eps_n: 0.0006        # Neighbor learning rate (slower than winner)
 gng_alpha: 0.95          # Error decay rate (close to 1.0 = retain longer)
 gng_beta: 0.9995         # Global error reduction per insertion step
 # Require at least N observations before committing a graph node.
-gng_min_observations_to_commit: 2
+gng_min_observations_to_commit: 3
 # Merge/associate components within this distance (meters).
 gng_cluster_merge_distance: 0.5
 # Ignore samples farther than this from existing instances (meters, 0 disables).
