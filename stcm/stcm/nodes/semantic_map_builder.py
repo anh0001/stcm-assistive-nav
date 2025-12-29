@@ -117,7 +117,7 @@ class SemanticMapBuilder(Node):
         self.place_gng_eps_n = float(self.declare_parameter("place_gng_eps_n", 0.01).value)
         self.place_gng_max_edge_age = int(self.declare_parameter("place_gng_max_edge_age", 50).value)
         self.place_gng_max_nodes = int(self.declare_parameter("place_gng_max_nodes", 0).value)
-        self.place_gng_lambda = int(self.declare_parameter("place_gng_lambda", 1).value)
+        self.place_gng_lambda = int(self.declare_parameter("place_gng_lambda", 100).value)
         self.place_gng_alpha = float(self.declare_parameter("place_gng_alpha", 0.95).value)
         self.place_gng_beta = float(self.declare_parameter("place_gng_beta", 0.9995).value)
         self.place_gng_semantic_alpha = float(

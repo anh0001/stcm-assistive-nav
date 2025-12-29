@@ -55,7 +55,8 @@ synchronizer_slop_sec: 2.0
 # ============================================================================
 # Enable the STCM topological GNG place-graph module.
 place_gng_enabled: true
-# Pose insertion threshold D_new (meters).
+# Pose insertion threshold D_new (meters); only insert samples when farther than this.
+# This does not enforce node spacing; place_gng_lambda controls node growth cadence.
 place_gng_distance_threshold: 0.5
 # Winner learning rate epsilon_b.
 place_gng_eps_w: 0.1
@@ -65,7 +66,7 @@ place_gng_eps_n: 0.01
 place_gng_max_edge_age: 50
 # Max number of place nodes for i-GNG (0 = unlimited).
 place_gng_max_nodes: 0
-# Add a new i-GNG node every N samples (lower = faster growth).
+# Add a new i-GNG node every N inserted samples (lower = denser graph).
 place_gng_lambda: 1
 # Error decay rate for i-GNG.
 place_gng_alpha: 0.95

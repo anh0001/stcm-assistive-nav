@@ -159,7 +159,7 @@ def launch_setup(context, *args, **kwargs):
     place_gng_lambda = _resolve_int(
         context,
         "place_gng_lambda",
-        config.get("place_gng_lambda", 1),
+        config.get("place_gng_lambda", 100),
     )
     place_gng_alpha = _resolve_float(
         context,

@@ -200,6 +200,7 @@ class PlaceGng:
             config.max_nodes = self._gng_max_nodes
         if self._gng_lambda > 0:
             config.lambda_ = self._gng_lambda
+        config.grow_on_new_samples = True
         if self.max_edge_age > 0:
             config.max_age = self.max_edge_age
         if self.eps_w > 0.0:

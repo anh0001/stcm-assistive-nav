@@ -18,6 +18,43 @@ if str(PKG_ROOT) not in sys.path:
 from stcm.core.place_gng import PlaceGng
 
 
+class _TestLogger:
+    def __init__(self) -> None:
+        self.warnings: list[str] = []
+        self.errors: list[str] = []
+
+    def warning(self, message: str) -> None:
+        self.warnings.append(str(message))
+
+    def error(self, message: str) -> None:
+        self.errors.append(str(message))
+
+
+def test_place_gng_warns_on_low_lambda() -> None:
+    logger = _TestLogger()
+    gng = PlaceGng(
+        enabled=True,
+        distance_threshold=1.0,
+        eps_w=0.1,
+        eps_n=0.01,
+        max_edge_age=2,
+        gng_max_nodes=0,
+        gng_lambda=1,
+        gng_alpha=0.95,
+        gng_beta=0.9995,
+        semantic_alpha=0.5,
+        semantic_aggregation="max",
+        use_second_best_edge=True,
+        use_transition_edges=True,
+        update_semantics_when_empty=False,
+        labels=["table", "chair"],
+        logger=logger,
+    )
+
+    assert any("place_gng_lambda=1" in msg for msg in logger.warnings)
+    gng.shutdown()
+
+
 def test_place_gng_basic() -> None:
     """
     Test PlaceGng graph operations without GNG (disabled mode).

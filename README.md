@@ -186,8 +186,10 @@ gng_outlier_gate_meters: 0.0
 
 **Topological Place GNG (paper STCM)** (optional, configure in YAML):
 Builds a place graph from the robot trajectory (2D map-frame pose) using i-GNG to adapt node prototypes online.
-The distance threshold gates which poses are inserted into i-GNG, and `place_gng_lambda` controls new node cadence.
-adds edges on transitions, and fuses detection confidences into node-level semantic scores/labels.
+The distance threshold gates which poses are inserted into i-GNG; it does not enforce node spacing.
+`place_gng_lambda` controls how often new place nodes are created from inserted samples (lower = denser).
+Typical environments use 100-300 to avoid overly dense graphs.
+Adds edges on transitions, and fuses detection confidences into node-level semantic scores/labels.
 Outputs a MarkerArray on `semantic_graph/place_graph` and embeds the place graph in the STCM JSON
 (`graph_output_path`). Set `place_gng_output_path` to a different file if you need a standalone
 place graph export; otherwise it defaults to `graph_output_path`.
@@ -198,7 +200,7 @@ place_gng_eps_w: 0.1               # winner learning rate
 place_gng_eps_n: 0.01              # neighbor learning rate
 place_gng_max_edge_age: 50         # a_max
 place_gng_max_nodes: 0             # 0 = unlimited
-place_gng_lambda: 1                # add node every N samples
+place_gng_lambda: 100              # add node every N inserted samples (lower = denser)
 place_gng_alpha: 0.95              # error decay
 place_gng_beta: 0.9995             # global error reduction
 place_gng_semantic_alpha: 0.1      # semantic fusion rate
