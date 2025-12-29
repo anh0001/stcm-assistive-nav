@@ -75,6 +75,8 @@ class PlaceGng:
         self._seed_mapping_pending = False
         self._gng_ready = False
         self._sample_count = 0
+        # Track pose insertions so edges can be formed once i-GNG materializes nodes.
+        self._pending_edge_seeds: list[tuple[np.ndarray, Optional[str], Optional[str]]] = []
 
         if self.semantic_aggregation not in {"max", "sum"}:
             self._log_warning(
@@ -90,6 +92,7 @@ class PlaceGng:
             return
         self.graph = graph
         self._sanitize_graph()
+        self._pending_edge_seeds = []
         self._seed_gng_from_graph()
 
     def shutdown(self) -> None:
@@ -117,11 +120,17 @@ class PlaceGng:
         if self._gng is None:
             return None
 
-        winner_dist = None
+        pre_winner_id = None
+        pre_winner_dist = None
         if self.graph.number_of_nodes() > 0:
-            _, _, winner_dist = self._nearest_nodes(position)
+            pre_winner_id, _, pre_winner_dist = self._nearest_nodes(position)
 
-        self._maybe_insert_sample(position, winner_dist)
+        inserted = self._maybe_insert_sample(position, pre_winner_dist)
+        current_pending_idx = None
+        if inserted:
+            current_pending_idx = self._queue_pending_edge(
+                position, pre_winner_id, self._prev_winner
+            )
 
         created_ids: set[str] = set()
         nodes = self._snapshot_gng_nodes()
@@ -131,8 +140,27 @@ class PlaceGng:
         if self.graph.number_of_nodes() == 0:
             return None
 
-        winner_id, second_best_id, winner_dist = self._nearest_nodes(position)
+        pending_assignments: dict[int, str] = {}
+        if created_ids and self._pending_edge_seeds:
+            pending_assignments = self._match_pending_edges(created_ids)
+
+        winner_id, second_best_id, _ = self._nearest_nodes(position)
         created = winner_id in created_ids
+        skip_pending_idx = None
+        if current_pending_idx is not None:
+            assigned_created = pending_assignments.get(current_pending_idx)
+            if assigned_created is not None:
+                winner_id = assigned_created
+                if (
+                    pre_winner_id is not None
+                    and pre_winner_id in self.graph
+                    and pre_winner_id != winner_id
+                ):
+                    second_best_id = pre_winner_id
+                else:
+                    second_best_id = None
+                created = True
+                skip_pending_idx = current_pending_idx
 
         if self._prev_winner is not None and self._prev_winner not in self.graph:
             self._prev_winner = None
@@ -144,6 +172,7 @@ class PlaceGng:
         if self.use_transition_edges and winner_changed:
             self._touch_edge(self._prev_winner, winner_id)
 
+        self._apply_pending_edges(pending_assignments, skip_pending_idx=skip_pending_idx)
         self._prune_edges()
         self._increment_visits(winner_id)
         self._update_semantics(winner_id, labels, scores)
@@ -201,6 +230,9 @@ class PlaceGng:
         if self._gng_lambda > 0:
             config.lambda_ = self._gng_lambda
         config.grow_on_new_samples = True
+        if hasattr(config, "new_node_position_mode"):
+            # 1 = place new nodes at the most recent sample instead of error midpoint.
+            config.new_node_position_mode = 1
         if self.max_edge_age > 0:
             config.max_age = self.max_edge_age
         if self.eps_w > 0.0:
@@ -239,20 +271,22 @@ class PlaceGng:
         self._gng.insert(np.stack(insert_positions, axis=0))
         self._sample_count = int(self._gng.server.dataset_size())
 
-    def _maybe_insert_sample(self, position: np.ndarray, winner_dist: Optional[float]) -> None:
+    def _maybe_insert_sample(self, position: np.ndarray, winner_dist: Optional[float]) -> bool:
         if self._gng is None:
-            return
+            return False
         dataset_size = int(self._gng.server.dataset_size())
         if dataset_size < 2:
             bootstrap = dataset_size == 0
             self._insert_sample(position, bootstrap=bootstrap)
-            return
+            return True
         # Gate insertions so distance_threshold still controls place growth.
         if self.distance_threshold <= 0.0:
             self._insert_sample(position)
-            return
+            return True
         if winner_dist is None or winner_dist > self.distance_threshold:
             self._insert_sample(position)
+            return True
+        return False
 
     def _insert_sample(self, position: np.ndarray, *, bootstrap: bool = False) -> None:
         if self._gng is None:
@@ -262,6 +296,59 @@ class PlaceGng:
         if bootstrap:
             self._gng.insert(position[None, :])
             self._sample_count += 1
+
+    def _queue_pending_edge(
+        self,
+        position: np.ndarray,
+        nearest_id: Optional[str],
+        prev_winner: Optional[str],
+    ) -> int:
+        self._pending_edge_seeds.append((position.copy(), nearest_id, prev_winner))
+        return len(self._pending_edge_seeds) - 1
+
+    def _match_pending_edges(self, created_ids: set[str]) -> dict[int, str]:
+        if not created_ids or not self._pending_edge_seeds:
+            return {}
+        pairs: list[tuple[float, str, int]] = []
+        for created_id in created_ids:
+            created_pos = np.asarray(self.graph.nodes[created_id]["pose"], dtype=np.float64)
+            for idx, (pending_pos, _, _) in enumerate(self._pending_edge_seeds):
+                dist = float(np.linalg.norm(created_pos - pending_pos))
+                pairs.append((dist, created_id, idx))
+        pairs.sort(key=lambda item: item[0])
+        assignments: dict[int, str] = {}
+        assigned_created: set[str] = set()
+        assigned_pending: set[int] = set()
+        for _, created_id, idx in pairs:
+            if created_id in assigned_created or idx in assigned_pending:
+                continue
+            assignments[idx] = created_id
+            assigned_created.add(created_id)
+            assigned_pending.add(idx)
+        return assignments
+
+    def _apply_pending_edges(
+        self,
+        pending_assignments: dict[int, str],
+        *,
+        skip_pending_idx: Optional[int] = None,
+    ) -> None:
+        if not pending_assignments:
+            return
+        for idx, created_id in pending_assignments.items():
+            if idx == skip_pending_idx:
+                continue
+            _, nearest_id, prev_winner_id = self._pending_edge_seeds[idx]
+            if self.use_second_best_edge and nearest_id is not None:
+                self._touch_edge(created_id, nearest_id)
+            if self.use_transition_edges and prev_winner_id is not None:
+                self._touch_edge(prev_winner_id, created_id)
+        assigned_indices = set(pending_assignments.keys())
+        self._pending_edge_seeds = [
+            entry
+            for idx, entry in enumerate(self._pending_edge_seeds)
+            if idx not in assigned_indices
+        ]
 
     def _snapshot_gng_nodes(self):
         if self._gng is None:
