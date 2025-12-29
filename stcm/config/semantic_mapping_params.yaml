@@ -19,6 +19,7 @@ offline_frame_stride: 5
 # Find your topics: ros2 topic list | grep image
 # ============================================================================
 rgb_topic: "/camera/image_raw"
+# if the use_projected_lidar option is false, depth_topic will be used
 depth_topic: "/camera/aligned_depth_to_color/image_raw"
 camera_info_topic: "/camera/camera_info"
 
@@ -72,7 +73,6 @@ place_gng_use_second_best_edge: true
 place_gng_use_transition_edges: true
 # Apply semantic updates even when no detections are present.
 place_gng_update_when_empty: false
-# Place graph JSON input/output paths (optional; defaults to graph_output_path).
 
 # ============================================================================
 # OBJECT DETECTION - What to detect and track
@@ -161,7 +161,7 @@ gng_outlier_gate_meters: 0.0
 # ============================================================================
 # Maximum distance in meters to create edges between nodes (spatial relationships)
 # Objects within this distance will be connected in the graph
-edge_distance_threshold: 3.0
+edge_distance_threshold: 0.0
 
 # ============================================================================
 # OUTPUT AND TIMING
