@@ -151,6 +151,26 @@ def launch_setup(context, *args, **kwargs):
         "place_gng_max_edge_age",
         config.get("place_gng_max_edge_age", 50),
     )
+    place_gng_max_nodes = _resolve_int(
+        context,
+        "place_gng_max_nodes",
+        config.get("place_gng_max_nodes", 0),
+    )
+    place_gng_lambda = _resolve_int(
+        context,
+        "place_gng_lambda",
+        config.get("place_gng_lambda", 1),
+    )
+    place_gng_alpha = _resolve_float(
+        context,
+        "place_gng_alpha",
+        config.get("place_gng_alpha", 0.95),
+    )
+    place_gng_beta = _resolve_float(
+        context,
+        "place_gng_beta",
+        config.get("place_gng_beta", 0.9995),
+    )
     place_gng_semantic_alpha = _resolve_float(
         context,
         "place_gng_semantic_alpha",
@@ -230,6 +250,10 @@ def launch_setup(context, *args, **kwargs):
             "place_gng_eps_w": place_gng_eps_w,
             "place_gng_eps_n": place_gng_eps_n,
             "place_gng_max_edge_age": place_gng_max_edge_age,
+            "place_gng_max_nodes": place_gng_max_nodes,
+            "place_gng_lambda": place_gng_lambda,
+            "place_gng_alpha": place_gng_alpha,
+            "place_gng_beta": place_gng_beta,
             "place_gng_semantic_alpha": place_gng_semantic_alpha,
             "place_gng_semantic_aggregation": place_gng_semantic_aggregation,
             "place_gng_use_second_best_edge": place_gng_use_second_best_edge,
@@ -289,6 +313,10 @@ def launch_setup(context, *args, **kwargs):
                 "place_gng_eps_w": place_gng_eps_w,
                 "place_gng_eps_n": place_gng_eps_n,
                 "place_gng_max_edge_age": place_gng_max_edge_age,
+                "place_gng_max_nodes": place_gng_max_nodes,
+                "place_gng_lambda": place_gng_lambda,
+                "place_gng_alpha": place_gng_alpha,
+                "place_gng_beta": place_gng_beta,
                 "place_gng_semantic_alpha": place_gng_semantic_alpha,
                 "place_gng_semantic_aggregation": place_gng_semantic_aggregation,
                 "place_gng_use_second_best_edge": place_gng_use_second_best_edge,
@@ -448,6 +476,26 @@ def generate_launch_description():
                 "place_gng_max_edge_age",
                 default_value="",
                 description="Override the place_gng_max_edge_age value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_max_nodes",
+                default_value="",
+                description="Override the place_gng_max_nodes value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_lambda",
+                default_value="",
+                description="Override the place_gng_lambda value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_alpha",
+                default_value="",
+                description="Override the place_gng_alpha value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_beta",
+                default_value="",
+                description="Override the place_gng_beta value from the config file.",
             ),
             DeclareLaunchArgument(
                 "place_gng_semantic_alpha",

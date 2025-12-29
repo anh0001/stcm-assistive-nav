@@ -3,10 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import threading
 from typing import Dict, Iterable, Optional, Sequence
 
 import networkx as nx
 import numpy as np
+
+try:
+    from gng import GNGConfiguration, GrowingNeuralGas
+except ImportError:
+    GNGConfiguration = None
+    GrowingNeuralGas = None
 
 
 @dataclass
@@ -17,7 +24,7 @@ class PlaceGngUpdate:
 
 
 class PlaceGng:
-    """Incremental place discovery using a distance-threshold GNG variant."""
+    """Incremental place discovery using i-GNG for place node adaptation."""
 
     def __init__(
         self,
@@ -27,6 +34,10 @@ class PlaceGng:
         eps_w: float,
         eps_n: float,
         max_edge_age: int,
+        gng_max_nodes: int,
+        gng_lambda: int,
+        gng_alpha: float,
+        gng_beta: float,
         semantic_alpha: float,
         semantic_aggregation: str,
         use_second_best_edge: bool,
@@ -42,6 +53,10 @@ class PlaceGng:
         self.eps_w = float(eps_w)
         self.eps_n = float(eps_n)
         self.max_edge_age = int(max_edge_age)
+        self._gng_max_nodes = int(gng_max_nodes)
+        self._gng_lambda = int(gng_lambda)
+        self._gng_alpha = float(gng_alpha)
+        self._gng_beta = float(gng_beta)
         self.semantic_alpha = float(semantic_alpha)
         self.semantic_aggregation = str(semantic_aggregation).lower()
         self.use_second_best_edge = bool(use_second_best_edge)
@@ -54,6 +69,12 @@ class PlaceGng:
         self._node_counter = 0
         self._prev_winner: str | None = None
         self._logger = logger
+        self._gng = None
+        self._gng_node_map: Dict[int, str] = {}
+        self._seed_nodes: list[tuple[str, np.ndarray]] = []
+        self._seed_mapping_pending = False
+        self._gng_ready = False
+        self._sample_count = 0
 
         if self.semantic_aggregation not in {"max", "sum"}:
             self._log_warning(
@@ -62,12 +83,22 @@ class PlaceGng:
             self.semantic_aggregation = "max"
 
         self._sanitize_graph()
+        self._init_gng()
 
     def seed_from_graph(self, graph: nx.Graph) -> None:
         if not self.enabled:
             return
         self.graph = graph
         self._sanitize_graph()
+        self._seed_gng_from_graph()
+
+    def shutdown(self) -> None:
+        if self._gng is None:
+            return
+        try:
+            self._gng.terminate()
+        except Exception:
+            pass
 
     def update(
         self,
@@ -83,21 +114,28 @@ class PlaceGng:
         if position is None:
             return None
 
-        created = False
-        if self.graph.number_of_nodes() == 0:
-            winner_id = self._create_node(position)
-            created = True
-            second_best_id = None
-        else:
-            winner_id, second_best_id, winner_dist = self._nearest_nodes(position)
-            if self.distance_threshold > 0.0 and winner_dist > self.distance_threshold:
-                nearest_before_insert = winner_id
-                winner_id = self._create_node(position)
-                created = True
-                second_best_id = nearest_before_insert
-            else:
-                self._adapt_winner_and_neighbors(winner_id, position)
+        if self._gng is None:
+            return None
 
+        winner_dist = None
+        if self.graph.number_of_nodes() > 0:
+            _, _, winner_dist = self._nearest_nodes(position)
+
+        self._maybe_insert_sample(position, winner_dist)
+
+        created_ids: set[str] = set()
+        nodes = self._snapshot_gng_nodes()
+        if nodes is not None:
+            _, created_ids = self._sync_graph_from_gng(nodes)
+
+        if self.graph.number_of_nodes() == 0:
+            return None
+
+        winner_id, second_best_id, winner_dist = self._nearest_nodes(position)
+        created = winner_id in created_ids
+
+        if self._prev_winner is not None and self._prev_winner not in self.graph:
+            self._prev_winner = None
         winner_changed = self._prev_winner is not None and self._prev_winner != winner_id
 
         self._age_edges(winner_id)
@@ -144,6 +182,200 @@ class PlaceGng:
             edge_data.setdefault("age", 0)
             edge_data.setdefault("traversals", 0)
 
+    def _init_gng(self) -> None:
+        if not self.enabled:
+            return
+        if GNGConfiguration is None or GrowingNeuralGas is None:
+            self._log_error("GNG bindings are unavailable; disabling place_gng.")
+            self.enabled = False
+            return
+        config = self._build_config()
+        self._gng = GrowingNeuralGas(config)
+        self._seed_gng_from_graph()
+
+    def _build_config(self):
+        config = GNGConfiguration()
+        config.dim = 2
+        if self._gng_max_nodes > 0:
+            config.max_nodes = self._gng_max_nodes
+        if self._gng_lambda > 0:
+            config.lambda_ = self._gng_lambda
+        if self.max_edge_age > 0:
+            config.max_age = self.max_edge_age
+        if self.eps_w > 0.0:
+            config.eps_w = self.eps_w
+        if self.eps_n > 0.0:
+            config.eps_n = self.eps_n
+        if self._gng_alpha > 0.0:
+            config.alpha = self._gng_alpha
+        if self._gng_beta > 0.0:
+            config.beta = self._gng_beta
+        config.dataset_type = 2
+        return config
+
+    def _seed_gng_from_graph(self) -> None:
+        if self._gng is None:
+            return
+        self._gng_node_map = {}
+        self._seed_nodes = []
+        self._seed_mapping_pending = False
+        if self.graph.number_of_nodes() == 0:
+            return
+        positions = []
+        for node_id, data in self.graph.nodes(data=True):
+            pose = data.get("pose")
+            pose_xy = self._as_position(pose)
+            if pose_xy is None:
+                continue
+            positions.append(pose_xy)
+            self._seed_nodes.append((str(node_id), pose_xy))
+        if not positions:
+            return
+        insert_positions = positions
+        if len(positions) == 1:
+            insert_positions = [positions[0], positions[0]]
+        self._seed_mapping_pending = True
+        self._gng.insert(np.stack(insert_positions, axis=0))
+        self._sample_count = int(self._gng.server.dataset_size())
+
+    def _maybe_insert_sample(self, position: np.ndarray, winner_dist: Optional[float]) -> None:
+        if self._gng is None:
+            return
+        dataset_size = int(self._gng.server.dataset_size())
+        if dataset_size < 2:
+            bootstrap = dataset_size == 0
+            self._insert_sample(position, bootstrap=bootstrap)
+            return
+        # Gate insertions so distance_threshold still controls place growth.
+        if self.distance_threshold <= 0.0:
+            self._insert_sample(position)
+            return
+        if winner_dist is None or winner_dist > self.distance_threshold:
+            self._insert_sample(position)
+
+    def _insert_sample(self, position: np.ndarray, *, bootstrap: bool = False) -> None:
+        if self._gng is None:
+            return
+        self._gng.insert(position[None, :])
+        self._sample_count += 1
+        if bootstrap:
+            self._gng.insert(position[None, :])
+            self._sample_count += 1
+
+    def _snapshot_gng_nodes(self):
+        if self._gng is None:
+            return None
+
+        pause_event = threading.Event()
+        pause_exception = [None]
+        resume_event = threading.Event()
+
+        def pause_with_catch():
+            try:
+                self._gng.pause()
+            except Exception as exc:
+                pause_exception[0] = exc
+            if resume_event.is_set():
+                try:
+                    self._gng.run()
+                except Exception:
+                    pass
+            pause_event.set()
+
+        pause_thread = threading.Thread(target=pause_with_catch, daemon=True)
+        pause_thread.start()
+
+        if not pause_event.wait(timeout=2.0):
+            resume_event.set()
+            self._log_warning(
+                f"Place GNG pause timeout after 2.0s (samples={self._sample_count})."
+            )
+            return None
+
+        if pause_exception[0] is not None:
+            self._log_error(f"Place GNG pause failed: {pause_exception[0]}")
+            return None
+
+        try:
+            return self._gng.nodes()
+        finally:
+            self._gng.run()
+
+    def _sync_graph_from_gng(self, nodes) -> tuple[set[str], set[str]]:
+        if not nodes:
+            return set(), set()
+        if self._seed_mapping_pending:
+            self._assign_seed_mapping(nodes)
+        active_indices = {node.index for node in nodes}
+        active_ids: set[str] = set()
+        created_ids: set[str] = set()
+        for node in nodes:
+            node_id = self._gng_node_map.get(node.index)
+            if node_id is None:
+                node_id = self._create_node(np.asarray(node.position, dtype=np.float64))
+                created_ids.add(node_id)
+                self._gng_node_map[node.index] = node_id
+            data = self.graph.nodes[node_id]
+            data["pose"] = np.asarray(node.position, dtype=np.float64).tolist()
+            self._ensure_node_fields(node_id)
+            active_ids.add(node_id)
+        if not self._seed_mapping_pending:
+            self._gng_ready = True
+        if self._gng_ready:
+            self._prune_missing_nodes(active_ids)
+            self._prune_missing_mappings(active_indices)
+        return active_ids, created_ids
+
+    def _assign_seed_mapping(self, nodes) -> None:
+        if not self._seed_mapping_pending or not self._seed_nodes:
+            self._seed_mapping_pending = False
+            return
+        seed_positions = {node_id: pose for node_id, pose in self._seed_nodes}
+        pairs = []
+        for node in nodes:
+            node_pos = np.asarray(node.position, dtype=np.float64)
+            for node_id, pose in seed_positions.items():
+                dist = float(np.linalg.norm(node_pos - pose))
+                pairs.append((dist, node.index, node_id))
+        pairs.sort(key=lambda item: item[0])
+        assigned_nodes: set[int] = set()
+        assigned_seeds: set[str] = set()
+        for _, gng_idx, node_id in pairs:
+            if gng_idx in assigned_nodes or node_id in assigned_seeds:
+                continue
+            self._gng_node_map[gng_idx] = node_id
+            assigned_nodes.add(gng_idx)
+            assigned_seeds.add(node_id)
+        self._seed_mapping_pending = False
+
+    def _prune_missing_nodes(self, active_ids: set[str]) -> None:
+        prefix = f"{self._node_prefix}_"
+        for node_id in list(self.graph.nodes):
+            if node_id in active_ids:
+                continue
+            if isinstance(node_id, str) and node_id.startswith(prefix):
+                self.graph.remove_node(node_id)
+
+    def _prune_missing_mappings(self, active_indices: set[int]) -> None:
+        for idx in list(self._gng_node_map):
+            if idx not in active_indices:
+                del self._gng_node_map[idx]
+
+    def _ensure_node_fields(self, node_id: str) -> None:
+        data = self.graph.nodes[node_id]
+        data.setdefault("id", node_id)
+        data.setdefault("visits", 0)
+        scores = data.get("scores")
+        if not isinstance(scores, dict):
+            scores = {}
+        if self._labels:
+            for label in self._labels:
+                scores.setdefault(label, 0.0)
+        data["scores"] = scores
+        label = data.get("label")
+        if not label and scores:
+            data["label"] = self._resolve_label(scores)
+
     def _infer_next_counter(self) -> int:
         max_idx = -1
         prefix = f"{self._node_prefix}_"
@@ -188,17 +420,6 @@ class PlaceGng:
             second_best_id = nodes[second_idx][0]
         return winner_id, second_best_id, float(dists[winner_idx])
 
-    def _adapt_winner_and_neighbors(self, winner_id: str, position: np.ndarray) -> None:
-        winner_data = self.graph.nodes[winner_id]
-        winner_pos = np.array(winner_data["pose"], dtype=np.float64)
-        winner_pos = winner_pos + self.eps_w * (position - winner_pos)
-        winner_data["pose"] = winner_pos.tolist()
-        for neighbor in list(self.graph.neighbors(winner_id)):
-            neighbor_data = self.graph.nodes[neighbor]
-            neighbor_pos = np.array(neighbor_data["pose"], dtype=np.float64)
-            neighbor_pos = neighbor_pos + self.eps_n * (position - neighbor_pos)
-            neighbor_data["pose"] = neighbor_pos.tolist()
-
     def _age_edges(self, winner_id: str) -> None:
         if self.max_edge_age <= 0:
             return
@@ -208,6 +429,8 @@ class PlaceGng:
 
     def _touch_edge(self, node_a: str, node_b: str) -> None:
         if node_a is None or node_b is None or node_a == node_b:
+            return
+        if node_a not in self.graph or node_b not in self.graph:
             return
         if not self.graph.has_edge(node_a, node_b):
             self.graph.add_edge(node_a, node_b, age=0, traversals=0)
@@ -320,3 +543,7 @@ class PlaceGng:
     def _log_warning(self, message: str) -> None:
         if self._logger:
             self._logger.warning(message)
+
+    def _log_error(self, message: str) -> None:
+        if self._logger:
+            self._logger.error(message)

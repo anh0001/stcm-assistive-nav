@@ -105,6 +105,10 @@ class SemanticMapUpdater(Node):
         self.place_gng_eps_w = float(self.declare_parameter("place_gng_eps_w", 0.1).value)
         self.place_gng_eps_n = float(self.declare_parameter("place_gng_eps_n", 0.01).value)
         self.place_gng_max_edge_age = int(self.declare_parameter("place_gng_max_edge_age", 50).value)
+        self.place_gng_max_nodes = int(self.declare_parameter("place_gng_max_nodes", 0).value)
+        self.place_gng_lambda = int(self.declare_parameter("place_gng_lambda", 1).value)
+        self.place_gng_alpha = float(self.declare_parameter("place_gng_alpha", 0.95).value)
+        self.place_gng_beta = float(self.declare_parameter("place_gng_beta", 0.9995).value)
         self.place_gng_semantic_alpha = float(
             self.declare_parameter("place_gng_semantic_alpha", 0.1).value
         )
@@ -215,6 +219,10 @@ class SemanticMapUpdater(Node):
                 eps_w=self.place_gng_eps_w,
                 eps_n=self.place_gng_eps_n,
                 max_edge_age=self.place_gng_max_edge_age,
+                gng_max_nodes=self.place_gng_max_nodes,
+                gng_lambda=self.place_gng_lambda,
+                gng_alpha=self.place_gng_alpha,
+                gng_beta=self.place_gng_beta,
                 semantic_alpha=self.place_gng_semantic_alpha,
                 semantic_aggregation=self.place_gng_semantic_aggregation,
                 use_second_best_edge=self.place_gng_use_second_best_edge,
@@ -224,6 +232,11 @@ class SemanticMapUpdater(Node):
                 graph=self.place_graph,
                 logger=self.get_logger(),
             )
+            if not self._place_gng.enabled:
+                self.get_logger().warning(
+                    "place_gng_enabled was set, but GNG bindings are unavailable; disabling place graph."
+                )
+                self.place_gng_enabled = False
 
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
         self.place_marker_pub = None
@@ -721,6 +734,8 @@ class SemanticMapUpdater(Node):
     def destroy_node(self):
         if self._gng_manager is not None:
             self._gng_manager.shutdown()
+        if self._place_gng is not None:
+            self._place_gng.shutdown()
         self._save_graphs()
         super().destroy_node()
 
