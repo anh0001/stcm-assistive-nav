@@ -133,10 +133,10 @@ gng_outlier_gate_meters: 0.0
 # ============================================================================
 # TOPOLOGICAL PLACE GRAPH - GNG place discovery (optional)
 # ============================================================================
-# Enable the STCM topological GNG place-graph module (paper Section 3.3).
-place_gng_enabled: false
+# Enable the STCM topological GNG place-graph module.
+place_gng_enabled: true
 # New node creation threshold D_new (meters).
-place_gng_distance_threshold: 1.5
+place_gng_distance_threshold: 0.5
 # Winner learning rate epsilon_b.
 place_gng_eps_w: 0.1
 # Neighbor learning rate epsilon_n.
