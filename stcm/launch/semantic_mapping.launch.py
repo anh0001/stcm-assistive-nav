@@ -179,12 +179,12 @@ def launch_setup(context, *args, **kwargs):
     place_gng_input_path = _resolve_str(
         context,
         "place_gng_input_path",
-        config.get("place_gng_input_path", "stcm.json"),
+        config.get("place_gng_input_path", graph_path),
     )
     place_gng_output_path = _resolve_str(
         context,
         "place_gng_output_path",
-        config.get("place_gng_output_path", "stcm.json"),
+        config.get("place_gng_output_path", graph_path),
     )
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))

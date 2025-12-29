@@ -189,7 +189,7 @@ Builds a place graph from the robot trajectory (2D map-frame pose), adapts node 
 adds edges on transitions, and fuses detection confidences into node-level semantic scores/labels.
 Outputs a MarkerArray on `semantic_graph/place_graph` and embeds the place graph in the STCM JSON
 (`graph_output_path`). Set `place_gng_output_path` to a different file if you need a standalone
-place graph export.
+place graph export; otherwise it defaults to `graph_output_path`.
 ```yaml
 place_gng_enabled: true
 place_gng_distance_threshold: 1.5  # D_new (meters)
@@ -201,8 +201,6 @@ place_gng_semantic_aggregation: "max"  # "max" or "sum"
 place_gng_use_second_best_edge: true
 place_gng_use_transition_edges: true
 place_gng_update_when_empty: false
-place_gng_input_path: "output/stcm.json"
-place_gng_output_path: "output/stcm.json"
 ```
 
 **Spatial Relationships** (optional, configure in YAML):

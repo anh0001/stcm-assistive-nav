@@ -1,4 +1,5 @@
-# Semantic mapping launch parameters. Adjust these values as needed before running
+# Semantic Topological Cognitive Map launch parameters.
+# Adjust these values as needed before running
 # `ros2 launch stcm semantic_mapping.launch.py`.
 
 # ============================================================================
@@ -71,9 +72,7 @@ place_gng_use_second_best_edge: true
 place_gng_use_transition_edges: true
 # Apply semantic updates even when no detections are present.
 place_gng_update_when_empty: false
-# Place graph JSON input/output paths (use the STCM file to embed place graph).
-place_gng_input_path: "output/stcm.json"
-place_gng_output_path: "output/stcm.json"
+# Place graph JSON input/output paths (optional; defaults to graph_output_path).
 
 # ============================================================================
 # OBJECT DETECTION - What to detect and track
