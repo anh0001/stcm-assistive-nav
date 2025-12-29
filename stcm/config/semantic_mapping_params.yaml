@@ -49,6 +49,33 @@ projected_lidar_timeout_sec: 3.0
 synchronizer_slop_sec: 2.0
 
 # ============================================================================
+# TOPOLOGICAL PLACE GRAPH - GNG place discovery (optional)
+# ============================================================================
+# Enable the STCM topological GNG place-graph module.
+place_gng_enabled: true
+# New node creation threshold D_new (meters).
+place_gng_distance_threshold: 0.5
+# Winner learning rate epsilon_b.
+place_gng_eps_w: 0.1
+# Neighbor learning rate epsilon_n.
+place_gng_eps_n: 0.01
+# Edge age threshold a_max before removal.
+place_gng_max_edge_age: 50
+# Semantic fusion rate alpha for place labels.
+place_gng_semantic_alpha: 0.1
+# Aggregate detection confidences per class: "max" or "sum".
+place_gng_semantic_aggregation: "max"
+# Create/refresh edges between winner and 2nd nearest node.
+place_gng_use_second_best_edge: true
+# Create/refresh edges on winner transitions (i_{t-1} -> i*).
+place_gng_use_transition_edges: true
+# Apply semantic updates even when no detections are present.
+place_gng_update_when_empty: false
+# Place graph JSON input/output paths (use the STCM file to embed place graph).
+place_gng_input_path: "output/stcm.json"
+place_gng_output_path: "output/stcm.json"
+
+# ============================================================================
 # OBJECT DETECTION - What to detect and track
 # ============================================================================
 # Space-separated list; end each object with " ." (space + period)
@@ -131,33 +158,6 @@ gng_cluster_merge_distance: 0.5
 gng_outlier_gate_meters: 0.0
 
 # ============================================================================
-# TOPOLOGICAL PLACE GRAPH - GNG place discovery (optional)
-# ============================================================================
-# Enable the STCM topological GNG place-graph module.
-place_gng_enabled: true
-# New node creation threshold D_new (meters).
-place_gng_distance_threshold: 0.5
-# Winner learning rate epsilon_b.
-place_gng_eps_w: 0.1
-# Neighbor learning rate epsilon_n.
-place_gng_eps_n: 0.01
-# Edge age threshold a_max before removal.
-place_gng_max_edge_age: 50
-# Semantic fusion rate alpha for place labels.
-place_gng_semantic_alpha: 0.1
-# Aggregate detection confidences per class: "max" or "sum".
-place_gng_semantic_aggregation: "max"
-# Create/refresh edges between winner and 2nd nearest node.
-place_gng_use_second_best_edge: true
-# Create/refresh edges on winner transitions (i_{t-1} -> i*).
-place_gng_use_transition_edges: true
-# Apply semantic updates even when no detections are present.
-place_gng_update_when_empty: false
-# Place graph JSON input/output paths.
-place_gng_input_path: "output/place_graph.json"
-place_gng_output_path: "output/place_graph.json"
-
-# ============================================================================
 # SPATIAL RELATIONSHIPS - Edge creation between objects
 # ============================================================================
 # Maximum distance in meters to create edges between nodes (spatial relationships)
@@ -167,8 +167,8 @@ edge_distance_threshold: 3.0
 # ============================================================================
 # OUTPUT AND TIMING
 # ============================================================================
-# Where to save the semantic graph JSON file
-graph_output_path: "output/semantic_graph.json"
+# Where to save the STCM JSON file (semantic + place graphs)
+graph_output_path: "output/stcm.json"
 
 # Set `true` for bag playback or Gazebo, `false` for live robot
 use_sim_time: true

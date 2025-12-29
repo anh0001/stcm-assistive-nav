@@ -49,7 +49,7 @@
         {
             "label": "Run Semantic Map Builder Node",
             "type": "shell",
-            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm semantic_map_builder --ros-args -p text_prompt:='table . chair . door .' -p graph_output_path:=/tmp/semantic_graph.json",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm semantic_map_builder --ros-args -p text_prompt:='table . chair . door .' -p graph_output_path:=/tmp/stcm.json",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -89,7 +89,7 @@
         {
             "label": "Run Semantic Graph Simulator",
             "type": "shell",
-            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=./output/semantic_graph.json -p model:=qwen2.5:14b -p run_mode:=use_tools",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=./output/stcm.json -p model:=qwen2.5:14b -p run_mode:=use_tools",
             "options": {
                 "cwd": "${workspaceFolder}"
             },

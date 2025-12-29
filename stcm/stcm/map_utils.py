@@ -21,6 +21,7 @@ fx = intrinsics[0][0]
 fy = intrinsics[1][1]
 px = intrinsics[0][2]
 py = intrinsics[1][2]
+STCM_VERSION = "1.0"
 
 
 def _intrinsics_values(override=None):
@@ -355,6 +356,207 @@ def update_graph_edges(graph, edge_distance_threshold=3.0):
     return graph
 
 
+def _is_stcm_payload(data):
+    return isinstance(data, dict) and (
+        "semantic_graph" in data or "place_graph" in data or "stcm_version" in data
+    )
+
+
+def _empty_graph_data():
+    return {"directed": False, "multigraph": False, "graph": {}, "nodes": [], "links": []}
+
+
+def _graph_data_to_graph(graph_data):
+    if not isinstance(graph_data, dict) or "nodes" not in graph_data:
+        return nx.Graph()
+    return json_graph.node_link_graph(graph_data)
+
+
+def _safe_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_pose_3d(pose):
+    if pose is None or len(pose) < 2:
+        return None
+    z_val = pose[2] if len(pose) >= 3 else 0.0
+    return [float(pose[0]), float(pose[1]), float(z_val)]
+
+
+def _coerce_pose_2d(pose):
+    if pose is None or len(pose) < 2:
+        return None
+    return [float(pose[0]), float(pose[1])]
+
+
+def _build_edge_list(graph, include_distance=True, extra_keys=()):
+    edges = []
+    sorted_edges = sorted(graph.edges(data=True), key=lambda item: (str(item[0]), str(item[1])))
+    for node_a, node_b, data in sorted_edges:
+        entry = {"source": str(node_a), "target": str(node_b)}
+        if include_distance:
+            distance = _safe_float(data.get("distance")) if data else None
+            if distance is None:
+                pose_a = _coerce_pose_3d(graph.nodes[node_a].get("pose"))
+                pose_b = _coerce_pose_3d(graph.nodes[node_b].get("pose"))
+                if pose_a and pose_b:
+                    distance = float(np.linalg.norm(np.array(pose_a[:2]) - np.array(pose_b[:2])))
+            if distance is not None:
+                entry["distance"] = distance
+        for key in extra_keys:
+            if data and key in data:
+                entry[key] = data[key]
+        edges.append(entry)
+    return edges
+
+
+def _build_object_place_links(objects, places):
+    if not objects or not places:
+        return []
+    place_positions = [(place["id"], place.get("pose")) for place in places]
+    links = []
+    for obj in objects:
+        obj_pose = obj.get("pose")
+        if not obj_pose:
+            continue
+        best_place = None
+        best_distance = None
+        for place_id, place_pose in place_positions:
+            if not place_pose:
+                continue
+            distance = float(np.linalg.norm(np.array(obj_pose[:2]) - np.array(place_pose[:2])))
+            if best_distance is None or distance < best_distance:
+                best_distance = distance
+                best_place = place_id
+        if best_place is not None and best_distance is not None:
+            links.append(
+                {
+                    "object_id": obj["id"],
+                    "place_id": best_place,
+                    "distance": best_distance,
+                }
+            )
+    return links
+
+
+def _build_llm_summary(semantic_graph, place_graph=None):
+    objects = []
+    for node_id, data in sorted(semantic_graph.nodes(data=True), key=lambda item: str(item[0])):
+        pose = _coerce_pose_3d(data.get("pose"))
+        if not pose:
+            continue
+        obj = {
+            "id": str(node_id),
+            "label": str(data.get("category", data.get("label", "object"))),
+            "pose": pose,
+        }
+        caption = data.get("caption")
+        if caption:
+            obj["caption"] = str(caption)
+        stability = _safe_float(data.get("stability"))
+        if stability is not None:
+            obj["stability"] = stability
+        dimensions = data.get("dimensions")
+        if isinstance(dimensions, (list, tuple)) and len(dimensions) >= 3:
+            obj["dimensions"] = [float(dim) for dim in dimensions[:3]]
+        heading = _safe_float(data.get("heading"))
+        if heading is not None:
+            obj["heading"] = heading
+        objects.append(obj)
+
+    object_edges = _build_edge_list(semantic_graph, include_distance=True)
+
+    places = []
+    if place_graph is not None:
+        for node_id, data in sorted(place_graph.nodes(data=True), key=lambda item: str(item[0])):
+            pose = _coerce_pose_2d(data.get("pose"))
+            if not pose:
+                continue
+            place = {
+                "id": str(node_id),
+                "pose": pose,
+                "label": str(data.get("label", "")),
+            }
+            visits = _safe_int(data.get("visits"))
+            if visits is not None:
+                place["visits"] = visits
+            scores = data.get("scores")
+            if isinstance(scores, dict):
+                place["scores"] = {str(k): float(v) for k, v in scores.items()}
+            places.append(place)
+
+    place_edges = _build_edge_list(
+        place_graph, include_distance=True, extra_keys=("age", "traversals")
+    ) if place_graph is not None else []
+
+    summary = {
+        "object_count": len(objects),
+        "object_edge_count": len(object_edges),
+        "place_count": len(places),
+        "place_edge_count": len(place_edges),
+    }
+
+    payload = {
+        "summary": summary,
+        "objects": objects,
+        "object_edges": object_edges,
+        "places": places,
+        "place_edges": place_edges,
+    }
+    if places:
+        payload["object_place_links"] = _build_object_place_links(objects, places)
+    return payload
+
+
+def read_stcm_json(file="stcm.json"):
+    with open(file, "r") as handle:
+        data = json.load(handle)
+    if not _is_stcm_payload(data):
+        return {
+            "is_stcm": False,
+            "stcm_version": None,
+            "semantic_graph": json_graph.node_link_graph(data),
+            "place_graph": nx.Graph(),
+            "metadata": {},
+            "llm": {},
+        }
+    semantic_graph = _graph_data_to_graph(data.get("semantic_graph"))
+    place_graph = _graph_data_to_graph(data.get("place_graph"))
+    return {
+        "is_stcm": True,
+        "stcm_version": data.get("stcm_version"),
+        "semantic_graph": semantic_graph,
+        "place_graph": place_graph,
+        "metadata": data.get("metadata", {}),
+        "llm": data.get("llm", {}),
+    }
+
+
+def save_stcm_json(semantic_graph, place_graph=None, file="stcm.json", metadata=None):
+    stcm_payload = {
+        "stcm_version": STCM_VERSION,
+        "semantic_graph": json_graph.node_link_data(semantic_graph),
+        "place_graph": json_graph.node_link_data(place_graph)
+        if place_graph is not None
+        else _empty_graph_data(),
+        "llm": _build_llm_summary(semantic_graph, place_graph),
+    }
+    if metadata:
+        stcm_payload["metadata"] = metadata
+    with open(file, "w") as handle:
+        json.dump(stcm_payload, handle, indent=4)
+
+
 def save_graph_json(graph, file="graph.json"):
     '''
     input graph \n
@@ -367,13 +569,16 @@ def save_graph_json(graph, file="graph.json"):
         file.close()
 
 
-def read_graph_json(file="graph.json"):
-    with open(file, "r") as file:
-        data = json.load(file)
-        file.close()
-    # print(data)
-    graph = json_graph.node_link_graph(data)
-    return graph
+def read_graph_json(file="graph.json", graph_key=None):
+    with open(file, "r") as handle:
+        data = json.load(handle)
+    if _is_stcm_payload(data):
+        key = graph_key or "semantic_graph"
+        graph_data = data.get(key)
+        return _graph_data_to_graph(graph_data)
+    if graph_key and graph_key != "semantic_graph":
+        return nx.Graph()
+    return json_graph.node_link_graph(data)
 
 
 def read_and_visualize_graph(map_file_path, map_metadata_filepath, on_map=False, catgeories=[], graph=None):

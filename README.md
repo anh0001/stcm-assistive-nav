@@ -187,7 +187,9 @@ gng_outlier_gate_meters: 0.0
 **Topological Place GNG (paper STCM)** (optional, configure in YAML):
 Builds a place graph from the robot trajectory (2D map-frame pose), adapts node prototypes online,
 adds edges on transitions, and fuses detection confidences into node-level semantic scores/labels.
-Outputs a MarkerArray on `semantic_graph/place_graph` and saves a JSON graph to `place_gng_output_path`.
+Outputs a MarkerArray on `semantic_graph/place_graph` and embeds the place graph in the STCM JSON
+(`graph_output_path`). Set `place_gng_output_path` to a different file if you need a standalone
+place graph export.
 ```yaml
 place_gng_enabled: true
 place_gng_distance_threshold: 1.5  # D_new (meters)
@@ -199,8 +201,8 @@ place_gng_semantic_aggregation: "max"  # "max" or "sum"
 place_gng_use_second_best_edge: true
 place_gng_use_transition_edges: true
 place_gng_update_when_empty: false
-place_gng_input_path: "output/place_graph.json"
-place_gng_output_path: "output/place_graph.json"
+place_gng_input_path: "output/stcm.json"
+place_gng_output_path: "output/stcm.json"
 ```
 
 **Spatial Relationships** (optional, configure in YAML):
@@ -236,12 +238,12 @@ ros2 launch stcm semantic_mapping.launch.py \
 
 ## Semantic Graph Simulator (RViz)
 
-Use the semantic graph JSON to drive a 2D RViz simulation with the language planner.
+Use the STCM JSON to drive a 2D RViz simulation with the language planner.
 
 ```bash
 colcon build --packages-select stcm_planner
 source install/setup.bash
-ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=/tmp/semantic_graph.json
+ros2 run stcm_planner semantic_graph_simulator --ros-args -p graph_path:=/tmp/stcm.json
 ```
 
 In RViz, add MarkerArray for `/semantic_graph_sim/nodes` and Marker displays for
@@ -256,7 +258,7 @@ The query publisher sends commands on `/stcm_planner_query`.
 Run the updater separately once you have an initial graph:
 
 ```bash
-ros2 run stcm semantic_map_updater graph_input_path:=/tmp/semantic_graph.json
+ros2 run stcm semantic_map_updater graph_input_path:=/tmp/stcm.json
 ```
 
 ## Generating semantic graphs on a new robot
@@ -288,7 +290,7 @@ python stcm/test/test_depth_anything.py stcm/imgs/color-000089.png
 
 To retroactively add spatial edges to an existing graph:
 ```bash
-python3 stcm/tools/add_edges_to_graph.py semantic_graph.json --output semantic_graph_with_edges.json --distance 3.0
+python3 stcm/tools/add_edges_to_graph.py stcm.json --output stcm_with_edges.json --distance 3.0
 ```
 
 These scripts import the `stcm.core` modules directly and are useful for quick sanity checks outside of ROS.
@@ -296,7 +298,7 @@ These scripts import the `stcm.core` modules directly and are useful for quick s
 ## Checkpoint & data directories
 - Checkpoints: `~/.stcm/ckpts` (override via `STCM_CKPT_DIR`)
 - RViz config: `stcm/config/semantic_mapping.rviz`
-- Output graphs: configurable per node (`graph_output_path`)
+- Output graphs: configurable per node (`graph_output_path`, default `output/stcm.json`, includes `semantic_graph`, `place_graph`, and `llm` summary)
 
 ## License
 MIT License © 2025 Anhar Risnumawan. External models (GroundingDINO, MobileSAM, DepthAnything) retain their original licenses—review them before deployment.

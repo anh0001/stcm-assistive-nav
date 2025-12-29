@@ -132,7 +132,7 @@ class ProjectedLidarPoseExporter(Node):
         )
 
     def _prepare_output_dir(self, output_subdir: str) -> Path:
-        graph_output_path = Path(self.config.get("graph_output_path", "output/semantic_graph.json"))
+        graph_output_path = Path(self.config.get("graph_output_path", "output/stcm.json"))
         if not graph_output_path.is_absolute():
             graph_output_path = (REPO_ROOT / graph_output_path).resolve()
         output_root = graph_output_path.parent

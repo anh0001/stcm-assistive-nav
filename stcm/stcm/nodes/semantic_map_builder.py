@@ -38,6 +38,7 @@ from ..map_utils import (
     pose_in_map_frame,
     pose_in_map_frame_from_projected,
     save_graph_json,
+    save_stcm_json,
     update_graph_edges,
 )
 from ..ros_utils import ros_qt_to_rt
@@ -131,9 +132,9 @@ class SemanticMapBuilder(Node):
             self.declare_parameter("place_gng_update_when_empty", False).value
         )
         self.place_gng_output_path = Path(
-            self.declare_parameter("place_gng_output_path", "place_graph.json").value
+            self.declare_parameter("place_gng_output_path", "stcm.json").value
         )
-        self.graph_path = Path(self.declare_parameter("graph_output_path", "graph.json").value)
+        self.graph_path = Path(self.declare_parameter("graph_output_path", "stcm.json").value)
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
         self.mobilesam_checkpoint = self.declare_parameter("mobilesam_checkpoint", "").value
         self.depth_anything_checkpoint = self.declare_parameter("depth_anything_checkpoint", "").value
@@ -1055,11 +1056,7 @@ class SemanticMapBuilder(Node):
         self.get_logger().info(f"Total edges in graph: {self.graph.number_of_edges()}")
 
         # Save the graph immediately after processing
-        save_graph_json(self.graph, file=str(self.graph_path))
-        self.get_logger().info(f"Graph saved to: {self.graph_path}")
-        if self._place_gng is not None and self.place_gng_enabled:
-            save_graph_json(self.place_graph, file=str(self.place_gng_output_path))
-            self.get_logger().info(f"Place graph saved to: {self.place_gng_output_path}")
+        self._save_graphs()
 
         self.get_logger().info("You can now stop the process with Ctrl+C")
         self.get_logger().info("=" * 80)
@@ -1322,14 +1319,26 @@ class SemanticMapBuilder(Node):
     def destroy_node(self):
         if self._gng_manager is not None:
             self._gng_manager.shutdown()
-        save_graph_json(self.graph, file=str(self.graph_path))
-        self.get_logger().info(f"Semantic graph saved to {self.graph_path.resolve()}")
-        if self._place_gng is not None and self.place_gng_enabled:
+        self._save_graphs()
+        super().destroy_node()
+
+    def _save_graphs(self):
+        metadata = {
+            "world_frame": self.world_frame,
+            "base_frame": self.base_frame,
+            "place_gng_enabled": bool(self.place_gng_enabled),
+        }
+        place_graph = self.place_graph if self.place_gng_enabled and self._place_gng is not None else None
+        save_stcm_json(self.graph, place_graph=place_graph, file=str(self.graph_path), metadata=metadata)
+        self.get_logger().info(f"STCM graph saved to: {self.graph_path.resolve()}")
+        if (
+            place_graph is not None
+            and self.place_gng_output_path.resolve() != self.graph_path.resolve()
+        ):
             save_graph_json(self.place_graph, file=str(self.place_gng_output_path))
             self.get_logger().info(
-                f"Place graph saved to {self.place_gng_output_path.resolve()}"
+                f"Place graph saved to: {self.place_gng_output_path.resolve()}"
             )
-        super().destroy_node()
 
 
 def main(args=None):

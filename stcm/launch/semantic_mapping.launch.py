@@ -11,7 +11,7 @@ from launch_ros.actions import Node
 
 
 DEFAULT_TEXT_PROMPT = "table . door . chair ."
-DEFAULT_GRAPH_PATH = "graph.json"
+DEFAULT_GRAPH_PATH = "stcm.json"
 DEFAULT_USE_SIM_TIME = False
 DEFAULT_RUN_UPDATER = False
 DEFAULT_RESET_TF_ON_TIME_JUMP = True
@@ -179,12 +179,12 @@ def launch_setup(context, *args, **kwargs):
     place_gng_input_path = _resolve_str(
         context,
         "place_gng_input_path",
-        config.get("place_gng_input_path", "place_graph.json"),
+        config.get("place_gng_input_path", "stcm.json"),
     )
     place_gng_output_path = _resolve_str(
         context,
         "place_gng_output_path",
-        config.get("place_gng_output_path", "place_graph.json"),
+        config.get("place_gng_output_path", "stcm.json"),
     )
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
@@ -332,7 +332,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "graph_output_path",
                 default_value="",
-                description="Override the graph path from the config file.",
+                description="Override the STCM graph path from the config file.",
             ),
             DeclareLaunchArgument(
                 "use_sim_time",
@@ -482,7 +482,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "place_gng_output_path",
                 default_value="",
-                description="Override the place_gng_output_path value from the config file.",
+                description="Override the place_gng_output_path value from the config file (set to the STCM path to embed).",
             ),
             DeclareLaunchArgument(
                 "groundingdino_checkpoint",

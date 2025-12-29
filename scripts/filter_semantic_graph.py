@@ -28,9 +28,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
+from networkx.readwrite import json_graph
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_GRAPH_PATH = REPO_ROOT / "output" / "semantic_graph.json"
-DEFAULT_OUTPUT_PATH = REPO_ROOT / "output" / "semantic_graph.filtered.json"
+DEFAULT_GRAPH_PATH = REPO_ROOT / "output" / "stcm.json"
+DEFAULT_OUTPUT_PATH = REPO_ROOT / "output" / "stcm.filtered.json"
+
+PACKAGE_ROOT = REPO_ROOT / "stcm"
+if str(PACKAGE_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_ROOT))
+
+from stcm.map_utils import save_stcm_json
 
 
 @dataclass
@@ -160,6 +168,12 @@ def _is_float(text: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+def _is_stcm_payload(data: Dict[str, Any]) -> bool:
+    return isinstance(data, dict) and (
+        "semantic_graph" in data or "place_graph" in data or "stcm_version" in data
+    )
 
 
 def _parse_remove_near(value: str) -> RemoveNearRule:
@@ -615,7 +629,12 @@ def main() -> int:
     with input_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
 
-    nodes = list(data.get("nodes", []))
+    is_stcm = _is_stcm_payload(data)
+    graph_data = data.get("semantic_graph") if is_stcm else data
+    if graph_data is None:
+        graph_data = {}
+
+    nodes = list(graph_data.get("nodes", []))
     if args.list_nodes:
         _list_nodes(nodes)
 
@@ -644,12 +663,12 @@ def main() -> int:
         print("No filter rules provided. Use --rules or --remove-* options.")
         return 1
 
-    filtered_data, removed = filter_graph(data, rules)
+    filtered_data, removed = filter_graph(graph_data, rules)
 
     total_nodes = len(nodes)
     kept_nodes = len(filtered_data.get("nodes", []))
     removed_nodes = len(removed)
-    total_links = len(data.get("links", data.get("edges", [])) or [])
+    total_links = len(graph_data.get("links", graph_data.get("edges", [])) or [])
     kept_links = len(filtered_data.get("links", filtered_data.get("edges", [])) or [])
 
     print(f"Filtered nodes: {removed_nodes} removed, {kept_nodes} kept (from {total_nodes} total).")
@@ -664,8 +683,20 @@ def main() -> int:
 
     output_path = Path(args.output_path).expanduser()
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as handle:
-        json.dump(filtered_data, handle, indent=4)
+    if is_stcm:
+        semantic_graph = json_graph.node_link_graph(filtered_data)
+        place_graph = None
+        if isinstance(data.get("place_graph"), dict):
+            place_graph = json_graph.node_link_graph(data["place_graph"])
+        save_stcm_json(
+            semantic_graph,
+            place_graph=place_graph,
+            file=str(output_path),
+            metadata=data.get("metadata"),
+        )
+    else:
+        with output_path.open("w", encoding="utf-8") as handle:
+            json.dump(filtered_data, handle, indent=4)
     print(f"✓ Wrote filtered graph to: {output_path}")
     return 0
 

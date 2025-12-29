@@ -45,7 +45,7 @@ Use the provided launch file for quick bring-up:
 ```bash
 ros2 launch stcm semantic_mapping.launch.py \
   text_prompt:="table . chair . door ." \
-  graph_output_path:="/tmp/semantic_graph.json" \
+  graph_output_path:="/tmp/stcm.json" \
   run_updater:=false
 ```
 
@@ -55,14 +55,14 @@ Key parameters (set via the launch file or `ros2 param set`):
 - Set `use_projected_lidar: true` to ingest the `/lidar_points_projected` cloud instead of the depth image; tweak `projected_lidar_topic` and `projected_lidar_frame` if your fusion node uses different names or frames.
 - `target_labels` / `target_label_thresholds`: object classes of interest and per-class merge radius.
 - `text_prompt`, `box_threshold`, `text_threshold`: detection prompt and thresholds.
-- `graph_output_path` / `graph_input_path`: where semantic graphs are stored.
+- `graph_output_path` / `graph_input_path`: where STCM JSON graphs (semantic + place) are stored.
 - `offline_sequential`, `rosbag_path`, `offline_frame_stride`: enable rosbag playback and process every Nth RGB frame offline.
 - `use_depth_anything_fallback`: disable Depth Anything when you only want projected LiDAR/RGB-D depth.
 
 Run the updater separately once you have an initial graph:
 
 ```bash
-ros2 run stcm semantic_map_updater graph_input_path:=/tmp/semantic_graph.json
+ros2 run stcm semantic_map_updater graph_input_path:=/tmp/stcm.json
 ```
 
 ## Generating semantic graphs on a new robot
@@ -85,7 +85,7 @@ These scripts now import the `stcm.core` modules directly and are useful for qui
 ## Checkpoint & data directories
 - Checkpoints: `./models` (override via `STCM_CKPT_DIR`)
 - RViz config: `stcm/config/semantic_mapping.rviz`
-- Output graphs: configurable per node (`graph_output_path`)
+- Output graphs: configurable per node (`graph_output_path`, default `stcm.json`)
 
 ## License
 MIT License © 2025 Anhar Risnumawan. External models (GroundingDINO, MobileSAM, DepthAnything) retain their original licenses—review them before deployment.

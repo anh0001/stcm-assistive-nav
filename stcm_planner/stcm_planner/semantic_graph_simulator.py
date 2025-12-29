@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Simulate 2D language plans from a semantic graph JSON in RViz."""
+"""Simulate 2D language plans from an STCM JSON in RViz."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ class SemanticGraphSimulator(Node):
         super().__init__("semantic_graph_simulator")
 
         self.graph_path = Path(
-            self.declare_parameter("graph_path", "output/semantic_graph.json").value
+            self.declare_parameter("graph_path", "output/stcm.json").value
         ).expanduser()
         self.environment_name = self.declare_parameter(
             "environment_name", "a room"

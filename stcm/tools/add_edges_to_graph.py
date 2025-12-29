@@ -4,19 +4,21 @@ Utility script to retroactively add edges to an existing semantic graph.
 
 This script reads a semantic graph JSON file (with no edges), calculates spatial
 relationships between nodes based on distance, and adds edges to create a connected graph.
+If the input is an STCM container, the semantic graph is updated in place and the
+place graph is preserved.
 
 Usage:
     python3 add_edges_to_graph.py <input_graph.json> [--output <output_graph.json>] [--distance <threshold>]
 
 Examples:
-    # Add edges to semantic_graph.json with default 3.0m threshold
-    python3 add_edges_to_graph.py semantic_graph.json
+    # Add edges to stcm.json with default 3.0m threshold
+    python3 add_edges_to_graph.py stcm.json
 
     # Specify custom output file and distance threshold
-    python3 add_edges_to_graph.py semantic_graph.json --output graph_with_edges.json --distance 2.5
+    python3 add_edges_to_graph.py stcm.json --output stcm_with_edges.json --distance 2.5
 
     # Overwrite input file in-place
-    python3 add_edges_to_graph.py semantic_graph.json --output semantic_graph.json
+    python3 add_edges_to_graph.py stcm.json --output stcm.json
 """
 
 import argparse
@@ -26,7 +28,7 @@ from pathlib import Path
 # Add parent directory to path to import stcm modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stcm.map_utils import read_graph_json, save_graph_json, update_graph_edges
+from stcm.map_utils import read_stcm_json, save_graph_json, save_stcm_json, update_graph_edges
 
 
 def main():
@@ -74,7 +76,8 @@ def main():
 
     # Load the graph
     print(f"Loading graph from: {input_path}")
-    graph = read_graph_json(str(input_path))
+    stcm_payload = read_stcm_json(str(input_path))
+    graph = stcm_payload["semantic_graph"]
 
     num_nodes = graph.number_of_nodes()
     num_edges_before = graph.number_of_edges()
@@ -100,7 +103,15 @@ def main():
 
     # Save the updated graph
     print(f"Saving graph to: {output_path}")
-    save_graph_json(graph, file=str(output_path))
+    if stcm_payload["is_stcm"]:
+        save_stcm_json(
+            graph,
+            place_graph=stcm_payload["place_graph"],
+            file=str(output_path),
+            metadata=stcm_payload.get("metadata"),
+        )
+    else:
+        save_graph_json(graph, file=str(output_path))
 
     print("Done!")
 

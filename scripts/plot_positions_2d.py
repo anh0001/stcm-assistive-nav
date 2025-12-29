@@ -20,7 +20,7 @@ if str(PACKAGE_ROOT) not in sys.path:
 
 from stcm.map_utils import read_graph_json
 
-DEFAULT_GRAPH_PATH = REPO_ROOT / "output" / "semantic_graph.json"
+DEFAULT_GRAPH_PATH = REPO_ROOT / "output" / "stcm.json"
 DEFAULT_FIGURE_PATH = REPO_ROOT / "output" / "object_positions_2d.png"
 
 

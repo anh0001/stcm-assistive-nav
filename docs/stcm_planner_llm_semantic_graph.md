@@ -1,8 +1,8 @@
 # STCM Planner: LLM From Semantic Graph
 
-This guide shows how to drive the 2D RViz simulation from a semantic graph JSON.
+This guide shows how to drive the 2D RViz simulation from an STCM JSON graph.
 
-## 1) Generate or locate a semantic graph
+## 1) Generate or locate an STCM graph
 
 If you already have a graph, note its path and skip this step.
 
@@ -16,7 +16,7 @@ ros2 launch stcm semantic_mapping.launch.py \
   config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml
 ```
 
-The default graph output path is `output/semantic_graph.json` (override with
+The default graph output path is `output/stcm.json` (override with
 `graph_output_path:=...` in the YAML or launch args).
 
 ## 2) Run the LLM simulator
@@ -26,13 +26,13 @@ colcon build --packages-select stcm_planner
 source install/setup.bash
 
 ros2 run stcm_planner semantic_graph_simulator --ros-args \
-  -p graph_path:=/output/semantic_graph.json \
+  -p graph_path:=/output/stcm.json \
   -p model:=gpt-4o \
   -p run_mode:=use_tools
 ```
 
 Notes:
-- `graph_path` points to your semantic graph JSON file.
+- `graph_path` points to your STCM JSON file.
 - `model` and `run_mode` must match your configured LLM backend.
 - The simulator listens for queries on `/stcm_planner_query`.
 

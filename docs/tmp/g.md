@@ -20,7 +20,7 @@
 
 - **Launch usage example**:
   - `ros2 launch stcm semantic_mapping.launch.py config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml`
-  - To update an existing graph only: `ros2 run stcm semantic_map_updater graph_input_path:=/tmp/semantic_graph.json`
+  - To update an existing graph only: `ros2 run stcm semantic_map_updater graph_input_path:=/tmp/stcm.json`
 
 - **Topic/frame assumptions**: Defaults expect depth in meters (`16UC1` or `32FC1`), TF frames `camera_frame`→`base_frame`→`world_frame` to be available, and synchronized RGB/depth via ApproximateTimeSynchronizer. Remap or adjust thresholds when integrating new sensors.
 

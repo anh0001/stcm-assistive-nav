@@ -77,13 +77,13 @@ ros2 launch stcm semantic_mapping.launch.py \
 ros2 launch stcm semantic_mapping.launch.py \
   config_file:=path/to/config.yaml \
   text_prompt:="chair . table . laptop ." \
-  graph_output_path:=/tmp/my_graph.json \
+  graph_output_path:=/tmp/stcm.json \
   run_updater:=false
 ```
 
 Edit [stcm/config/semantic_mapping_params.yaml](stcm/config/semantic_mapping_params.yaml) to configure:
 - `text_prompt` - Space-separated object classes, each ending with ` .` (e.g., `"table . chair . door ."`)
-- `graph_output_path` - Where to save the semantic graph JSON
+- `graph_output_path` - Where to save the STCM JSON
 - `use_sim_time` - Set to `true` for bag playback or Gazebo, `false` for live robot
 - `run_updater` - Launch the updater node alongside the builder
 - `groundingdino_checkpoint`, `mobilesam_checkpoint`, `depth_anything_checkpoint` - Paths to model weights
@@ -95,12 +95,12 @@ Edit [stcm/config/semantic_mapping_params.yaml](stcm/config/semantic_mapping_par
 ros2 run stcm semantic_map_builder \
   --ros-args \
   -p text_prompt:="table . chair . door ." \
-  -p graph_output_path:=/tmp/semantic_graph.json
+  -p graph_output_path:=/tmp/stcm.json
 
 # Updater node (maintains existing graph)
 ros2 run stcm semantic_map_updater \
   --ros-args \
-  -p graph_input_path:=/tmp/semantic_graph.json
+  -p graph_input_path:=/tmp/stcm.json
 ```
 
 ### Key ROS Parameters
@@ -117,8 +117,8 @@ Parameters can be set in the config YAML or passed via `--ros-args -p`:
 - `box_threshold`, `text_threshold` - Detection confidence thresholds (default: 0.55)
 
 **Graph management:**
-- `graph_output_path` - Path where builder saves the graph
-- `graph_input_path` - Path where updater reads the graph
+- `graph_output_path` - Path where builder saves the STCM graph
+- `graph_input_path` - Path where updater reads the STCM graph
 - `processing_period` - Frame processing interval in seconds (default: 1.0)
 
 ## Testing
