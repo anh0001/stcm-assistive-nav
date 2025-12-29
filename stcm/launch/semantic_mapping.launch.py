@@ -126,6 +126,66 @@ def launch_setup(context, *args, **kwargs):
         "gng_outlier_gate_meters",
         config.get("gng_outlier_gate_meters", 0.0),
     )
+    place_gng_enabled = _resolve_bool(
+        context,
+        "place_gng_enabled",
+        config.get("place_gng_enabled", False),
+    )
+    place_gng_distance_threshold = _resolve_float(
+        context,
+        "place_gng_distance_threshold",
+        config.get("place_gng_distance_threshold", 1.5),
+    )
+    place_gng_eps_w = _resolve_float(
+        context,
+        "place_gng_eps_w",
+        config.get("place_gng_eps_w", 0.1),
+    )
+    place_gng_eps_n = _resolve_float(
+        context,
+        "place_gng_eps_n",
+        config.get("place_gng_eps_n", 0.01),
+    )
+    place_gng_max_edge_age = _resolve_int(
+        context,
+        "place_gng_max_edge_age",
+        config.get("place_gng_max_edge_age", 50),
+    )
+    place_gng_semantic_alpha = _resolve_float(
+        context,
+        "place_gng_semantic_alpha",
+        config.get("place_gng_semantic_alpha", 0.1),
+    )
+    place_gng_semantic_aggregation = _resolve_str(
+        context,
+        "place_gng_semantic_aggregation",
+        config.get("place_gng_semantic_aggregation", "max"),
+    )
+    place_gng_use_second_best_edge = _resolve_bool(
+        context,
+        "place_gng_use_second_best_edge",
+        config.get("place_gng_use_second_best_edge", True),
+    )
+    place_gng_use_transition_edges = _resolve_bool(
+        context,
+        "place_gng_use_transition_edges",
+        config.get("place_gng_use_transition_edges", True),
+    )
+    place_gng_update_when_empty = _resolve_bool(
+        context,
+        "place_gng_update_when_empty",
+        config.get("place_gng_update_when_empty", False),
+    )
+    place_gng_input_path = _resolve_str(
+        context,
+        "place_gng_input_path",
+        config.get("place_gng_input_path", "place_graph.json"),
+    )
+    place_gng_output_path = _resolve_str(
+        context,
+        "place_gng_output_path",
+        config.get("place_gng_output_path", "place_graph.json"),
+    )
     grounding_ckpt = _resolve_str(context, "groundingdino_checkpoint", config.get("groundingdino_checkpoint", ""))
     mobilesam_ckpt = _resolve_str(context, "mobilesam_checkpoint", config.get("mobilesam_checkpoint", ""))
     depth_ckpt = _resolve_str(context, "depth_anything_checkpoint", config.get("depth_anything_checkpoint", ""))
@@ -146,7 +206,7 @@ def launch_setup(context, *args, **kwargs):
         logger.warning("offline_sequential is enabled; disabling run_updater for this launch.")
         run_updater = False
 
-    builder_params = _node_params()
+    builder_params = _node_params(drop_keys=["place_gng_input_path"])
     builder_params.update(
         {
             "text_prompt": text_prompt,
@@ -165,6 +225,17 @@ def launch_setup(context, *args, **kwargs):
             "gng_min_observations_to_commit": gng_min_obs,
             "gng_cluster_merge_distance": gng_cluster_merge_distance,
             "gng_outlier_gate_meters": gng_outlier_gate_meters,
+            "place_gng_enabled": place_gng_enabled,
+            "place_gng_distance_threshold": place_gng_distance_threshold,
+            "place_gng_eps_w": place_gng_eps_w,
+            "place_gng_eps_n": place_gng_eps_n,
+            "place_gng_max_edge_age": place_gng_max_edge_age,
+            "place_gng_semantic_alpha": place_gng_semantic_alpha,
+            "place_gng_semantic_aggregation": place_gng_semantic_aggregation,
+            "place_gng_use_second_best_edge": place_gng_use_second_best_edge,
+            "place_gng_use_transition_edges": place_gng_use_transition_edges,
+            "place_gng_update_when_empty": place_gng_update_when_empty,
+            "place_gng_output_path": place_gng_output_path,
             "reset_tf_on_time_jump": reset_tf_on_time_jump,
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
@@ -209,11 +280,23 @@ def launch_setup(context, *args, **kwargs):
             "gng_eps_w": gng_eps_w,
             "gng_eps_n": gng_eps_n,
             "gng_alpha": gng_alpha,
-            "gng_beta": gng_beta,
-            "gng_min_observations_to_commit": gng_min_obs,
-            "gng_cluster_merge_distance": gng_cluster_merge_distance,
-            "gng_outlier_gate_meters": gng_outlier_gate_meters,
-            "reset_tf_on_time_jump": reset_tf_on_time_jump,
+                "gng_beta": gng_beta,
+                "gng_min_observations_to_commit": gng_min_obs,
+                "gng_cluster_merge_distance": gng_cluster_merge_distance,
+                "gng_outlier_gate_meters": gng_outlier_gate_meters,
+                "place_gng_enabled": place_gng_enabled,
+                "place_gng_distance_threshold": place_gng_distance_threshold,
+                "place_gng_eps_w": place_gng_eps_w,
+                "place_gng_eps_n": place_gng_eps_n,
+                "place_gng_max_edge_age": place_gng_max_edge_age,
+                "place_gng_semantic_alpha": place_gng_semantic_alpha,
+                "place_gng_semantic_aggregation": place_gng_semantic_aggregation,
+                "place_gng_use_second_best_edge": place_gng_use_second_best_edge,
+                "place_gng_use_transition_edges": place_gng_use_transition_edges,
+                "place_gng_update_when_empty": place_gng_update_when_empty,
+                "place_gng_input_path": place_gng_input_path,
+                "place_gng_output_path": place_gng_output_path,
+                "reset_tf_on_time_jump": reset_tf_on_time_jump,
             "groundingdino_checkpoint": grounding_ckpt,
             "mobilesam_checkpoint": mobilesam_ckpt,
                 "depth_anything_checkpoint": depth_ckpt,
@@ -340,6 +423,66 @@ def generate_launch_description():
                 "gng_outlier_gate_meters",
                 default_value="",
                 description="Override the gng_outlier_gate_meters value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_enabled",
+                default_value="",
+                description="Override the place_gng_enabled flag from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_distance_threshold",
+                default_value="",
+                description="Override the place_gng_distance_threshold value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_eps_w",
+                default_value="",
+                description="Override the place_gng_eps_w value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_eps_n",
+                default_value="",
+                description="Override the place_gng_eps_n value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_max_edge_age",
+                default_value="",
+                description="Override the place_gng_max_edge_age value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_semantic_alpha",
+                default_value="",
+                description="Override the place_gng_semantic_alpha value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_semantic_aggregation",
+                default_value="",
+                description="Override the place_gng_semantic_aggregation value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_use_second_best_edge",
+                default_value="",
+                description="Override the place_gng_use_second_best_edge value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_use_transition_edges",
+                default_value="",
+                description="Override the place_gng_use_transition_edges value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_update_when_empty",
+                default_value="",
+                description="Override the place_gng_update_when_empty value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_input_path",
+                default_value="",
+                description="Override the place_gng_input_path value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "place_gng_output_path",
+                default_value="",
+                description="Override the place_gng_output_path value from the config file.",
             ),
             DeclareLaunchArgument(
                 "groundingdino_checkpoint",

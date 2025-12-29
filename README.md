@@ -184,6 +184,25 @@ gng_cluster_merge_distance: 0.5
 gng_outlier_gate_meters: 0.0
 ```
 
+**Topological Place GNG (paper STCM)** (optional, configure in YAML):
+Builds a place graph from the robot trajectory (2D map-frame pose), adapts node prototypes online,
+adds edges on transitions, and fuses detection confidences into node-level semantic scores/labels.
+Outputs a MarkerArray on `semantic_graph/place_graph` and saves a JSON graph to `place_gng_output_path`.
+```yaml
+place_gng_enabled: true
+place_gng_distance_threshold: 1.5  # D_new (meters)
+place_gng_eps_w: 0.1               # winner learning rate
+place_gng_eps_n: 0.01              # neighbor learning rate
+place_gng_max_edge_age: 50         # a_max
+place_gng_semantic_alpha: 0.1      # semantic fusion rate
+place_gng_semantic_aggregation: "max"  # "max" or "sum"
+place_gng_use_second_best_edge: true
+place_gng_use_transition_edges: true
+place_gng_update_when_empty: false
+place_gng_input_path: "output/place_graph.json"
+place_gng_output_path: "output/place_graph.json"
+```
+
 **Spatial Relationships** (optional, configure in YAML):
 ```yaml
 edge_distance_threshold: 3.0  # max distance (meters) to connect objects in the graph

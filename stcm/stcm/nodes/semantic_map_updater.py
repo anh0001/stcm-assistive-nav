@@ -11,8 +11,9 @@ import ros2_numpy as ros_numpy
 import rclpy
 from PIL import Image as PILImg
 from rclpy.node import Node
+from geometry_msgs.msg import Point as RosPoint
 from sensor_msgs.msg import Image
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point as ShapelyPoint, Polygon
 from std_msgs.msg import Int32
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -22,6 +23,7 @@ from ..core.perception import (
     SegmentAnythingPredictor,
 )
 from ..core.gng_instance_manager import GngInstanceManager
+from ..core.place_gng import PlaceGng
 from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
@@ -94,6 +96,34 @@ class SemanticMapUpdater(Node):
         self.gng_outlier_gate_meters = float(
             self.declare_parameter("gng_outlier_gate_meters", 0.0).value
         )
+        self.place_gng_enabled = bool(self.declare_parameter("place_gng_enabled", False).value)
+        self.place_gng_distance_threshold = float(
+            self.declare_parameter("place_gng_distance_threshold", 1.5).value
+        )
+        self.place_gng_eps_w = float(self.declare_parameter("place_gng_eps_w", 0.1).value)
+        self.place_gng_eps_n = float(self.declare_parameter("place_gng_eps_n", 0.01).value)
+        self.place_gng_max_edge_age = int(self.declare_parameter("place_gng_max_edge_age", 50).value)
+        self.place_gng_semantic_alpha = float(
+            self.declare_parameter("place_gng_semantic_alpha", 0.1).value
+        )
+        self.place_gng_semantic_aggregation = self.declare_parameter(
+            "place_gng_semantic_aggregation", "max"
+        ).value
+        self.place_gng_use_second_best_edge = bool(
+            self.declare_parameter("place_gng_use_second_best_edge", True).value
+        )
+        self.place_gng_use_transition_edges = bool(
+            self.declare_parameter("place_gng_use_transition_edges", True).value
+        )
+        self.place_gng_update_when_empty = bool(
+            self.declare_parameter("place_gng_update_when_empty", False).value
+        )
+        self.place_gng_input_path = Path(
+            self.declare_parameter("place_gng_input_path", "place_graph.json").value
+        )
+        self.place_gng_output_path = Path(
+            self.declare_parameter("place_gng_output_path", "place_graph.json").value
+        )
         self.graph_input_path = Path(self.declare_parameter("graph_input_path", "graph.json").value)
         self.graph_output_path = Path(self.declare_parameter("graph_output_path", "graph_updated.json").value)
         self.groundingdino_checkpoint = self.declare_parameter("groundingdino_checkpoint", "").value
@@ -108,8 +138,14 @@ class SemanticMapUpdater(Node):
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
         self.graph = read_graph_json(str(self.graph_input_path)) if self.graph_input_path.exists() else nx.Graph()
+        self.place_graph = (
+            read_graph_json(str(self.place_gng_input_path))
+            if self.place_gng_enabled and self.place_gng_input_path.exists()
+            else nx.Graph()
+        )
         self.pause = False
         self._gng_manager = None
+        self._place_gng = None
         self._depth_anything = None
         self._depth_anything_failed = False
         self._depth_anything_cache = None
@@ -162,7 +198,27 @@ class SemanticMapUpdater(Node):
                     "gng_enabled was set, but GNG bindings are unavailable; falling back to distance merge."
                 )
 
+        if self.place_gng_enabled:
+            self._place_gng = PlaceGng(
+                enabled=self.place_gng_enabled,
+                distance_threshold=self.place_gng_distance_threshold,
+                eps_w=self.place_gng_eps_w,
+                eps_n=self.place_gng_eps_n,
+                max_edge_age=self.place_gng_max_edge_age,
+                semantic_alpha=self.place_gng_semantic_alpha,
+                semantic_aggregation=self.place_gng_semantic_aggregation,
+                use_second_best_edge=self.place_gng_use_second_best_edge,
+                use_transition_edges=self.place_gng_use_transition_edges,
+                update_semantics_when_empty=self.place_gng_update_when_empty,
+                labels=list(self.distance_thresholds.keys()),
+                graph=self.place_graph,
+                logger=self.get_logger(),
+            )
+
         self.marker_pub = self.create_publisher(MarkerArray, "semantic_graph/nodes", 10)
+        self.place_marker_pub = None
+        if self.place_gng_enabled:
+            self.place_marker_pub = self.create_publisher(MarkerArray, "semantic_graph/place_graph", 10)
         self.image_pub = self.create_publisher(Image, "semantic_graph/segmented_image", 10)
         self.timer = self.create_timer(self.processing_period, self._process_frame)
 
@@ -314,6 +370,8 @@ class SemanticMapUpdater(Node):
         rt_projected = frames.get("rt_projected")
 
         img_pil = PILImg.fromarray(rgb_image[:, :, (2, 1, 0)])
+        place_labels = None
+        place_scores = None
 
         bboxes, phrases, gdino_conf = self.gdino.predict(
             img_pil, self.text_prompt, self.box_threshold, self.text_threshold
@@ -332,8 +390,12 @@ class SemanticMapUpdater(Node):
 
         if skip_detection:
             self._prune_nodes_in_fov(depth_image, rt_camera, rt_base, intrinsics)
+            if self._maybe_update_place_graph(rt_base):
+                self._publish_place_graph_markers()
             return
         if len(phrases) == 0:
+            if self._maybe_update_place_graph(rt_base):
+                self._publish_place_graph_markers()
             return
 
         width = rgb_image.shape[1]
@@ -342,11 +404,15 @@ class SemanticMapUpdater(Node):
         image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
         if not np.any(keep_index):
+            if self._maybe_update_place_graph(rt_base):
+                self._publish_place_graph_markers()
             return
         masks = masks[keep_index]
         gdino_conf = gdino_conf[keep_index]
         selected_idx = np.where(keep_index)[0]
         phrases = [phrases[i] for i in selected_idx]
+        place_labels = phrases
+        place_scores = gdino_conf
 
         detected_poses = {label: [] for label in self.distance_thresholds}
         mask_array = masks.cpu().numpy()
@@ -391,6 +457,8 @@ class SemanticMapUpdater(Node):
         msg.header.frame_id = frames["frame_id"]
         self.image_pub.publish(msg)
         self._publish_graph_markers()
+        if self._maybe_update_place_graph(rt_base, place_labels, place_scores):
+            self._publish_place_graph_markers()
 
     def _remove_missing_nodes(self, depth_image, rt_camera, rt_base, detected_poses, intrinsics):
         fov_points = get_fov_points_in_map(depth_image, rt_camera, rt_base, intrinsics)
@@ -402,7 +470,7 @@ class SemanticMapUpdater(Node):
                 continue
             pose = list(data["pose"])
             pose[2] = 0.0
-            if not polygon.contains(Point(pose)):
+            if not polygon.contains(ShapelyPoint(pose)):
                 continue
             detections = detected_poses[label]
             if not detections:
@@ -506,7 +574,7 @@ class SemanticMapUpdater(Node):
                 continue
             pose = list(data["pose"])
             pose[2] = 0.0
-            if polygon.contains(Point(pose)):
+            if polygon.contains(ShapelyPoint(pose)):
                 nodes_to_remove.append(node_name)
         for node_name in nodes_to_remove:
             self.graph.remove_node(node_name)
@@ -519,6 +587,100 @@ class SemanticMapUpdater(Node):
             marker_id += 1
         if marker_array.markers:
             self.marker_pub.publish(marker_array)
+
+    def _maybe_update_place_graph(self, rt_base, labels=None, scores=None) -> bool:
+        if self._place_gng is None or not self.place_gng_enabled:
+            return False
+        if rt_base is None:
+            return False
+        position = np.asarray(rt_base[:2, 3], dtype=np.float64)
+        score_list = self._coerce_scores(scores)
+        label_list = list(labels) if labels is not None else None
+        update = self._place_gng.update(position, labels=label_list, scores=score_list)
+        return update is not None
+
+    @staticmethod
+    def _coerce_scores(scores):
+        if scores is None:
+            return None
+        if isinstance(scores, (list, tuple)):
+            return [float(s.item()) if hasattr(s, "item") else float(s) for s in scores]
+        if hasattr(scores, "tolist"):
+            values = scores.tolist()
+            if isinstance(values, list):
+                return [float(v) for v in values]
+            return [float(values)]
+        return [float(scores)]
+
+    def _publish_place_graph_markers(self):
+        if self.place_marker_pub is None:
+            return
+        marker_array = MarkerArray()
+
+        clear_marker = Marker()
+        clear_marker.action = Marker.DELETEALL
+        marker_array.markers.append(clear_marker)
+
+        now = self.get_clock().now().to_msg()
+        edge_marker = Marker()
+        edge_marker.header.frame_id = self.world_frame
+        edge_marker.header.stamp = now
+        edge_marker.ns = "place_edges"
+        edge_marker.id = 0
+        edge_marker.type = Marker.LINE_LIST
+        edge_marker.action = Marker.ADD
+        edge_marker.scale.x = 0.05
+        edge_marker.color.r = 0.7
+        edge_marker.color.g = 0.7
+        edge_marker.color.b = 0.7
+        edge_marker.color.a = 0.8
+        for node_a, node_b in self.place_graph.edges():
+            pose_a = self.place_graph.nodes[node_a].get("pose")
+            pose_b = self.place_graph.nodes[node_b].get("pose")
+            if pose_a is None or pose_b is None:
+                continue
+            if len(pose_a) < 2 or len(pose_b) < 2:
+                continue
+            point_a = RosPoint()
+            point_a.x = float(pose_a[0])
+            point_a.y = float(pose_a[1])
+            point_a.z = 0.0
+            point_b = RosPoint()
+            point_b.x = float(pose_b[0])
+            point_b.y = float(pose_b[1])
+            point_b.z = 0.0
+            edge_marker.points.extend([point_a, point_b])
+        if edge_marker.points:
+            marker_array.markers.append(edge_marker)
+
+        marker_id = 0
+        for _, data in self.place_graph.nodes(data=True):
+            pose = data.get("pose")
+            if pose is None or len(pose) < 2:
+                continue
+            marker = Marker()
+            marker.header.frame_id = self.world_frame
+            marker.header.stamp = now
+            marker.ns = "place_nodes"
+            marker.id = marker_id
+            marker.type = Marker.SPHERE
+            marker.action = Marker.ADD
+            marker.pose.position.x = float(pose[0])
+            marker.pose.position.y = float(pose[1])
+            marker.pose.position.z = 0.0
+            marker.pose.orientation.w = 1.0
+            marker.scale.x = 0.4
+            marker.scale.y = 0.4
+            marker.scale.z = 0.1
+            marker.color.r = 0.2
+            marker.color.g = 0.7
+            marker.color.b = 1.0
+            marker.color.a = 0.9
+            marker_array.markers.append(marker)
+            marker_id += 1
+
+        if marker_array.markers:
+            self.place_marker_pub.publish(marker_array)
 
     def _create_marker(self, pose, category, marker_id):
         marker = Marker()
@@ -551,6 +713,11 @@ class SemanticMapUpdater(Node):
             self._gng_manager.shutdown()
         save_graph_json(self.graph, file=str(self.graph_output_path))
         self.get_logger().info(f"Updated graph saved to {self.graph_output_path.resolve()}")
+        if self._place_gng is not None and self.place_gng_enabled:
+            save_graph_json(self.place_graph, file=str(self.place_gng_output_path))
+            self.get_logger().info(
+                f"Place graph saved to {self.place_gng_output_path.resolve()}"
+            )
         super().destroy_node()
 
 
