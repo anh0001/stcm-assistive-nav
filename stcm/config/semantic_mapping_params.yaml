@@ -51,7 +51,7 @@ projected_lidar_timeout_sec: 3.0
 synchronizer_slop_sec: 2.0
 
 # ============================================================================
-# TOPOLOGICAL PLACE GRAPH - GNG place discovery (optional)
+# TOPOLOGICAL PLACE GRAPH - GNG place discovery
 # ============================================================================
 # Enable the STCM topological GNG place-graph module.
 place_gng_enabled: true
@@ -135,7 +135,7 @@ filter_percent_area: 0.005
 filter_enabled: true
 
 # ============================================================================
-# INSTANCE MANAGEMENT - i-GNG clustering (optional)
+# INSTANCE MANAGEMENT - i-GNG clustering for filtering and stable instance IDs
 # ============================================================================
 # Enable per-label Growing Neural Gas clustering for stable instance IDs.
 gng_enabled: true
