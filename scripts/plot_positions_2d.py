@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot STCM maps (semantic + place graphs) on a 2D map."""
+"""Plot STCM maps on a 2D map."""
 
 from __future__ import annotations
 

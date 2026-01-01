@@ -31,7 +31,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from networkx.readwrite import json_graph
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_GRAPH_PATH = REPO_ROOT / "output" / "stcm.json"
+DEFAULT_GRAPH_PATH = REPO_ROOT / "stcm.json"
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "output" / "stcm.filtered.json"
 
 PACKAGE_ROOT = REPO_ROOT / "stcm"
@@ -155,11 +155,19 @@ class FilterRules:
 
 
 def _node_id(node: Dict[str, Any], index: int) -> str:
-    for key in ("id", "name"):
+    for key in ("id", "instance_id", "name", "object_id"):
         value = node.get(key)
         if value is not None:
             return str(value)
     return f"node_{index}"
+
+
+def _node_category(node: Dict[str, Any]) -> str:
+    for key in ("category", "label", "class"):
+        value = node.get(key)
+        if value is not None:
+            return str(value)
+    return "unknown"
 
 
 def _is_float(text: str) -> bool:
@@ -379,7 +387,7 @@ def _evaluate_removals(
 
     for idx, node in enumerate(nodes):
         node_id = _node_id(node, idx)
-        category = str(node.get("category", "unknown"))
+        category = _node_category(node)
         pose = node.get("pose") or []
         reasons: List[str] = []
 
@@ -523,7 +531,7 @@ def filter_graph(
 def _list_nodes(nodes: List[Dict[str, Any]]) -> None:
     for idx, node in enumerate(nodes):
         node_id = _node_id(node, idx)
-        category = node.get("category", "unknown")
+        category = _node_category(node)
         pose = node.get("pose")
         if pose and len(pose) >= 3:
             pose_str = f"({pose[0]:.2f}, {pose[1]:.2f}, {pose[2]:.2f})"
@@ -619,12 +627,49 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _filter_llm_summary(llm: Dict[str, Any], kept_ids: set[str]) -> None:
+    objects = llm.get("objects")
+    if isinstance(objects, list):
+        object_ids = [_node_id(obj, idx) for idx, obj in enumerate(objects)]
+        removed_ids = {obj_id for obj_id in object_ids if obj_id not in kept_ids}
+        llm["objects"] = [
+            obj for idx, obj in enumerate(objects) if object_ids[idx] not in removed_ids
+        ]
+        object_edges = llm.get("object_edges")
+        if isinstance(object_edges, list) and object_ids:
+            llm["object_edges"] = _filter_links(object_edges, object_ids, removed_ids)
+        object_place_links = llm.get("object_place_links")
+        if isinstance(object_place_links, list):
+            llm["object_place_links"] = [
+                link
+                for link in object_place_links
+                if str(link.get("object_id")) in kept_ids
+            ]
+
+    summary = llm.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+        llm["summary"] = summary
+    if isinstance(llm.get("objects"), list):
+        summary["object_count"] = len(llm["objects"])
+    if isinstance(llm.get("object_edges"), list):
+        summary["object_edge_count"] = len(llm["object_edges"])
+    if isinstance(llm.get("places"), list):
+        summary["place_count"] = len(llm["places"])
+    if isinstance(llm.get("place_edges"), list):
+        summary["place_edge_count"] = len(llm["place_edges"])
+
+
 def main() -> int:
     args = _parse_args()
     input_path = Path(args.input_path).expanduser()
     if not input_path.exists():
-        print(f"Input graph not found: {input_path}")
-        return 2
+        fallback_path = REPO_ROOT / "output" / "stcm.json"
+        if args.input_path == str(DEFAULT_GRAPH_PATH) and fallback_path.exists():
+            input_path = fallback_path
+        else:
+            print(f"Input graph not found: {input_path}")
+            return 2
 
     with input_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
@@ -664,6 +709,7 @@ def main() -> int:
         return 1
 
     filtered_data, removed = filter_graph(graph_data, rules)
+    kept_ids = {_node_id(node, idx) for idx, node in enumerate(filtered_data.get("nodes", []))}
 
     total_nodes = len(nodes)
     kept_nodes = len(filtered_data.get("nodes", []))
@@ -684,16 +730,26 @@ def main() -> int:
     output_path = Path(args.output_path).expanduser()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if is_stcm:
-        semantic_graph = json_graph.node_link_graph(filtered_data)
-        place_graph = None
-        if isinstance(data.get("place_graph"), dict):
-            place_graph = json_graph.node_link_graph(data["place_graph"])
-        save_stcm_json(
-            semantic_graph,
-            place_graph=place_graph,
-            file=str(output_path),
-            metadata=data.get("metadata"),
-        )
+        data["semantic_graph"] = filtered_data
+        llm_summary = data.get("llm")
+        if isinstance(llm_summary, dict):
+            _filter_llm_summary(llm_summary, kept_ids)
+            with output_path.open("w", encoding="utf-8") as handle:
+                json.dump(data, handle, indent=4)
+        else:
+            edges_key = "links" if "links" in filtered_data else "edges"
+            semantic_graph = json_graph.node_link_graph(filtered_data, edges=edges_key)
+            place_graph = None
+            place_graph_data = data.get("place_graph")
+            if isinstance(place_graph_data, dict):
+                place_edges_key = "links" if "links" in place_graph_data else "edges"
+                place_graph = json_graph.node_link_graph(place_graph_data, edges=place_edges_key)
+            save_stcm_json(
+                semantic_graph,
+                place_graph=place_graph,
+                file=str(output_path),
+                metadata=data.get("metadata"),
+            )
     else:
         with output_path.open("w", encoding="utf-8") as handle:
             json.dump(filtered_data, handle, indent=4)
