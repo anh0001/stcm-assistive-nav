@@ -8,7 +8,7 @@
 # Enable deterministic single-thread processing from a rosbag2 file.
 offline_sequential: true
 # Path to the rosbag2 directory (required when offline_sequential is true).
-rosbag_path: "/media/STREAM/ranger_recording_20251215_163827_uncompressed"
+rosbag_path: "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed"
 # Storage plugin for rosbag2 ("sqlite3" default, use "mcap" if applicable).
 rosbag_storage_id: "sqlite3"
 # Process every Nth RGB frame from the rosbag (1 = every frame).
