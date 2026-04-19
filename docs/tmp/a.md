@@ -7,12 +7,20 @@ Use this document whenever you (or another AI coding assistant) contribute to th
 - Runtime nodes live under `stcm/stcm/nodes/`; perception primitives are inside `stcm/stcm/core/`.
 - Launch entry point: `stcm/launch/semantic_mapping.launch.py`, usually fed by `stcm/config/semantic_mapping_params.yaml`.
 - Graphs store labeled objects, 3‑D centroids, and relationship metadata; they publish RViz `MarkerArray` data on `/semantic_graph/nodes`.
+- The optional topological place graph (paper GNG) learns place nodes from the robot pose stream, publishes `MarkerArray` data on `/semantic_graph/place_graph`, and saves JSON to `place_gng_output_path`. Nodes appear only when the robot moves beyond `place_gng_distance_threshold` (default 1.5 m).
 
 ## 2. Environment & Runtime Rules
-1. **Always** activate Conda before ROS: `conda activate stcm_env` → `source /opt/ros/humble/setup.bash` → `source ./install/setup.bash`.
-2. Build with `colcon build --packages-select stcm`; clean via `rm -rf build install log`.
-3. Model checkpoints default to `./models` (override with `$STCM_CKPT_DIR`). Run `ros2 run stcm stcm_download_checkpoints` to hydrate weights.
-4. When launching, prefer YAML configs, but expose new parameters in both the config file and launch description.
+1. Keep ROS nodes on `/usr/bin/python3` (existing shebang) so rclpy uses the distro interpreter—skip conda entirely.
+2. Isolate ML dependencies with a dedicated user base instead of polluting a “dirty” `~/.local`:
+   ```bash
+   export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"
+   python3 -m pip install --upgrade --user pip
+   python3 -m pip install --user ros2-numpy
+   python3 -m pip install --user torch torchvision torchaudio
+   ```
+   Extend this list as new imports appear; follow PyTorch’s selector for CUDA wheels (they ship their own CUDA runtime, so the driver version is what matters).
+3. Ensure `PYTHONUSERBASE` is exported in every terminal (profile, launch wrapper, VS Code task, etc.) **before** sourcing ROS: `source /opt/ros/humble/setup.bash && source ./install/setup.bash`.
+4. Build with `colcon build --packages-select stcm`; clean via `rm -rf build install log`. Prefer YAML configs for launches and expose new parameters in both the config and launch file.
 
 ## 3. Coding Expectations
 - Python 3.10, ROS 2 `rclpy` nodes, MIT license.
@@ -46,5 +54,12 @@ Use this document whenever you (or another AI coding assistant) contribute to th
 ## 7. When in Doubt
 - Consult `README.md` for installation nuances, `CLAUDE.md` for deep architecture notes, and `.github/copilot-instructions.md` for ROS parameter expectations.
 - Ask for clarification (or leave TODOs) when robot-specific assumptions leak into general-purpose code.
+
+## 8. System Python Runtime
+- Keep ROS + perception code on the distro interpreter with the `PYTHONUSERBASE` above. Leave the `#!/usr/bin/python3` shebang untouched.
+- Install every imported package into that user base only; do **not** add more packages to the global `~/.local`.
+- Export `PYTHONUSERBASE` in your shell profile, Launch task, or wrapper script so ROS nodes always see the isolated site-packages.
+- Heavy perception helpers can still run out-of-process, but they should use the same Python install to avoid ABI mismatch.
+- Pros: ROS-friendly and low-weirdness. Cons: you own the ML deps in system-python land, so keep the user base tidy.
 
 Welcome aboard—ship changes that keep the perception stack reproducible, configurable, and well-tested.***

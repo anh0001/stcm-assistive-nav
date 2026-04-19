@@ -10,20 +10,24 @@ The system processes synchronized RGB-D camera streams, detects objects using te
 
 ## Environment Setup
 
-This project requires a specific environment configuration that MUST be followed in order:
+ROS nodes must run on `/usr/bin/python3` (keep the `#!/usr/bin/python3` shebang) to match ROS 2’s assumptions, so skip conda and prime a dedicated user base for this project:
 
 ```bash
-# 1. ALWAYS activate conda environment FIRST
-conda activate stcm_env
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"  # add to your shell profile / VS Code tasks
+python3 -m pip install --upgrade --user pip
+python3 -m pip install --user ros2-numpy
+python3 -m pip install --user torch torchvision torchaudio
+# install any additional imports the nodes require
+```
 
-# 2. Source ROS 2 Humble
+Follow PyTorch’s selector to pick the correct CUDA wheels; their binaries already ship the CUDA runtime, so the NVIDIA driver version matters more than your local toolkit. Once the user base is ready, source ROS and the workspace (after ensuring `PYTHONUSERBASE` is still exported):
+
+```bash
 source /opt/ros/humble/setup.bash
-
-# 3. Source workspace (from repository root)
 source install/setup.bash
 ```
 
-**Critical**: The conda environment must be activated before sourcing ROS 2, as PyTorch and perception models depend on the conda Python environment. Never source ROS before activating conda.
+This keeps the runtime ROS-friendly while isolating ML dependencies in `$HOME/.local/stcm_sys_py310`.
 
 ## Build System
 
@@ -77,15 +81,18 @@ ros2 launch stcm semantic_mapping.launch.py \
 ros2 launch stcm semantic_mapping.launch.py \
   config_file:=path/to/config.yaml \
   text_prompt:="chair . table . laptop ." \
-  graph_output_path:=/tmp/stcm.json \
+  graph_output_path:=/tmp/my_graph.json \
   run_updater:=false
 ```
 
 Edit [stcm/config/semantic_mapping_params.yaml](stcm/config/semantic_mapping_params.yaml) to configure:
 - `text_prompt` - Space-separated object classes, each ending with ` .` (e.g., `"table . chair . door ."`)
-- `graph_output_path` - Where to save the STCM JSON
+- `graph_output_path` - Where to save the semantic graph JSON
 - `use_sim_time` - Set to `true` for bag playback or Gazebo, `false` for live robot
 - `run_updater` - Launch the updater node alongside the builder
+- `offline_sequential` - Enable deterministic rosbag2 sequential processing
+- `rosbag_path` - Path to the rosbag2 directory (required when offline)
+- `rosbag_storage_id` - Storage plugin for rosbag2 (default `sqlite3`)
 - `groundingdino_checkpoint`, `mobilesam_checkpoint`, `depth_anything_checkpoint` - Paths to model weights
 
 ### Running Individual Nodes
@@ -95,12 +102,12 @@ Edit [stcm/config/semantic_mapping_params.yaml](stcm/config/semantic_mapping_par
 ros2 run stcm semantic_map_builder \
   --ros-args \
   -p text_prompt:="table . chair . door ." \
-  -p graph_output_path:=/tmp/stcm.json
+  -p graph_output_path:=/tmp/semantic_graph.json
 
 # Updater node (maintains existing graph)
 ros2 run stcm semantic_map_updater \
   --ros-args \
-  -p graph_input_path:=/tmp/stcm.json
+  -p graph_input_path:=/tmp/semantic_graph.json
 ```
 
 ### Key ROS Parameters
@@ -117,9 +124,30 @@ Parameters can be set in the config YAML or passed via `--ros-args -p`:
 - `box_threshold`, `text_threshold` - Detection confidence thresholds (default: 0.55)
 
 **Graph management:**
-- `graph_output_path` - Path where builder saves the STCM graph
-- `graph_input_path` - Path where updater reads the STCM graph
+- `graph_output_path` - Path where builder saves the graph
+- `graph_input_path` - Path where updater reads the graph
 - `processing_period` - Frame processing interval in seconds (default: 1.0)
+
+**Instance management (i-GNG):**
+- `gng_enabled` - Enable per-label Growing Neural Gas instance management
+- `gng_per_label` - Maintain a separate GNG model per label (recommended)
+- `gng_max_nodes`, `gng_lambda`, `gng_max_age`, `gng_eps_w`, `gng_eps_n`, `gng_alpha`, `gng_beta` - GNG tuning knobs
+- `gng_min_observations_to_commit` - Observations required before adding a graph node
+- `gng_cluster_merge_distance` - Merge/associate clusters within this radius (meters)
+- `gng_outlier_gate_meters` - Ignore samples farther than this from existing instances (meters)
+
+**Topological place GNG (paper STCM):**
+- `place_gng_enabled` - Enable place-graph learning from the robot pose stream
+- `place_gng_distance_threshold` - Pose insertion threshold for i-GNG (meters)
+- `place_gng_eps_w`, `place_gng_eps_n` - Winner/neighbor learning rates
+- `place_gng_max_edge_age` - Edge age threshold for pruning
+- `place_gng_max_nodes`, `place_gng_lambda`, `place_gng_alpha`, `place_gng_beta` - i-GNG tuning knobs
+- `place_gng_semantic_alpha` - Semantic score fusion rate
+- `place_gng_semantic_aggregation` - Aggregate class evidence via `max` or `sum`
+- `place_gng_use_second_best_edge` / `place_gng_use_transition_edges` - Edge creation toggles
+- `place_gng_update_when_empty` - Whether to update scores when no detections are present
+- `place_gng_input_path` / `place_gng_output_path` - Place graph JSON paths (output published on `semantic_graph/place_graph`)
+  - Place graph nodes/edges are separate from the object graph; RViz markers use the `world_frame` fixed frame.
 
 ## Testing
 
@@ -127,7 +155,7 @@ Tests are located in [stcm/test/](stcm/test/) and test individual perception com
 
 ```bash
 # Ensure environment is set up (from repository root)
-conda activate stcm_env
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"  # required so pip-installed deps resolve
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 
@@ -262,7 +290,7 @@ The system uses spatial proximity to merge repeated detections of the same objec
 
 ## Dependencies
 
-**Python packages (managed via conda + pip):**
+**Python packages (install via pip into `$PYTHONUSERBASE`):**
 - PyTorch 2.4.0 + CUDA 12.1 (installed from torch index)
 - GroundingDINO (installed from source via `pip install -e` or `groundingdino-py`)
 - MobileSAM (installed from GitHub)
@@ -279,13 +307,20 @@ The system uses spatial proximity to merge repeated detections of the same objec
 **System requirements:**
 - Ubuntu 22.04 + ROS 2 Humble
 - CUDA 12.x + cuDNN 9 (for GPU acceleration)
-- Conda/Miniconda for environment management
 
 ## Important Notes
 
-- **Environment activation order matters**: Always activate conda before sourcing ROS 2
+- **Environment prep matters**: Export `PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"` (or your chosen path) before sourcing `/opt/ros/humble/setup.bash` so the system interpreter sees the isolated dependencies
 - **Test scripts must be run from repository root**: They use relative paths to `stcm/test/` and `stcm/imgs/`
 - **Text prompt format**: Each object class must end with ` .` (space + period) for GroundingDINO
 - **Checkpoint directory**: Override default `./models` with `export STCM_CKPT_DIR=/custom/path`
 - **TF requirement**: The builder node requires TF transforms from camera → world frame to exist before processing frames
 - **Graph persistence**: Graphs are saved as JSON with NetworkX node-link format (readable and editable)
+
+## System Python Runtime Checklist
+
+- Keep ROS and perception processes on `/usr/bin/python3` with the dedicated `PYTHONUSERBASE` (`$HOME/.local/stcm_sys_py310`). Leave node shebangs untouched.
+- Make sure `PYTHONUSERBASE` is exported before sourcing ROS or running VS Code tasks/launchers so pip-installed packages resolve. Bake it into your shell profile or wrapper scripts.
+- Install every new dependency with `python3 -m pip install --user ...` while the user base is active; never add more packages to the global `~/.local`.
+- If you still split perception into a helper service, start it from the same interpreter and document IPC parameters such as `perception_endpoint`, `ipc_transport`, and `request_timeout` in YAML + launch files.
+- Pros: ROS-friendly, minimal ABI fights. Cons: you must maintain ML deps in system-python land—but they stay isolated inside `PYTHONUSERBASE`.
