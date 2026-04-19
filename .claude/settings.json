@@ -1,0 +1,92 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(colcon build *)",
+      "Bash(colcon test *)",
+      "Bash(source install/setup.bash)",
+      "Bash(source /opt/ros/humble/setup.bash)",
+      "Bash(ros2 launch stcm *)",
+      "Bash(ros2 run stcm *)",
+      "Bash(ros2 topic list*)",
+      "Bash(ros2 topic echo *)",
+      "Bash(ros2 topic info *)",
+      "Bash(ros2 topic hz *)",
+      "Bash(ros2 node list*)",
+      "Bash(ros2 node info *)",
+      "Bash(ros2 param list*)",
+      "Bash(ros2 param get *)",
+      "Bash(ros2 param set *)",
+      "Bash(ros2 bag info *)",
+      "Bash(ros2 bag play *)",
+      "Bash(ros2 pkg prefix *)",
+      "Bash(python3 stcm/test/*)",
+      "Bash(python3 -m py_compile *)",
+      "Bash(rm -rf build/)",
+      "Bash(rm -rf install/)",
+      "Bash(rm -rf log/)",
+      "Bash(rm -rf build/ install/ log/)",
+      "Bash(wc -l *)",
+      "Edit(stcm/**)",
+      "Edit(stcm_planner/**)",
+      "Edit(i-gng/**)",
+      "Edit(.claude/**)",
+      "Edit(CLAUDE.md)",
+      "Edit(AGENTS.md)",
+      "Edit(.gitignore)",
+      "Edit(README.md)",
+      "Edit(docs/**)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf $HOME*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Edit(models/**)",
+      "Edit(output/**)",
+      "Edit(build/**)",
+      "Edit(install/**)",
+      "Edit(log/**)",
+      "Edit(.env)",
+      "Edit(.env.local)"
+    ]
+  },
+  "env": {
+    "PYTHONUSERBASE": "${HOME}/.local/stcm_sys_py310"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cmd=$(jq -r \".tool_input.command // empty\"); case \"$cmd\" in *\"rm -rf /\"*|*\"rm -rf ~\"*|*\"rm -rf $HOME\"*) echo \"Blocked: destructive rm outside project scope\" >&2; exit 2;; *\"rm -rf models\"*|*\"rm -rf output\"*|*\"rm -rf stcm\"*) echo \"Blocked: cannot delete models/, output/, or stcm/ source\" >&2; exit 2;; esac; exit 0'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(jq -r \".tool_input.file_path // empty\"); case \"$f\" in *.py) python3 -m py_compile \"$f\" 2>&1 | head -20 || echo \"py_compile failed for $f\" >&2;; esac; exit 0'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Verify: colcon build clean + ros2 launch dry-run before claiming done.' >&2"
+          }
+        ]
+      }
+    ]
+  }
+}
