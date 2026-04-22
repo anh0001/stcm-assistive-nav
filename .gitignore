@@ -1,6 +1,10 @@
 models/
 output/
 
+results/eval/[0-9]*_*.json
+results/eval/artifacts/
+results/eval/ros_logs/
+
 devel/
 logs/
 build/

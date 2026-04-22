@@ -47,6 +47,26 @@
             "detail": "Score output/stcm.json against the meeting ground-truth STCM graph with same-label F1@1m metrics"
         },
         {
+            "label": "Show Experiment Results Table",
+            "type": "shell",
+            "command": "python3 scripts/experiments/results_table.py --summary results/eval/summary.csv",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Print the latest executed benchmark row from results/eval/summary.csv as a Markdown table"
+        },
+        {
+            "label": "Run Meeting Full Experiment",
+            "type": "shell",
+            "command": "env ROS_LOG_DIR=${workspaceFolder}/results/eval/ros_logs python3 scripts/experiments/run_experiment.py --scenario meeting --variant full --skip-bag-hash",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Run the meeting scenario with the full variant and keep ROS launch logs under results/eval/ros_logs"
+        },
+        {
             "label": "Launch Semantic Mapping (with Updater)",
             "type": "shell",
             "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 launch stcm semantic_mapping.launch.py config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml run_updater:=true",
