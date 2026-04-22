@@ -1,0 +1,8 @@
+interface:
+  display_name: "STCM Experiment Harness"
+  short_description: "Reviewer experiment runner, aggregation, and evidence gate"
+  brand_color: "#0F766E"
+  default_prompt: "Run STCM reviewer experiments with reproducible evidence"
+policy:
+  allow_implicit_invocation: true
+

@@ -1,0 +1,8 @@
+interface:
+  display_name: "STCM Quality Gate"
+  short_description: "Block reviewer evidence until required experiment artifacts exist"
+  brand_color: "#DC2626"
+  default_prompt: "Check STCM reviewer experiment evidence readiness"
+policy:
+  allow_implicit_invocation: true
+

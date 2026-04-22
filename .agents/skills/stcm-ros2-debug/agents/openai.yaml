@@ -1,0 +1,8 @@
+interface:
+  display_name: "STCM ROS 2 Debug"
+  short_description: "Diagnose topic, TF, clock, sync, and silent-output failures"
+  brand_color: "#2563EB"
+  default_prompt: "Debug an STCM ROS 2 experiment run"
+policy:
+  allow_implicit_invocation: true
+

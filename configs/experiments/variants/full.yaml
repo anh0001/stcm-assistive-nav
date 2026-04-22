@@ -1,0 +1,7 @@
+offline_sequential: true
+use_sim_time: true
+run_updater: false
+place_gng_enabled: true
+gng_enabled: true
+use_projected_lidar: true
+use_depth_anything_fallback: false

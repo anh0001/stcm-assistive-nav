@@ -1,0 +1,35 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Slim Codex configuration for STCM reviewer experiments.
+# Keep this project config focused: ROS 2 offline runs, experiment evidence,
+# and docs lookup only when a current API claim needs verification.
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+persistent_instructions = "Follow AGENTS.md. For experiment work, preserve evidence under results/ and record bag path, config, git SHA, checkpoint hashes, command, logs, and output JSON."
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+startup_timeout_sec = 30
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 4
+max_depth = 1
+
+[agents.explorer]
+description = "Read-only STCM experiment explorer for tracing configs, bags, launch paths, and output artifacts."
+config_file = "agents/explorer.toml"
+
+[agents.reviewer]
+description = "Reviewer for experiment evidence, missing metadata, and metric reproducibility."
+config_file = "agents/reviewer.toml"
+
+[agents.docs_researcher]
+description = "Documentation verifier for ROS 2, Nav2, FAST-LIO2, and Python library claims."
+config_file = "agents/docs-researcher.toml"

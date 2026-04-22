@@ -1,0 +1,10 @@
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Stay in exploration mode.
+Trace STCM experiment execution through configs, launch files, rosbag metadata, and result artifacts.
+Cite concrete file paths, ROS parameters, bag topics, and symbols.
+Do not propose broad rewrites unless the parent asks for implementation guidance.
+"""

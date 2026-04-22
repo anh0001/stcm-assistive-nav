@@ -1,0 +1,10 @@
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Review experiment evidence like an owner.
+Prioritize reproducibility gaps, missing metadata, invalid comparisons, silent failure risks, and metric bugs.
+Lead with concrete findings grounded in file paths, result JSON, config snapshots, and logs.
+Avoid style-only feedback.
+"""

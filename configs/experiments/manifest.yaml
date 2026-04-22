@@ -1,0 +1,47 @@
+# Reviewer experiment manifest for JACIII Jc26-0002 evidence.
+# Runner default: scripts/experiments/run_experiment.py --scenario all --variant full
+
+base_config: stcm/config/semantic_mapping_params.yaml
+results_dir: results/eval
+bench_dir: results/bench
+
+scenarios:
+  corridor:
+    description: "Candidate corridor-style run; rename once final annotation is fixed."
+    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_162017_uncompressed
+    storage_id: sqlite3
+  office:
+    description: "Candidate office/lab-style run; rename once final annotation is fixed."
+    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_163039_uncompressed
+    storage_id: sqlite3
+  meeting:
+    description: "Candidate meeting-room-style run; rename once final annotation is fixed."
+    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed
+    storage_id: sqlite3
+
+required_topics:
+  - /camera/image_raw
+  - /camera/camera_info
+  - /tf
+  - /tf_static
+  - /lidar_points_projected
+
+variants:
+  full:
+    description: "Full STCM: object i-GNG + place GNG + graph serialization."
+    overlay: configs/experiments/variants/full.yaml
+  semantic-only:
+    description: "Semantic object graph only; disables place GNG and i-GNG."
+    overlay: configs/experiments/variants/semantic-only.yaml
+  place-gng-only:
+    description: "Place topology enabled; object i-GNG disabled."
+    overlay: configs/experiments/variants/place-gng-only.yaml
+  no-llm:
+    description: "Same map output as full; used with template grounding evaluator."
+    overlay: configs/experiments/variants/no-llm.yaml
+
+sensitivity:
+  place_gng_distance_threshold: [0.3, 0.5, 0.8]
+  place_gng_semantic_alpha: [0.05, 0.1, 0.2]
+  box_text_threshold: [0.45, 0.55, 0.65]
+  gng_min_observations_to_commit: [1, 3, 5]

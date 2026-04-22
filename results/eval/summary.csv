@@ -1,0 +1,1 @@
+run_id,scenario,variant,sensitivity,executed,git_sha,bag_path,duration_ns,object_nodes,object_edges,place_nodes,place_edges,zero_detection_frames,frames_seen,pose_failures,tf_lookup_failures,failure_flags,result_path

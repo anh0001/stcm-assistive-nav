@@ -1,0 +1,8 @@
+interface:
+  display_name: "STCM Tuning"
+  short_description: "Tune detection, merging, instance GNG, and place GNG"
+  brand_color: "#7C3AED"
+  default_prompt: "Tune STCM experiment parameters from observed graph symptoms"
+policy:
+  allow_implicit_invocation: true
+

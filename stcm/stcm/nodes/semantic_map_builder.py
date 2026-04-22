@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
+import time
 from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
@@ -171,6 +172,8 @@ class SemanticMapBuilder(Node):
         self._depth_anything_failed = False
         self._depth_anything_cache = None
         self._depth_anything_cache_stamp = None
+        self._runtime_samples: Dict[str, List[float]] = {}
+        self._event_counts: Dict[str, int] = {}
 
         self.listener = None
         self.timer = None
@@ -256,6 +259,29 @@ class SemanticMapBuilder(Node):
             self.get_logger().info("Offline sequential mode enabled; using rosbag2 reader.")
 
         self.get_logger().info(f"Semantic map builder ready (labels: {', '.join(self.distance_thresholds.keys())})")
+
+    def _record_timing(self, name: str, start_time: float) -> None:
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        self._runtime_samples.setdefault(name, []).append(elapsed_ms)
+
+    def _count_event(self, name: str, value: int = 1) -> None:
+        self._event_counts[name] = self._event_counts.get(name, 0) + int(value)
+
+    def _runtime_summary(self) -> Dict[str, Dict[str, float | int]]:
+        summary: Dict[str, Dict[str, float | int]] = {}
+        for name, samples in sorted(self._runtime_samples.items()):
+            if not samples:
+                continue
+            values = np.asarray(samples, dtype=np.float64)
+            summary[name] = {
+                "n": int(values.size),
+                "mean_ms": float(np.mean(values)),
+                "p50_ms": float(np.percentile(values, 50)),
+                "p95_ms": float(np.percentile(values, 95)),
+                "min_ms": float(np.min(values)),
+                "max_ms": float(np.max(values)),
+            }
+        return summary
 
     def _build_threshold_map(self, labels, thresholds):
         thresholds = list(thresholds) if isinstance(thresholds, (list, tuple)) else [thresholds]
@@ -385,7 +411,9 @@ class SemanticMapBuilder(Node):
                 return None
 
         try:
+            depth_start = time.perf_counter()
             _, depth_raw = self._depth_anything.predict(img_pil)
+            self._record_timing("depth_anything_predict", depth_start)
         except Exception as exc:
             self.get_logger().error(f"Depth Anything prediction failed: {exc}")
             self._depth_anything_failed = True
@@ -437,6 +465,8 @@ class SemanticMapBuilder(Node):
         self._process_frame_data(frames)
 
     def _process_frame_data(self, frames) -> None:
+        frame_start = time.perf_counter()
+        self._count_event("frames_seen")
         self.get_logger().info("Processing frame - running detection")
         rgb_image = frames["rgb"].astype(np.uint8)
         depth_image = frames.get("depth")
@@ -450,11 +480,15 @@ class SemanticMapBuilder(Node):
         place_labels = None
         place_scores = None
 
+        gdino_start = time.perf_counter()
         bboxes, phrases, gdino_conf = self.gdino.predict(
             img_pil, self.text_prompt, self.box_threshold, self.text_threshold
         )
+        self._record_timing("groundingdino_predict", gdino_start)
         self.get_logger().info(f"GroundingDINO detected {len(phrases)} objects: {phrases}")
+        self._count_event("raw_detections", len(phrases))
 
+        filter_start = time.perf_counter()
         bboxes, gdino_conf, phrases, skip_detection = filter(
             bboxes,
             gdino_conf,
@@ -466,11 +500,14 @@ class SemanticMapBuilder(Node):
             self.filter_percent_area,
             self.filter_enabled,
         )
+        self._record_timing("detection_filter", filter_start)
         self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
         if skip_detection or len(phrases) == 0:
+            self._count_event("zero_detection_frames")
             self.get_logger().debug("Skipping frame: no detections after filtering")
             if self._maybe_update_place_graph(rt_base):
                 self._publish_place_graph_markers()
+            self._record_timing("frame_total", frame_start)
             return
 
         width = rgb_image.shape[1]
@@ -479,12 +516,16 @@ class SemanticMapBuilder(Node):
 
         self.get_logger().info(f"Running SAM segmentation on {len(image_pil_bboxes)} boxes...")
         try:
+            sam_start = time.perf_counter()
             image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
+            self._record_timing("sam_predict", sam_start)
             self.get_logger().info(f"SAM segmentation completed, got {len(masks)} masks")
         except Exception as e:
+            self._count_event("sam_failures")
             self.get_logger().error(f"SAM segmentation failed: {e}")
             if self._maybe_update_place_graph(rt_base):
                 self._publish_place_graph_markers()
+            self._record_timing("frame_total", frame_start)
             return
 
         self.get_logger().info("Filtering large boxes...")
@@ -492,9 +533,11 @@ class SemanticMapBuilder(Node):
         # Convert PyTorch tensor to numpy for np.any() and indexing
         keep_index_np = keep_index.numpy() if hasattr(keep_index, "numpy") else keep_index
         if not np.any(keep_index_np):
+            self._count_event("large_box_filtered_frames")
             self.get_logger().info("All boxes filtered out as too large")
             if self._maybe_update_place_graph(rt_base):
                 self._publish_place_graph_markers()
+            self._record_timing("frame_total", frame_start)
             return
         masks = masks[keep_index]
         gdino_conf = gdino_conf[keep_index]
@@ -506,13 +549,16 @@ class SemanticMapBuilder(Node):
         filtered = self._filter_to_target_labels(image_pil_bboxes, masks, gdino_conf, phrases)
         self.get_logger().info("Target label filtering complete")
         if filtered is None:
+            self._count_event("target_label_empty_frames")
             self.get_logger().debug("Detections did not match any target_labels; skipping frame.")
             if self._maybe_update_place_graph(rt_base):
                 self._publish_place_graph_markers()
+            self._record_timing("frame_total", frame_start)
             return
         image_pil_bboxes, masks, gdino_conf, phrases = filtered
         place_labels = phrases
         place_scores = gdino_conf
+        self._count_event("target_detections", len(phrases))
 
         graph_updated = False
         projected_ready = (
@@ -528,6 +574,7 @@ class SemanticMapBuilder(Node):
             self.get_logger().info("Converting masks to numpy...")
             masks_numpy = masks.cpu().numpy()
             self.get_logger().info(f"Masks converted: shape {masks_numpy.shape}")
+            update_start = time.perf_counter()
             self._update_graph(
                 masks_numpy,
                 phrases,
@@ -541,12 +588,14 @@ class SemanticMapBuilder(Node):
                 img_pil=img_pil,
                 stamp=frames.get("stamp"),
             )
+            self._record_timing("graph_update", update_start)
             graph_updated = True
             self.get_logger().info("Graph update complete")
         elif rt_base is not None and rt_camera is not None and (depth_ready or fallback_ready):
             if intrinsics is None and not self._intrinsics_warned:
                 self.get_logger().warning("Camera intrinsics missing; using defaults for graph projection.")
                 self._intrinsics_warned = True
+            update_start = time.perf_counter()
             self._update_graph(
                 masks.cpu().numpy(),
                 phrases,
@@ -560,6 +609,7 @@ class SemanticMapBuilder(Node):
                 img_pil=img_pil,
                 stamp=frames.get("stamp"),
             )
+            self._record_timing("graph_update", update_start)
             graph_updated = True
         else:
             missing = []
@@ -574,6 +624,7 @@ class SemanticMapBuilder(Node):
             if rt_camera is None:
                 missing.append("rt_camera")
             if missing:
+                self._count_event("missing_data_frames")
                 self.get_logger().warning(f"Skipping graph update due to missing data: {', '.join(missing)}")
 
         if graph_updated:
@@ -583,6 +634,7 @@ class SemanticMapBuilder(Node):
         self._publish_graph_markers()
         if self._maybe_update_place_graph(rt_base, place_labels, place_scores):
             self._publish_place_graph_markers()
+        self._record_timing("frame_total", frame_start)
 
     def _pose_from_sources(
         self,
@@ -618,6 +670,7 @@ class SemanticMapBuilder(Node):
         if pose is None and rt_camera is not None and img_pil is not None:
             depth_anything = self._get_depth_anything_depth(img_pil, depth_image, stamp)
             if depth_anything is not None:
+                self._count_event("depth_anything_used")
                 pose = pose_in_map_frame(
                     rt_camera, rt_base, depth_anything, segment=mask[0], intrinsics=intrinsics
                 )
@@ -670,10 +723,12 @@ class SemanticMapBuilder(Node):
                     Time(),
                     timeout=Duration(seconds=0.2),
                 )
+                self._count_event("tf_lookup_latest_fallbacks")
                 self.get_logger().warning(
                     f"TF lookup failed at {stamp.nanoseconds} ({source_frame} -> {target_frame}): {exc}. Using latest."
                 )
             except (LookupException, ConnectivityException, ExtrapolationException) as exc_latest:
+                self._count_event("tf_lookup_failures")
                 self.get_logger().warning(
                     f"TF lookup failed ({source_frame} -> {target_frame}): {exc_latest}"
                 )
@@ -897,6 +952,8 @@ class SemanticMapBuilder(Node):
                         rgb_msg.height,
                     )
             self._trim_queue(pending_cloud, rgb_stamp_ns - slop_ns)
+        elif self.use_projected_lidar:
+            self._count_event("projected_lidar_missing_frames")
 
         if depth_image is None and self.depth_topic:
             selection = self._select_nearest_message(pending_depth, rgb_stamp_ns)
@@ -1108,6 +1165,7 @@ class SemanticMapBuilder(Node):
                 self.get_logger().info(f"    Skipping '{label}' (not in distance_thresholds)")
                 continue
             self.get_logger().info(f"    Calculating 3D pose for '{label}'...")
+            pose_start = time.perf_counter()
             pose, depth_method = self._pose_from_sources(
                 mask,
                 rt_camera,
@@ -1119,13 +1177,16 @@ class SemanticMapBuilder(Node):
                 img_pil,
                 stamp,
             )
+            self._record_timing("pose_association", pose_start)
             self.get_logger().info(f"    Pose calculation complete: pose={'valid' if pose is not None else 'None'}")
             if pose is None:
+                self._count_event("pose_failures")
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
 
             if self._gng_manager is not None and self._gng_manager.enabled:
                 self.get_logger().info(f"    Running GNG update for '{label}'...")
+                self._count_event("gng_update_calls")
                 score = None
                 if scores is not None:
                     score = scores[idx]
@@ -1135,12 +1196,16 @@ class SemanticMapBuilder(Node):
                         score = float(score)
                 self.get_logger().info(f"    Calling GNG manager.update() with pose={pose}, score={score}")
                 try:
+                    gng_start = time.perf_counter()
                     assignment = self._gng_manager.update(label, np.asarray(pose), score, stamp)
+                    self._record_timing("instance_gng_update", gng_start)
                     self.get_logger().info(f"    GNG update complete: assignment={'committed' if assignment and assignment.committed else 'not committed'}")
                 except Exception as e:
+                    self._count_event("gng_update_failures")
                     self.get_logger().error(f"    GNG update failed: {e}")
                     continue
                 if assignment is None or not assignment.committed:
+                    self._count_event("gng_not_committed")
                     self.get_logger().info(f"    Skipping '{label}' - not yet committed (needs {self.gng_min_observations_to_commit} observations)")
                     continue
                 node_id = assignment.instance_id
@@ -1243,7 +1308,9 @@ class SemanticMapBuilder(Node):
         position = np.asarray(rt_base[:2, 3], dtype=np.float64)
         score_list = self._coerce_scores(scores)
         label_list = list(labels) if labels is not None else None
+        place_start = time.perf_counter()
         update = self._place_gng.update(position, labels=label_list, scores=score_list)
+        self._record_timing("place_gng_update", place_start)
         return update is not None
 
     @staticmethod
@@ -1338,13 +1405,19 @@ class SemanticMapBuilder(Node):
         super().destroy_node()
 
     def _save_graphs(self):
+        save_start = time.perf_counter()
         metadata = {
             "world_frame": self.world_frame,
             "base_frame": self.base_frame,
             "place_gng_enabled": bool(self.place_gng_enabled),
+            "runtime": {
+                "events": dict(sorted(self._event_counts.items())),
+                "timings": self._runtime_summary(),
+            },
         }
         place_graph = self.place_graph if self.place_gng_enabled and self._place_gng is not None else None
         save_stcm_json(self.graph, place_graph=place_graph, file=str(self.graph_path), metadata=metadata)
+        self._record_timing("graph_save", save_start)
         self.get_logger().info(f"STCM graph saved to: {self.graph_path.resolve()}")
         if (
             place_graph is not None

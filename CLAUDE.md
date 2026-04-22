@@ -79,6 +79,18 @@ Inner-loop commands in `.claude/commands/`:
 Revision agents in `.claude/agents/` (invoke via Agent tool):
 - `planner`, `python-reviewer`, `silent-failure-hunter`, `comment-analyzer`, `doc-updater`
 
+Codex-specific experiment harness:
+- `.agents/skills/` — project-local Codex/plugin-style skills for STCM
+  experiments, quality gating, ROS 2 debugging, and tuning.
+- `.codex/config.toml` — slim Codex config for reviewer experiments.
+- `.codex/agents/` — read-only explorer/reviewer/docs-researcher roles.
+- `configs/experiments/manifest.yaml` — scenario bags, variants, required topics,
+  and sensitivity values.
+- `scripts/experiments/run_experiment.py` — deterministic offline rosbag runner
+  that writes graph/config/log/result evidence under `results/`.
+- `scripts/experiments/aggregate_results.py` and `summarize_bags.py` — rebuild
+  CSV summaries from result JSON and bag metadata.
+
 ## Paper revision workflow (JACIII Jc26-0002)
 
 See `response_to_reviewers.pdf` for AE-1..AE-13 + R1/R2 items. Workflow:
@@ -91,6 +103,40 @@ See `response_to_reviewers.pdf` for AE-1..AE-13 + R1/R2 items. Workflow:
 6. Submission preflight → `/verify` then `/quality-gate paper` (AE-11..13)
 
 Harness rules (permissions, env, hooks) in `.claude/settings.json`.
+
+## Experiment mode for Codex
+
+Primary goal: generate experiment evidence for reviewer comments before paper
+editing. For each run, record:
+- scenario name, bag path, rosbag metadata hash, and required topic checks
+- exact merged YAML config snapshot
+- git SHA and dirty-state flag
+- checkpoint paths and hashes where applicable
+- command, launch log, output STCM JSON, runtime event/timing summary
+- failure flags such as missing graph, zero object nodes, TF lookup failures, or
+  zero-detection frames over 10%
+
+Use `results/eval/*.json` and `results/bench/*.csv` as evidence sources.
+Do **not** treat files in `output/` as reviewer evidence unless copied into
+`results/` by the experiment runner with metadata.
+
+Default dry-run/preflight:
+
+```bash
+python3 scripts/experiments/summarize_bags.py
+python3 scripts/experiments/run_experiment.py --scenario meeting --variant full --no-run --skip-bag-hash
+```
+
+Default execution:
+
+```bash
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+python3 scripts/experiments/run_experiment.py --scenario meeting --variant full --skip-bag-hash
+python3 scripts/experiments/aggregate_results.py
+```
 
 ## Quick start (assumes env ready)
 

@@ -1,0 +1,9 @@
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Verify ROS 2, Nav2, FAST-LIO2, PyTorch, and evaluation/statistics claims against primary documentation or local source.
+Cite exact documentation URLs or repo file paths.
+Do not invent API behavior or benchmark requirements.
+"""

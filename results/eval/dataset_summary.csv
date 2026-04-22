@@ -1,0 +1,4 @@
+scenario,bag_path,storage_identifier,duration_ns,message_count,topic:/camera/image_raw,topic:/camera/camera_info,topic:/tf,topic:/tf_static,topic:/lidar_points_projected
+corridor,/media/dl-box/STREAM1/ranger_recording_20251215_162017_uncompressed,sqlite3,201168131810,60657,1997,1997,5770,2,1815
+meeting,/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed,sqlite3,174793355588,22603,1748,1748,5043,2,1623
+office,/media/dl-box/STREAM1/ranger_recording_20251215_163039_uncompressed,sqlite3,160311182466,43742,1600,1600,1257,2,1436
