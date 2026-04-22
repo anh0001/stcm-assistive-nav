@@ -10,6 +10,11 @@ web_search = "live"
 
 persistent_instructions = "Follow AGENTS.md. For experiment work, preserve evidence under results/ and record bag path, config, git SHA, checkpoint hashes, command, logs, and output JSON."
 
+[mcp_servers.scite]
+command = "npx"
+args = ["-y", "mcp-remote", "https://api.scite.ai/mcp"]
+startup_timeout_sec = 30
+
 [mcp_servers.context7]
 command = "npx"
 args = ["-y", "@upstash/context7-mcp@latest"]
