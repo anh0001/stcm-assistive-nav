@@ -4,4 +4,5 @@
 	branch = humble
 [submodule "i-gng"]
 	path = i-gng
-	url = https://github.com/anh0001/i-gng.git        branch = stcm
+	url = https://github.com/anh0001/i-gng.git
+	branch = stcm
