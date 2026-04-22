@@ -59,9 +59,10 @@ class NyuGroundedRgbdProposalBackend:
         self.chunks, self.class_id_to_label, self.per_chunk_thresholds = self._load_prompt_bank()
         self.box_threshold = float(box_threshold)
         self.text_threshold = float(text_threshold)
-        self.processor = AutoProcessor.from_pretrained(gdino_model_id, local_files_only=True)
+        gdino_model_ref = self._resolve_hf_model_ref(gdino_model_id)
+        self.processor = AutoProcessor.from_pretrained(gdino_model_ref, local_files_only=True)
         self.gdino = (
-            AutoModelForZeroShotObjectDetection.from_pretrained(gdino_model_id, local_files_only=True)
+            AutoModelForZeroShotObjectDetection.from_pretrained(gdino_model_ref, local_files_only=True)
             .to(self.device)
             .eval()
         )
@@ -81,6 +82,33 @@ class NyuGroundedRgbdProposalBackend:
         if cwd_path.exists():
             return cwd_path
         return PACKAGE_ROOT / path
+
+    @staticmethod
+    def _resolve_hf_model_ref(model_ref: str | Path) -> str:
+        path = Path(str(model_ref)).expanduser()
+        if path.exists():
+            return str(path)
+
+        model_id = str(model_ref)
+        if "/" not in model_id:
+            return model_id
+
+        namespace, repo = model_id.split("/", 1)
+        hub_root = Path.home() / ".cache" / "huggingface" / "hub" / f"models--{namespace}--{repo}"
+        snapshots_dir = hub_root / "snapshots"
+        if not snapshots_dir.exists():
+            return model_id
+
+        ref_path = hub_root / "refs" / "main"
+        if ref_path.exists():
+            snapshot = snapshots_dir / ref_path.read_text(encoding="utf-8").strip()
+            if snapshot.exists():
+                return str(snapshot)
+
+        snapshots = sorted(path for path in snapshots_dir.iterdir() if path.is_dir())
+        if snapshots:
+            return str(snapshots[-1])
+        return model_id
 
     def _import_external_symbols(self):
         repo_str = str(self.repo_path)

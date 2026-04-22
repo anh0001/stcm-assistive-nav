@@ -295,10 +295,19 @@ def _make_run_id(scenario: str, variant: str, suffix: str | None) -> str:
     return "_".join(part.replace("/", "-") for part in parts)
 
 
-def _build_launch_command(config_path: Path, graph_path: Path, bag_path: Path, storage_id: str) -> list[str]:
+def _build_launch_command(
+    config_path: Path,
+    graph_path: Path,
+    bag_path: Path,
+    storage_id: str,
+    ros_log_dir: Path,
+    mpl_config_dir: Path,
+) -> list[str]:
     setup_install = REPO_ROOT / "install" / "setup.bash"
     setup_parts = [
         'export PYTHONUSERBASE="${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}"',
+        f"export ROS_LOG_DIR={shlex.quote(str(ros_log_dir))}",
+        f"export MPLCONFIGDIR={shlex.quote(str(mpl_config_dir))}",
         "source /opt/ros/humble/setup.bash",
     ]
     if setup_install.exists():
@@ -488,6 +497,8 @@ def _run_one(args, manifest: dict[str, Any], scenario_name: str, variant_name: s
     config_path = artifact_dir / "config.yaml"
     log_path = artifact_dir / "launch.log"
     result_path = results_dir / f"{run_id}.json"
+    ros_log_dir = artifact_dir / "ros_logs"
+    mpl_config_dir = artifact_dir / "mplconfig"
 
     config = _materialize_run_config(
         base_config=base_config,
@@ -504,11 +515,22 @@ def _run_one(args, manifest: dict[str, Any], scenario_name: str, variant_name: s
         config_path = artifact_dir / "config.yaml"
         log_path = artifact_dir / "launch.log"
         result_path = results_dir / f"{run_id}.json"
+        ros_log_dir = artifact_dir / "ros_logs"
+        mpl_config_dir = artifact_dir / "mplconfig"
         config["graph_output_path"] = str(graph_path)
         config["place_gng_output_path"] = str(graph_path)
 
     _write_yaml(config_path, config)
-    command = _build_launch_command(config_path, graph_path, bag_path, storage_id)
+    ros_log_dir.mkdir(parents=True, exist_ok=True)
+    mpl_config_dir.mkdir(parents=True, exist_ok=True)
+    command = _build_launch_command(
+        config_path,
+        graph_path,
+        bag_path,
+        storage_id,
+        ros_log_dir,
+        mpl_config_dir,
+    )
     command_text = shlex.join(command)
 
     launch_result = {
