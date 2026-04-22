@@ -15,3 +15,21 @@ nyu_sam_model_type: vit_t
 
 box_threshold: 0.25
 text_threshold: 0.25
+
+target_labels:
+  - "chair"
+  - "bottle"
+  - "cup"
+  - "water fountain"
+  - "cardboard box"
+  - "emergency exit sign"
+  - "trash bins"
+
+target_label_thresholds:
+  - 0.6  # chair
+  - 0.3  # bottle
+  - 0.5  # cup
+  - 0.5  # water fountain
+  - 1.0  # cardboard box
+  - 0.3  # emergency exit sign
+  - 2.0  # trash bins

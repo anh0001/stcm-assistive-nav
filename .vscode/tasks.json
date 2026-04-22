@@ -49,12 +49,12 @@
         {
             "label": "Show Experiment Results Table",
             "type": "shell",
-            "command": "python3 scripts/experiments/results_table.py --summary results/eval/summary.csv",
+            "command": "python3 scripts/experiments/results_table.py --summary results/eval/summary.csv --all --include-dry-runs --include-failed",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [],
-            "detail": "Print the latest executed benchmark row from results/eval/summary.csv as a Markdown table"
+            "detail": "Print all rows from results/eval/summary.csv (including dry-runs and failed benchmarks) as a Markdown table"
         },
         {
             "label": "Run Meeting Full Experiment",
