@@ -49,11 +49,22 @@ Operational detail lives in `.claude/rules/`. Load on demand:
   → `.claude/rules/perception-pipeline.md`
 - **Topic inspection, RViz viz, threshold tuning, common failures**
   → `.claude/rules/debugging.md`
+- **Paper eval protocol (scenarios, metrics, ablations, sensitivity)**
+  → `.claude/rules/eval-protocol.md`
+- **Runtime benchmark protocol (per-module latency, HW disclosure)**
+  → `.claude/rules/benchmark-protocol.md`
 
 Domain knowledge also in `.claude/skills/`:
 - `env-bootstrap` — first-time fresh setup
 - `ros2-debug` — topic/TF/sync diagnosis
 - `stcm-tuning` — symptom → knob map (detection, GNG, place GNG)
+- `eval-harness` — EDD framework for Table B/C/E numbers
+- `benchmark` — runtime baseline + regression → Table D
+- `python-testing` — pytest/parametrize for sensitivity sweep
+- `pytorch-patterns` — reproducible GDINO/SAM benchmark
+- `deep-research` — cited SOTA capability matrix → Table F
+- `documentation-lookup` — verify Nav2/FAST-LIO2 API claims (Context7)
+- `article-writing` — trim Intro/Related Work prose
 
 Inner-loop commands in `.claude/commands/`:
 - `/build`, `/clean-build` — colcon build
@@ -61,6 +72,23 @@ Inner-loop commands in `.claude/commands/`:
 - `/download-ckpts` — model weight downloader
 - `/test-perception` — run standalone perception tests
 - `/rosbag-replay` — offline sequential bag replay
+- `/eval` — drive paper eval protocol (Tables B/C/E)
+- `/verify` — submission preflight (figs dpi, acronyms, track-changes)
+- `/quality-gate` — block until every AE-/R- item has evidence
+
+Revision agents in `.claude/agents/` (invoke via Agent tool):
+- `planner`, `python-reviewer`, `silent-failure-hunter`, `comment-analyzer`, `doc-updater`
+
+## Paper revision workflow (JACIII Jc26-0002)
+
+See `response_to_reviewers.pdf` for AE-1..AE-13 + R1/R2 items. Workflow:
+
+1. Scaffold sensitivity + scenarios → `/eval --sweep` (AE-9, AE-1)
+2. Per-module runtime → `benchmark` skill + `silent-failure-hunter` agent (AE-4)
+3. Ablations + SOTA matrix → `/eval` paired runs + `deep-research` skill (AE-2, AE-3)
+4. Figures ≥300 dpi ≥10pt, split Fig. 9 → `scripts/render_figures.py` (AE-6)
+5. Trim Intro/Related Work + glossary → `article-writing` skill + `doc-updater` agent (AE-5, AE-7, AE-8, AE-10)
+6. Submission preflight → `/verify` then `/quality-gate paper` (AE-11..13)
 
 Harness rules (permissions, env, hooks) in `.claude/settings.json`.
 

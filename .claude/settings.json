@@ -21,6 +21,13 @@
       "Bash(ros2 pkg prefix *)",
       "Bash(python3 stcm/test/*)",
       "Bash(python3 -m py_compile *)",
+      "Bash(python3 -m pytest *)",
+      "Bash(pytest *)",
+      "Bash(python3 scripts/*)",
+      "Bash(python3 -m cProfile *)",
+      "Bash(nvidia-smi*)",
+      "Bash(pdfinfo *)",
+      "Bash(identify *)",
       "Bash(rm -rf build/)",
       "Bash(rm -rf install/)",
       "Bash(rm -rf log/)",
@@ -34,7 +41,10 @@
       "Edit(AGENTS.md)",
       "Edit(.gitignore)",
       "Edit(README.md)",
-      "Edit(docs/**)"
+      "Edit(docs/**)",
+      "Edit(scripts/**)",
+      "Edit(results/**)",
+      "Edit(paper/**)"
     ],
     "deny": [
       "Bash(rm -rf /)",
