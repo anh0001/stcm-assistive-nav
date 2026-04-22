@@ -37,6 +37,16 @@
             "detail": "Launch semantic mapping with the config file using the system Python + isolated user base"
         },
         {
+            "label": "Benchmark STCM Graph",
+            "type": "shell",
+            "command": "python3 scripts/experiments/benchmark_stcm_graph.py --prediction output/stcm.json --ground-truth configs/experiments/ground_truth/meeting_stcm_gt.json --match-threshold-m 1.0 --output-json output/stcm_benchmark.json --output-csv output/stcm_benchmark.csv",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Score output/stcm.json against the meeting ground-truth STCM graph with same-label F1@1m metrics"
+        },
+        {
             "label": "Launch Semantic Mapping (with Updater)",
             "type": "shell",
             "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && source /opt/ros/humble/setup.bash && source install/setup.bash && ros2 launch stcm semantic_mapping.launch.py config_file:=$(ros2 pkg prefix stcm)/share/stcm/config/semantic_mapping_params.yaml run_updater:=true",

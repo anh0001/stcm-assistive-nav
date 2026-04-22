@@ -22,8 +22,9 @@ python3 scripts/experiments/quality_gate.py
   `place-gng-only`, and `no-llm`.
 - Runtime timings include at least GroundingDINO, SAM, pose association, and
   graph update measurements.
+- Scenarios with `ground_truth_path` include object-map benchmark metrics:
+  same-label one-to-one F1/precision/recall at the configured XY threshold.
 - Sensitivity evidence exists for every manifest sweep key.
 
 If the gate blocks, run only the concrete commands it prints. Do not mark a
 reviewer item complete on memory or on files in `output/`.
-

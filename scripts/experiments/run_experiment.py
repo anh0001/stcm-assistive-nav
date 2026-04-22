@@ -18,6 +18,12 @@ from typing import Any
 
 import yaml
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from benchmark_stcm_graph import evaluate_graphs, write_csv
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO_ROOT / "configs" / "experiments" / "manifest.yaml"
@@ -92,6 +98,13 @@ def _file_record(path_text: str | None, *, hash_file: bool = True) -> dict[str, 
         if hash_file:
             record["sha256"] = _sha256_file(path)
     return record
+
+
+def _resolve_repo_path(path_text: str | None) -> Path | None:
+    if not path_text:
+        return None
+    path = Path(path_text).expanduser()
+    return path if path.is_absolute() else REPO_ROOT / path
 
 
 def _bag_metadata_path(bag_path: Path) -> Path:
@@ -268,6 +281,9 @@ def _failure_flags(result: dict[str, Any]) -> list[str]:
         flags.append("gng_update_failures_present")
     if not result.get("log", {}).get("completion_marker_seen") and result.get("executed"):
         flags.append("completion_marker_missing")
+    benchmark = result.get("benchmark") or {}
+    if result.get("executed") and benchmark.get("required") and not benchmark.get("available"):
+        flags.append("benchmark_missing")
     return flags
 
 
@@ -392,6 +408,62 @@ def _apply_sensitivity(config: dict[str, Any], sensitivity: str | None) -> str |
     return f"{key}-{raw_value}".replace(".", "p")
 
 
+def _benchmark_metrics(
+    *,
+    scenario: dict[str, Any],
+    graph_path: Path,
+    artifact_dir: Path,
+) -> dict[str, Any]:
+    ground_truth_path = _resolve_repo_path(scenario.get("ground_truth_path"))
+    if ground_truth_path is None:
+        return {"required": False, "available": False}
+
+    benchmark_json_path = artifact_dir / "benchmark.json"
+    benchmark_csv_path = artifact_dir / "benchmark.csv"
+    threshold_m = float(scenario.get("benchmark_match_threshold_m", 1.0))
+    record: dict[str, Any] = {
+        "required": True,
+        "available": False,
+        "ground_truth_path": str(ground_truth_path),
+        "match_threshold_m": threshold_m,
+        "output_json": str(benchmark_json_path),
+        "output_csv": str(benchmark_csv_path),
+    }
+    if not ground_truth_path.exists():
+        record["error"] = f"Ground truth path does not exist: {ground_truth_path}"
+        return record
+    if not graph_path.exists():
+        record["error"] = f"Prediction graph path does not exist: {graph_path}"
+        return record
+
+    try:
+        benchmark = evaluate_graphs(
+            prediction_path=graph_path,
+            ground_truth_path=ground_truth_path,
+            match_threshold_m=threshold_m,
+        )
+    except Exception as exc:  # noqa: BLE001 - preserve failure evidence in result JSON.
+        record["error"] = f"{type(exc).__name__}: {exc}"
+        return record
+
+    _write_json(benchmark_json_path, benchmark)
+    write_csv(benchmark_csv_path, benchmark)
+    record.update(
+        {
+            "available": True,
+            "metric_name": benchmark.get("metric_name"),
+            "summary": benchmark.get("summary", {}),
+            "per_label": benchmark.get("per_label", {}),
+            "matched_pairs": benchmark.get("matched_pairs", []),
+            "false_positive_nodes": benchmark.get("false_positive_nodes", []),
+            "false_negative_gt_nodes": benchmark.get("false_negative_gt_nodes", []),
+            "wrong_label_near_gt": benchmark.get("wrong_label_near_gt", []),
+            "duplicate_pairs": benchmark.get("duplicate_pairs", []),
+        }
+    )
+    return record
+
+
 def _run_one(args, manifest: dict[str, Any], scenario_name: str, variant_name: str) -> Path:
     scenarios = manifest.get("scenarios", {})
     variants = manifest.get("variants", {})
@@ -483,6 +555,11 @@ def _run_one(args, manifest: dict[str, Any], scenario_name: str, variant_name: s
         "launch": launch_result,
         "log": _parse_log_metrics(log_path),
         "graph": _graph_metrics(graph_path),
+        "benchmark": _benchmark_metrics(
+            scenario=scenario,
+            graph_path=graph_path,
+            artifact_dir=artifact_dir,
+        ),
     }
     result["failure_flags"] = _failure_flags(result)
     _write_json(result_path, result)

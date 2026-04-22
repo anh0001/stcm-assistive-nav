@@ -106,6 +106,33 @@ def _runtime_ok(results: list[dict[str, Any]]) -> tuple[bool, str]:
     return False, "no executed run has the required runtime modules"
 
 
+def _benchmark_ok(results: list[dict[str, Any]], manifest: dict[str, Any]) -> tuple[bool, str]:
+    scenarios = [
+        name
+        for name, data in sorted((manifest.get("scenarios") or {}).items())
+        if data.get("ground_truth_path")
+    ]
+    if not scenarios:
+        return True, "no scenarios declare ground truth"
+
+    missing = []
+    for scenario in scenarios:
+        matches = [
+            result
+            for result in results
+            if result.get("scenario") == scenario
+            and result.get("variant") == "full"
+            and _executed_ok(result)
+            and ((result.get("benchmark") or {}).get("available") is True)
+            and (((result.get("benchmark") or {}).get("summary") or {}).get("f1") is not None)
+        ]
+        if not matches:
+            missing.append(scenario)
+    if missing:
+        return False, "missing benchmark metrics: " + ", ".join(missing)
+    return True, "object-map benchmark metrics exist for ground-truth scenarios"
+
+
 def _sensitivity_ok(results: list[dict[str, Any]], manifest: dict[str, Any]) -> tuple[bool, str]:
     expected_keys = set((manifest.get("sensitivity") or {}).keys())
     seen_keys = set()
@@ -149,6 +176,7 @@ def main() -> int:
         ("AE-1 / R1-1 full runs", *_full_runs_ok(results, scenarios)),
         ("AE-2 / AE-3 ablations", *_ablation_ok(results, scenarios)),
         ("AE-4 runtime timings", *_runtime_ok(results)),
+        ("Object-map benchmark", *_benchmark_ok(results, manifest)),
         ("AE-9 sensitivity", *_sensitivity_ok(results, manifest)),
     ]
 
@@ -172,4 +200,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

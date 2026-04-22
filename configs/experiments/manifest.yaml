@@ -18,6 +18,8 @@ scenarios:
     description: "Candidate meeting-room-style run; rename once final annotation is fixed."
     bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed
     storage_id: sqlite3
+    ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
 
 required_topics:
   - /camera/image_raw

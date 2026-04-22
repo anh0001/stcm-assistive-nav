@@ -28,12 +28,24 @@ Codex layout:
 - Treat experiments as the main workstream. Paper editing is out of scope unless
   explicitly requested.
 - Never use `output/` as evidence directly. Evidence lives under `results/`.
+- For scenarios with `ground_truth_path`, `run_experiment.py` must produce
+  same-label object-map benchmark metrics (`precision_1m`, `recall_1m`,
+  `f1_1m`, and XY error summaries) under the run artifact directory.
 - Prefer the `.agents/skills/stcm-experiment-harness` workflow when running
   reviewer experiments.
 - Prefer dry-run first:
 
 ```bash
 python3 scripts/experiments/run_matrix.py --scenario meeting --variant full --no-run --skip-bag-hash
+```
+
+- To score a manually produced graph:
+
+```bash
+python3 scripts/experiments/benchmark_stcm_graph.py \
+  --prediction output/stcm.json \
+  --ground-truth configs/experiments/ground_truth/meeting_stcm_gt.json \
+  --match-threshold-m 1.0
 ```
 
 - After real runs, rebuild summaries and inspect the gate:

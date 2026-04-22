@@ -42,6 +42,30 @@ def _event(graph: dict[str, Any], name: str) -> int:
     return int(events.get(name) or 0)
 
 
+def _benchmark_summary(result: dict[str, Any]) -> dict[str, Any]:
+    benchmark = result.get("benchmark") or {}
+    summary = benchmark.get("summary") or {}
+    return {
+        "benchmark_required": benchmark.get("required"),
+        "benchmark_available": benchmark.get("available"),
+        "benchmark_metric": benchmark.get("metric_name"),
+        "gt_nodes": summary.get("gt_nodes"),
+        "pred_nodes": summary.get("pred_nodes"),
+        "benchmark_tp": summary.get("tp"),
+        "benchmark_fp": summary.get("fp"),
+        "benchmark_fn": summary.get("fn"),
+        "precision_1m": summary.get("precision"),
+        "recall_1m": summary.get("recall"),
+        "f1_1m": summary.get("f1"),
+        "xy_error_mean_m": (summary.get("xy_error") or {}).get("mean_m"),
+        "xy_error_median_m": (summary.get("xy_error") or {}).get("median_m"),
+        "xy_error_rmse_m": (summary.get("xy_error") or {}).get("rmse_m"),
+        "xy_error_p95_m": (summary.get("xy_error") or {}).get("p95_m"),
+        "duplicate_pair_count": summary.get("duplicate_pair_count"),
+        "benchmark_error": benchmark.get("error"),
+    }
+
+
 def _write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
@@ -57,6 +81,7 @@ def aggregate(results_dir: Path) -> dict[str, Path]:
     for path, result in _iter_results(results_dir):
         graph = result.get("graph", {})
         bag = result.get("bag", {})
+        benchmark = _benchmark_summary(result)
         rows.append(
             {
                 "run_id": result.get("run_id"),
@@ -77,6 +102,7 @@ def aggregate(results_dir: Path) -> dict[str, Path]:
                 "tf_lookup_failures": _event(graph, "tf_lookup_failures"),
                 "failure_flags": ";".join(result.get("failure_flags", [])),
                 "result_path": str(path.relative_to(REPO_ROOT)),
+                **benchmark,
             }
         )
         for module in (
@@ -132,6 +158,23 @@ def aggregate(results_dir: Path) -> dict[str, Path]:
             "frames_seen",
             "pose_failures",
             "tf_lookup_failures",
+            "benchmark_required",
+            "benchmark_available",
+            "benchmark_metric",
+            "gt_nodes",
+            "pred_nodes",
+            "benchmark_tp",
+            "benchmark_fp",
+            "benchmark_fn",
+            "precision_1m",
+            "recall_1m",
+            "f1_1m",
+            "xy_error_mean_m",
+            "xy_error_median_m",
+            "xy_error_rmse_m",
+            "xy_error_p95_m",
+            "duplicate_pair_count",
+            "benchmark_error",
             "failure_flags",
             "result_path",
         ],
