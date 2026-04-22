@@ -41,6 +41,9 @@ variants:
   no-llm:
     description: "Same map output as full; used with template grounding evaluator."
     overlay: configs/experiments/variants/no-llm.yaml
+  full-nyu-proposals:
+    description: "Full STCM with nyu-grounded-rgbd proposal generation and meeting-label prompt bank."
+    overlay: configs/experiments/variants/full-nyu-proposals.yaml
 
 sensitivity:
   place_gng_distance_threshold: [0.3, 0.5, 0.8]

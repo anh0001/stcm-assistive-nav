@@ -1,0 +1,17 @@
+offline_sequential: true
+use_sim_time: true
+run_updater: false
+place_gng_enabled: true
+gng_enabled: true
+use_projected_lidar: true
+use_depth_anything_fallback: false
+
+perception_backend: nyu_grounded_rgbd
+nyu_grounded_repo_path: /home/anhar/codes/nyu-grounded-rgbd
+nyu_prompt_bank_path: stcm/config/meeting_nyu_grounded_prompts.yaml
+nyu_gdino_model_id: IDEA-Research/grounding-dino-base
+nyu_sam_backend: mobilesam
+nyu_sam_model_type: vit_t
+
+box_threshold: 0.25
+text_threshold: 0.25

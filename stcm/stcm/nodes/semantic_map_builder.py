@@ -31,8 +31,9 @@ from ..core.perception import (
     SegmentAnythingPredictor,
 )
 from ..core.gng_instance_manager import GngInstanceManager
+from ..core.nyu_grounded_backend import NyuGroundedRgbdProposalBackend
 from ..core.place_gng import PlaceGng
-from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
+from ..core.vision_utils import annotate, filter, filter_large_boxes, filter_xyxy, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
     is_nearby_in_map,
@@ -84,6 +85,14 @@ class SemanticMapBuilder(Node):
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
+        self.perception_backend = str(self.declare_parameter("perception_backend", "legacy").value).strip().lower()
+        self.nyu_grounded_repo_path = self.declare_parameter("nyu_grounded_repo_path", "").value
+        self.nyu_prompt_bank_path = self.declare_parameter("nyu_prompt_bank_path", "").value
+        self.nyu_gdino_model_id = self.declare_parameter(
+            "nyu_gdino_model_id", "IDEA-Research/grounding-dino-base"
+        ).value
+        self.nyu_sam_backend = self.declare_parameter("nyu_sam_backend", "mobilesam").value
+        self.nyu_sam_model_type = self.declare_parameter("nyu_sam_model_type", "vit_t").value
         self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
         self.filter_y_val = float(self.declare_parameter("filter_y_val", 1.0).value)
         self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.9).value)
@@ -174,6 +183,7 @@ class SemanticMapBuilder(Node):
         self._depth_anything_cache_stamp = None
         self._runtime_samples: Dict[str, List[float]] = {}
         self._event_counts: Dict[str, int] = {}
+        self._proposal_backend = None
 
         self.listener = None
         self.timer = None
@@ -194,12 +204,30 @@ class SemanticMapBuilder(Node):
                 reset_tf_on_time_jump=self.reset_tf_on_time_jump,
             )
 
-        self.gdino = GroundingDINOObjectPredictor(
-            checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
-        )
-        self.sam = SegmentAnythingPredictor(
-            checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
-        )
+        self.gdino = None
+        self.sam = None
+        if self.perception_backend == "nyu_grounded_rgbd":
+            self._proposal_backend = NyuGroundedRgbdProposalBackend(
+                repo_path=self.nyu_grounded_repo_path,
+                prompt_bank_path=self.nyu_prompt_bank_path,
+                gdino_model_id=self.nyu_gdino_model_id,
+                sam_backend=self.nyu_sam_backend,
+                sam_model_type=self.nyu_sam_model_type,
+                sam_checkpoint=self._expanduser_if_set(self.mobilesam_checkpoint),
+                box_threshold=self.box_threshold,
+                text_threshold=self.text_threshold,
+                device="cuda" if torch.cuda.is_available() else "cpu",
+            )
+            self.get_logger().info(
+                f"Using perception backend '{self.perception_backend}' via {self.nyu_grounded_repo_path}"
+            )
+        else:
+            self.gdino = GroundingDINOObjectPredictor(
+                checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
+            )
+            self.sam = SegmentAnythingPredictor(
+                checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
+            )
 
         if self.gng_enabled:
             self._gng_manager = GngInstanceManager(
@@ -453,32 +481,44 @@ class SemanticMapBuilder(Node):
         filtered_scores = _select(scores)
         return filtered_boxes, filtered_masks, filtered_scores, canonical_phrases
 
-    def _process_frame(self) -> None:
-        if self.listener is None:
-            return
+    def _run_proposal_backend(self, rgb_image: np.ndarray):
+        rgb_for_model = rgb_image[:, :, (2, 1, 0)]
+        img_pil = PILImg.fromarray(rgb_for_model)
 
-        frames = self.listener.get_latest_frames()
-        if frames is None:
-            self.get_logger().debug("No frames available from listener")
-            return
+        if self._proposal_backend is not None:
+            detect_start = time.perf_counter()
+            batch = self._proposal_backend.detect_and_segment(rgb_for_model)
+            self._record_timing("proposal_backend_predict", detect_start)
+            image_pil_bboxes = batch.boxes_xyxy
+            masks = batch.masks
+            gdino_conf = batch.scores
+            phrases = batch.phrases
+            self.get_logger().info(
+                f"Proposal backend '{self.perception_backend}' detected {len(phrases)} objects: {phrases}"
+            )
+            self._count_event("raw_detections", len(phrases))
 
-        self._process_frame_data(frames)
-
-    def _process_frame_data(self, frames) -> None:
-        frame_start = time.perf_counter()
-        self._count_event("frames_seen")
-        self.get_logger().info("Processing frame - running detection")
-        rgb_image = frames["rgb"].astype(np.uint8)
-        depth_image = frames.get("depth")
-        rt_camera = frames.get("rt_camera")
-        rt_base = frames.get("rt_base")
-        intrinsics = frames.get("intrinsics")
-        projected_cloud = frames.get("projected_cloud")
-        rt_projected = frames.get("rt_projected")
-
-        img_pil = PILImg.fromarray(rgb_image[:, :, (2, 1, 0)])
-        place_labels = None
-        place_scores = None
+            filter_start = time.perf_counter()
+            image_pil_bboxes, gdino_conf, phrases, skip_detection, keep_mask = filter_xyxy(
+                image_pil_bboxes,
+                gdino_conf,
+                phrases,
+                self.filter_conf_bound,
+                self.filter_y_val,
+                self.filter_percent_width,
+                self.filter_percent_height,
+                self.filter_percent_area,
+                self.filter_enabled,
+                image_width=rgb_image.shape[1],
+                image_height=rgb_image.shape[0],
+                return_mask=True,
+            )
+            if keep_mask is not None:
+                index_tensor = torch.nonzero(keep_mask, as_tuple=False).flatten().to(device=masks.device)
+                masks = masks.index_select(0, index_tensor)
+            self._record_timing("detection_filter", filter_start)
+            self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
+            return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection
 
         gdino_start = time.perf_counter()
         bboxes, phrases, gdino_conf = self.gdino.predict(
@@ -502,13 +542,8 @@ class SemanticMapBuilder(Node):
         )
         self._record_timing("detection_filter", filter_start)
         self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
-        if skip_detection or len(phrases) == 0:
-            self._count_event("zero_detection_frames")
-            self.get_logger().debug("Skipping frame: no detections after filtering")
-            if self._maybe_update_place_graph(rt_base):
-                self._publish_place_graph_markers()
-            self._record_timing("frame_total", frame_start)
-            return
+        if skip_detection:
+            return img_pil, None, None, gdino_conf, phrases, True
 
         width = rgb_image.shape[1]
         height = rgb_image.shape[0]
@@ -520,14 +555,51 @@ class SemanticMapBuilder(Node):
             image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
             self._record_timing("sam_predict", sam_start)
             self.get_logger().info(f"SAM segmentation completed, got {len(masks)} masks")
-        except Exception as e:
+        except Exception as exc:
             self._count_event("sam_failures")
-            self.get_logger().error(f"SAM segmentation failed: {e}")
+            self.get_logger().error(f"SAM segmentation failed: {exc}")
+            return img_pil, None, None, gdino_conf, phrases, True
+
+        return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, False
+
+    def _process_frame(self) -> None:
+        if self.listener is None:
+            return
+
+        frames = self.listener.get_latest_frames()
+        if frames is None:
+            self.get_logger().debug("No frames available from listener")
+            return
+
+        self._process_frame_data(frames)
+
+    def _process_frame_data(self, frames) -> None:
+        frame_start = time.perf_counter()
+        self._count_event("frames_seen")
+        self.get_logger().info("Processing frame - running detection")
+        rgb_image = frames["rgb"].astype(np.uint8)
+        depth_image = frames.get("depth")
+        rt_camera = frames.get("rt_camera")
+        rt_base = frames.get("rt_base")
+        intrinsics = frames.get("intrinsics")
+        projected_cloud = frames.get("projected_cloud")
+        rt_projected = frames.get("rt_projected")
+
+        img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection = self._run_proposal_backend(
+            rgb_image
+        )
+        place_labels = None
+        place_scores = None
+        if skip_detection or len(phrases) == 0:
+            self._count_event("zero_detection_frames")
+            self.get_logger().debug("Skipping frame: no detections after filtering")
             if self._maybe_update_place_graph(rt_base):
                 self._publish_place_graph_markers()
             self._record_timing("frame_total", frame_start)
             return
 
+        width = rgb_image.shape[1]
+        height = rgb_image.shape[0]
         self.get_logger().info("Filtering large boxes...")
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
         # Convert PyTorch tensor to numpy for np.any() and indexing

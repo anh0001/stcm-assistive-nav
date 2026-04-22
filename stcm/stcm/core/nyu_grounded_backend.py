@@ -1,0 +1,207 @@
+"""Adapter for reusing nyu-grounded-rgbd proposal generation inside STCM."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import os
+from pathlib import Path
+import sys
+from typing import Any
+
+import numpy as np
+import torch
+import yaml
+from PIL import Image
+
+
+PACKAGE_ROOT = Path(__file__).resolve().parents[3]
+
+
+@dataclass
+class ProposalBatch:
+    """STCM-ready proposal outputs from the external detector + SAM backend."""
+
+    boxes_xyxy: torch.Tensor
+    masks: torch.Tensor
+    scores: torch.Tensor
+    phrases: list[str]
+
+
+class NyuGroundedRgbdProposalBackend:
+    """Wrap the external nyu-grounded-rgbd detector/SAM stack for STCM."""
+
+    def __init__(
+        self,
+        *,
+        repo_path: str | Path,
+        prompt_bank_path: str | Path,
+        gdino_model_id: str,
+        sam_backend: str,
+        sam_model_type: str,
+        sam_checkpoint: str | Path | None,
+        box_threshold: float,
+        text_threshold: float,
+        device: str | torch.device = "cuda",
+    ) -> None:
+        self.repo_path = self._resolve_path(repo_path)
+        self.prompt_bank_path = self._resolve_path(prompt_bank_path)
+        self.device = torch.device(device)
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+        from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
+
+        SAMWrapper, PromptChunk, PromptClass, build_prompt, alias_for_label = self._import_external_symbols()
+        self._PromptChunk = PromptChunk
+        self._PromptClass = PromptClass
+        self._build_prompt = build_prompt
+        self._alias_for_label = alias_for_label
+
+        self.chunks, self.class_id_to_label, self.per_chunk_thresholds = self._load_prompt_bank()
+        self.box_threshold = float(box_threshold)
+        self.text_threshold = float(text_threshold)
+        self.processor = AutoProcessor.from_pretrained(gdino_model_id, local_files_only=True)
+        self.gdino = (
+            AutoModelForZeroShotObjectDetection.from_pretrained(gdino_model_id, local_files_only=True)
+            .to(self.device)
+            .eval()
+        )
+        self.sam = SAMWrapper(
+            backend=sam_backend,
+            checkpoint=str(Path(sam_checkpoint).expanduser()) if sam_checkpoint else None,
+            model_type=sam_model_type,
+            device=self.device,
+        )
+
+    @staticmethod
+    def _resolve_path(path_text: str | Path) -> Path:
+        path = Path(path_text).expanduser()
+        if path.is_absolute():
+            return path
+        cwd_path = Path.cwd() / path
+        if cwd_path.exists():
+            return cwd_path
+        return PACKAGE_ROOT / path
+
+    def _import_external_symbols(self):
+        repo_str = str(self.repo_path)
+        if repo_str not in sys.path:
+            sys.path.insert(0, repo_str)
+
+        from src.models.sam_wrapper import SAMWrapper
+        from src.prompts.alias_bank import PromptChunk, PromptClass
+        from src.prompts.builders import alias_for_label, build_prompt
+
+        return SAMWrapper, PromptChunk, PromptClass, build_prompt, alias_for_label
+
+    def _load_prompt_bank(
+        self,
+    ) -> tuple[list[Any], dict[int, str], dict[str, tuple[float, float]] | None]:
+        with self.prompt_bank_path.open("r", encoding="utf-8") as handle:
+            payload = yaml.safe_load(handle) or {}
+
+        chunk_specs = payload.get("chunks", {})
+        if not chunk_specs:
+            raise ValueError(f"Prompt bank has no chunks: {self.prompt_bank_path}")
+
+        chunks = []
+        class_id_to_label: dict[int, str] = {}
+        per_chunk_thresholds: dict[str, tuple[float, float]] = {}
+        next_class_id = 1
+
+        for chunk_name, chunk_spec in chunk_specs.items():
+            class_entries = chunk_spec.get("classes", [])
+            if not class_entries:
+                continue
+            classes = []
+            for entry in class_entries:
+                label = str(entry["label"])
+                aliases = [str(alias).strip().lower() for alias in entry.get("aliases", []) if str(alias).strip()]
+                if not aliases:
+                    aliases = [label.lower()]
+                classes.append(
+                    self._PromptClass(
+                        class_id=next_class_id,
+                        name=label,
+                        aliases=aliases,
+                    )
+                )
+                class_id_to_label[next_class_id] = label
+                next_class_id += 1
+
+            thresholds = chunk_spec.get("thresholds")
+            if thresholds is not None:
+                per_chunk_thresholds[str(chunk_name)] = (float(thresholds[0]), float(thresholds[1]))
+
+            chunks.append(self._PromptChunk(name=str(chunk_name), classes=classes))
+
+        return chunks, class_id_to_label, (per_chunk_thresholds or None)
+
+    def detect_and_segment(self, image_rgb: np.ndarray) -> ProposalBatch:
+        image_rgb = np.asarray(image_rgb, dtype=np.uint8)
+        height, width = image_rgb.shape[:2]
+        detections: list[tuple[int, np.ndarray, float]] = []
+        pil_image = Image.fromarray(image_rgb)
+
+        for chunk in self.chunks:
+            built_prompt = self._build_prompt(chunk)
+            if self.per_chunk_thresholds and chunk.name in self.per_chunk_thresholds:
+                box_threshold, text_threshold = self.per_chunk_thresholds[chunk.name]
+            else:
+                box_threshold, text_threshold = self.box_threshold, self.text_threshold
+
+            inputs = self.processor(images=pil_image, text=built_prompt.text, return_tensors="pt").to(self.device)
+            outputs = self.gdino(**inputs)
+            try:
+                results = self.processor.post_process_grounded_object_detection(
+                    outputs,
+                    inputs.input_ids,
+                    threshold=box_threshold,
+                    text_threshold=text_threshold,
+                    target_sizes=[(height, width)],
+                )[0]
+            except TypeError:
+                results = self.processor.post_process_grounded_object_detection(
+                    outputs,
+                    inputs.input_ids,
+                    box_threshold=box_threshold,
+                    text_threshold=text_threshold,
+                    target_sizes=[(height, width)],
+                )[0]
+
+            boxes = results["boxes"].detach().cpu().numpy()
+            scores = results["scores"].detach().cpu().numpy()
+            labels = results.get("text_labels")
+            if labels is None:
+                labels = results.get("labels", [])
+
+            for box_xyxy, score, label_text in zip(boxes, scores, labels):
+                class_id = self._alias_for_label(str(label_text), built_prompt.alias_to_class)
+                if class_id is None:
+                    continue
+                detections.append((int(class_id), np.asarray(box_xyxy, dtype=np.float32), float(score)))
+
+        if not detections:
+            return ProposalBatch(
+                boxes_xyxy=torch.empty((0, 4), dtype=torch.float32),
+                masks=torch.empty((0, 1, height, width), dtype=torch.bool),
+                scores=torch.empty((0,), dtype=torch.float32),
+                phrases=[],
+            )
+
+        self.sam.set_image(image_rgb)
+        boxes_xyxy = np.stack([det[1] for det in detections], axis=0).astype(np.float32)
+        try:
+            sam_results = self.sam.predict_boxes(boxes_xyxy)
+        except Exception:
+            sam_results = [self.sam.predict_box(box) for box in boxes_xyxy]
+
+        mask_stack = np.stack([result.mask for result in sam_results], axis=0)
+        phrases = [self.class_id_to_label[int(det[0])] for det in detections]
+        scores = np.asarray([float(det[2]) for det in detections], dtype=np.float32)
+
+        return ProposalBatch(
+            boxes_xyxy=torch.as_tensor(boxes_xyxy, dtype=torch.float32),
+            masks=torch.as_tensor(mask_stack[:, None, :, :], dtype=torch.bool),
+            scores=torch.as_tensor(scores, dtype=torch.float32),
+            phrases=phrases,
+        )

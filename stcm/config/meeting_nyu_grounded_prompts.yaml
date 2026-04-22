@@ -1,0 +1,68 @@
+chunks:
+  furniture:
+    thresholds: [0.25, 0.25]
+    classes:
+      - label: table
+        aliases:
+          - table
+          - tables
+      - label: chair
+        aliases:
+          - chair
+          - chairs
+          - armless chair
+          - armless chairs
+      - label: desk
+        aliases:
+          - desk
+          - metallic desk
+  portable_items:
+    thresholds: [0.25, 0.25]
+    classes:
+      - label: bottle
+        aliases:
+          - bottle
+          - dark thermos
+          - thermos
+          - dark thermos bottle
+      - label: cup
+        aliases:
+          - cup
+          - cups
+          - white drinking cup
+          - white drinking cups
+      - label: cardboard box
+        aliases:
+          - cardboard box
+          - brown cardboard
+          - brown cardboard box
+  fixtures:
+    thresholds: [0.25, 0.25]
+    classes:
+      - label: water fountain
+        aliases:
+          - water fountain
+          - metallic fountain
+          - metallic water fountain
+      - label: emergency exit sign
+        aliases:
+          - emergency exit sign
+          - green emergency exit sign
+      - label: elevator sliding door
+        aliases:
+          - elevator sliding door
+          - dark elevator sliding door
+          - dark elevator sliding door, door surface only
+  bins:
+    thresholds: [0.25, 0.25]
+    classes:
+      - label: trash bins
+        aliases:
+          - bin
+          - bins
+          - trash bin
+          - trash bins
+          - indoor trash bin
+          - indoor trash bins
+          - five indoor trash bins
+          - five indoor trash bins aligned against a wall

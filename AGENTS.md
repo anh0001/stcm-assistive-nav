@@ -53,12 +53,16 @@ Operational detail lives in `.claude/rules/`. Load on demand:
   → `.claude/rules/eval-protocol.md`
 - **Runtime benchmark protocol (per-module latency, HW disclosure)**
   → `.claude/rules/benchmark-protocol.md`
+- **Experiment harness contract (scripts, result.json schema, blockers,
+  long-horizon loop — parity w/ Codex `.agents/skills/stcm-experiment-harness`)**
+  → `.claude/rules/experiment-harness.md`
 
 Domain knowledge also in `.claude/skills/`:
 - `env-bootstrap` — first-time fresh setup
 - `ros2-debug` — topic/TF/sync diagnosis
 - `stcm-tuning` — symptom → knob map (detection, GNG, place GNG)
 - `eval-harness` — EDD framework for Table B/C/E numbers
+- `stcm-experiment-harness` — reviewer experiment runner + long-horizon run→fix→rerun loop
 - `benchmark` — runtime baseline + regression → Table D
 - `python-testing` — pytest/parametrize for sensitivity sweep
 - `pytorch-patterns` — reproducible GDINO/SAM benchmark
@@ -73,6 +77,9 @@ Inner-loop commands in `.claude/commands/`:
 - `/test-perception` — run standalone perception tests
 - `/rosbag-replay` — offline sequential bag replay
 - `/eval` — drive paper eval protocol (Tables B/C/E)
+- `/experiment` — single scenario+variant experiment run w/ evidence
+- `/experiment-matrix` — matrix run (scenarios × variants × sensitivity) + aggregate + gate
+- `/experiment-loop` — long-horizon run→diagnose→fix→rerun cycle
 - `/verify` — submission preflight (figs dpi, acronyms, track-changes)
 - `/quality-gate` — block until every AE-/R- item has evidence
 

@@ -9,6 +9,7 @@ import networkx as nx
 import numpy as np
 import ros2_numpy as ros_numpy
 import rclpy
+import torch
 from PIL import Image as PILImg
 from rclpy.node import Node
 from geometry_msgs.msg import Point as RosPoint
@@ -23,8 +24,9 @@ from ..core.perception import (
     SegmentAnythingPredictor,
 )
 from ..core.gng_instance_manager import GngInstanceManager
+from ..core.nyu_grounded_backend import NyuGroundedRgbdProposalBackend
 from ..core.place_gng import PlaceGng
-from ..core.vision_utils import annotate, filter, filter_large_boxes, overlay_masks
+from ..core.vision_utils import annotate, filter, filter_large_boxes, filter_xyxy, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
     get_fov_points_in_map,
@@ -72,6 +74,14 @@ class SemanticMapUpdater(Node):
         self.text_prompt = self.declare_parameter("text_prompt", "table . door . chair .").value
         self.box_threshold = float(self.declare_parameter("box_threshold", 0.55).value)
         self.text_threshold = float(self.declare_parameter("text_threshold", 0.55).value)
+        self.perception_backend = str(self.declare_parameter("perception_backend", "legacy").value).strip().lower()
+        self.nyu_grounded_repo_path = self.declare_parameter("nyu_grounded_repo_path", "").value
+        self.nyu_prompt_bank_path = self.declare_parameter("nyu_prompt_bank_path", "").value
+        self.nyu_gdino_model_id = self.declare_parameter(
+            "nyu_gdino_model_id", "IDEA-Research/grounding-dino-base"
+        ).value
+        self.nyu_sam_backend = self.declare_parameter("nyu_sam_backend", "mobilesam").value
+        self.nyu_sam_model_type = self.declare_parameter("nyu_sam_model_type", "vit_t").value
         self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
         self.filter_y_val = float(self.declare_parameter("filter_y_val", 0.8).value)
         self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.8).value)
@@ -164,6 +174,7 @@ class SemanticMapUpdater(Node):
         self._depth_anything_failed = False
         self._depth_anything_cache = None
         self._depth_anything_cache_stamp = None
+        self._proposal_backend = None
 
         if self.pause_topic:
             self.create_subscription(Int32, self.pause_topic, self._pause_callback, 10)
@@ -182,12 +193,30 @@ class SemanticMapUpdater(Node):
             reset_tf_on_time_jump=self.reset_tf_on_time_jump,
         )
 
-        self.gdino = GroundingDINOObjectPredictor(
-            checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
-        )
-        self.sam = SegmentAnythingPredictor(
-            checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
-        )
+        self.gdino = None
+        self.sam = None
+        if self.perception_backend == "nyu_grounded_rgbd":
+            self._proposal_backend = NyuGroundedRgbdProposalBackend(
+                repo_path=self.nyu_grounded_repo_path,
+                prompt_bank_path=self.nyu_prompt_bank_path,
+                gdino_model_id=self.nyu_gdino_model_id,
+                sam_backend=self.nyu_sam_backend,
+                sam_model_type=self.nyu_sam_model_type,
+                sam_checkpoint=self._expanduser_if_set(self.mobilesam_checkpoint),
+                box_threshold=self.box_threshold,
+                text_threshold=self.text_threshold,
+                device="cuda" if torch.cuda.is_available() else "cpu",
+            )
+            self.get_logger().info(
+                f"Using perception backend '{self.perception_backend}' via {self.nyu_grounded_repo_path}"
+            )
+        else:
+            self.gdino = GroundingDINOObjectPredictor(
+                checkpoint_path=self._expanduser_if_set(self.groundingdino_checkpoint)
+            )
+            self.sam = SegmentAnythingPredictor(
+                checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
+            )
 
         if self.gng_enabled:
             self._gng_manager = GngInstanceManager(
@@ -267,6 +296,61 @@ class SemanticMapUpdater(Node):
         if stamp is None:
             return None
         return (int(stamp.sec), int(stamp.nanosec))
+
+    def _run_proposal_backend(self, rgb_image: np.ndarray):
+        rgb_for_model = rgb_image[:, :, (2, 1, 0)]
+        img_pil = PILImg.fromarray(rgb_for_model)
+
+        if self._proposal_backend is not None:
+            batch = self._proposal_backend.detect_and_segment(rgb_for_model)
+            image_pil_bboxes = batch.boxes_xyxy
+            masks = batch.masks
+            gdino_conf = batch.scores
+            phrases = batch.phrases
+            self.get_logger().info(
+                f"Proposal backend '{self.perception_backend}' detected {len(phrases)} objects: {phrases}"
+            )
+            image_pil_bboxes, gdino_conf, phrases, skip_detection, keep_mask = filter_xyxy(
+                image_pil_bboxes,
+                gdino_conf,
+                phrases,
+                self.filter_conf_bound,
+                self.filter_y_val,
+                self.filter_percent_width,
+                self.filter_percent_height,
+                self.filter_percent_area,
+                self.filter_enabled,
+                image_width=rgb_image.shape[1],
+                image_height=rgb_image.shape[0],
+                return_mask=True,
+            )
+            if keep_mask is not None:
+                index_tensor = torch.nonzero(keep_mask, as_tuple=False).flatten().to(device=masks.device)
+                masks = masks.index_select(0, index_tensor)
+            return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection
+
+        bboxes, phrases, gdino_conf = self.gdino.predict(
+            img_pil, self.text_prompt, self.box_threshold, self.text_threshold
+        )
+        bboxes, gdino_conf, phrases, skip_detection = filter(
+            bboxes,
+            gdino_conf,
+            phrases,
+            self.filter_conf_bound,
+            self.filter_y_val,
+            self.filter_percent_width,
+            self.filter_percent_height,
+            self.filter_percent_area,
+            self.filter_enabled,
+        )
+        if skip_detection:
+            return img_pil, None, None, gdino_conf, phrases, True
+
+        width = rgb_image.shape[1]
+        height = rgb_image.shape[0]
+        image_pil_bboxes = self.gdino.bbox_to_scaled_xyxy(bboxes, width, height)
+        image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
+        return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, False
 
     def _scale_depth_anything(self, depth_raw: np.ndarray, depth_reference: np.ndarray | None) -> np.ndarray | None:
         depth_raw = depth_raw.astype(np.float32, copy=False)
@@ -392,24 +476,11 @@ class SemanticMapUpdater(Node):
         projected_cloud = frames.get("projected_cloud")
         rt_projected = frames.get("rt_projected")
 
-        img_pil = PILImg.fromarray(rgb_image[:, :, (2, 1, 0)])
+        img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection = self._run_proposal_backend(
+            rgb_image
+        )
         place_labels = None
         place_scores = None
-
-        bboxes, phrases, gdino_conf = self.gdino.predict(
-            img_pil, self.text_prompt, self.box_threshold, self.text_threshold
-        )
-        bboxes, gdino_conf, phrases, skip_detection = filter(
-            bboxes,
-            gdino_conf,
-            phrases,
-            self.filter_conf_bound,
-            self.filter_y_val,
-            self.filter_percent_width,
-            self.filter_percent_height,
-            self.filter_percent_area,
-            self.filter_enabled,
-        )
 
         if skip_detection:
             self._prune_nodes_in_fov(depth_image, rt_camera, rt_base, intrinsics)
@@ -423,8 +494,6 @@ class SemanticMapUpdater(Node):
 
         width = rgb_image.shape[1]
         height = rgb_image.shape[0]
-        image_pil_bboxes = self.gdino.bbox_to_scaled_xyxy(bboxes, width, height)
-        image_pil_bboxes, masks = self.sam.predict(img_pil, image_pil_bboxes)
         image_pil_bboxes, keep_index = filter_large_boxes(image_pil_bboxes, width, height, threshold=0.5)
         if not np.any(keep_index):
             if self._maybe_update_place_graph(rt_base):

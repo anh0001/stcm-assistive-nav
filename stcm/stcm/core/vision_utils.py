@@ -408,3 +408,73 @@ def filter(bboxes, conf_list, phrases ,conf_bound, yVal, precentWidth=0.5, prece
         if conf_list.size(dim=0) == 0:
             return bboxes, conf_list, phrases, True
         return bboxes, conf_list, phrases, False
+
+
+def filter_xyxy(
+    boxes,
+    conf_list,
+    phrases,
+    conf_bound,
+    yVal,
+    precentWidth=0.5,
+    precentHeight=0.5,
+    precentArea=0.05,
+    filterChoice=True,
+    image_width=640,
+    image_height=480,
+    return_mask=False,
+):
+    """Apply the same STCM heuristics to pixel-space xyxy boxes."""
+
+    if filterChoice:
+        image_area = float(image_width * image_height)
+        min_box_area = precentArea * image_area
+        phrases_np = np.array(phrases)
+        selected_mask = None
+
+        if conf_list.size(dim=0) >= 1:
+            widths = boxes[:, 2] - boxes[:, 0]
+            heights = boxes[:, 3] - boxes[:, 1]
+            centers_y = (boxes[:, 1] + boxes[:, 3]) / (2.0 * image_height)
+            box_areas = widths * heights
+
+            c1 = (heights / image_height) <= precentHeight
+            c2 = (widths / image_width) <= precentWidth
+            c3 = centers_y <= yVal
+            c4 = box_areas >= min_box_area
+            mask = c1 & c2 & c3 & c4
+            selected_mask = mask
+
+            door_indices = np.where(phrases_np == "door")[0]
+            for i in door_indices:
+                width = float(widths[i].item())
+                height = float(heights[i].item())
+                if width <= 0.0 or height / width < 1.7 or float(box_areas[i].item()) < 0.04 * image_area:
+                    mask[i] = False
+            selected_mask = mask
+
+            boxes = boxes[mask]
+            conf_list = conf_list[mask]
+            phrases_np = phrases_np[mask.cpu().numpy()]
+
+        if conf_list.size(dim=0) == 0:
+            if return_mask:
+                return boxes, conf_list, phrases_np.tolist(), True, selected_mask
+            return boxes, conf_list, phrases_np.tolist(), True
+
+        if any(conf >= conf_bound for conf in conf_list):
+            if return_mask:
+                return boxes, conf_list, phrases_np.tolist(), True, selected_mask
+            return boxes, conf_list, phrases_np.tolist(), True
+
+        if return_mask:
+            return boxes, conf_list, phrases_np.tolist(), False, selected_mask
+        return boxes, conf_list, phrases_np.tolist(), False
+
+    if conf_list.size(dim=0) == 0:
+        if return_mask:
+            return boxes, conf_list, phrases, True, None
+        return boxes, conf_list, phrases, True
+    if return_mask:
+        return boxes, conf_list, phrases, False, None
+    return boxes, conf_list, phrases, False

@@ -123,6 +123,17 @@ target_label_thresholds:
 box_threshold: 0.55
 text_threshold: 0.55
 
+# Optional alternative proposal backend.
+# "legacy" = STCM's original GroundingDINO + MobileSAM path.
+# "nyu_grounded_rgbd" = reuse the detector/SAM proposal stage from the
+# external nyu-grounded-rgbd repo while keeping STCM graph building unchanged.
+perception_backend: "legacy"
+nyu_grounded_repo_path: "/home/anhar/codes/nyu-grounded-rgbd"
+nyu_prompt_bank_path: "stcm/config/meeting_nyu_grounded_prompts.yaml"
+nyu_gdino_model_id: "IDEA-Research/grounding-dino-base"
+nyu_sam_backend: "mobilesam"
+nyu_sam_model_type: "vit_t"
+
 # ============================================================================
 # DETECTION FILTERING - Additional pruning before segmentation
 # ============================================================================
