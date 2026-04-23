@@ -266,6 +266,26 @@ Run the updater separately once you have an initial graph:
 ros2 run stcm semantic_map_updater graph_input_path:=/tmp/stcm.json
 ```
 
+## GT Annotation GUI
+
+Use the local Gradio app to inspect the meeting-room rosbag alongside the STCM
+ground-truth JSON and edit semantic object nodes.
+
+```bash
+export PYTHONUSERBASE="$HOME/.local/stcm_sys_py310"
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+python3 scripts/annotate_stcm_gt.py \
+  --bag /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed \
+  --input-json configs/experiments/ground_truth/meeting_stcm_gt.json
+```
+
+By default the app writes a draft file next to the input JSON
+(`meeting_stcm_gt_draft.json`) and preserves the read-only `place_graph` plus
+top-level metadata while regenerating the `llm` summary from the edited
+semantic graph.
+
 ## Generating semantic graphs on a new robot
 1. Ensure TF publishes the camera and base frames into `map`.
 2. Calibrate or set the `target_labels` to the objects that matter to your task.

@@ -369,7 +369,7 @@ def _empty_graph_data():
 def _graph_data_to_graph(graph_data):
     if not isinstance(graph_data, dict) or "nodes" not in graph_data:
         return nx.Graph()
-    return json_graph.node_link_graph(graph_data)
+    return json_graph.node_link_graph(graph_data, edges="links")
 
 
 def _safe_float(value):
@@ -525,7 +525,7 @@ def read_stcm_json(file="stcm.json"):
         return {
             "is_stcm": False,
             "stcm_version": None,
-            "semantic_graph": json_graph.node_link_graph(data),
+            "semantic_graph": json_graph.node_link_graph(data, edges="links"),
             "place_graph": nx.Graph(),
             "metadata": {},
             "llm": {},
@@ -545,8 +545,8 @@ def read_stcm_json(file="stcm.json"):
 def save_stcm_json(semantic_graph, place_graph=None, file="stcm.json", metadata=None):
     stcm_payload = {
         "stcm_version": STCM_VERSION,
-        "semantic_graph": json_graph.node_link_data(semantic_graph),
-        "place_graph": json_graph.node_link_data(place_graph)
+        "semantic_graph": json_graph.node_link_data(semantic_graph, edges="links"),
+        "place_graph": json_graph.node_link_data(place_graph, edges="links")
         if place_graph is not None
         else _empty_graph_data(),
         "llm": _build_llm_summary(semantic_graph, place_graph),
@@ -563,7 +563,7 @@ def save_graph_json(graph, file="graph.json"):
     save graph to graph.json
     '''
     file = file
-    data_to_save = json_graph.node_link_data(graph)
+    data_to_save = json_graph.node_link_data(graph, edges="links")
     with open(file, "w") as file:
         json.dump(data_to_save, file, indent=4)
         file.close()
@@ -578,7 +578,7 @@ def read_graph_json(file="graph.json", graph_key=None):
         return _graph_data_to_graph(graph_data)
     if graph_key and graph_key != "semantic_graph":
         return nx.Graph()
-    return json_graph.node_link_graph(data)
+    return json_graph.node_link_graph(data, edges="links")
 
 
 def read_and_visualize_graph(map_file_path, map_metadata_filepath, on_map=False, catgeories=[], graph=None):

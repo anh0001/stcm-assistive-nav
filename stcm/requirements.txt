@@ -28,6 +28,7 @@ PyYAML
 packaging
 chardet
 absl-py
+gradio>=5.0.0
 
 # ROS helper
 # ros2_numpy is built from Box-Robotics source as a git submodule (see ros2_numpy/ directory)
