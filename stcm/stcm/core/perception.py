@@ -444,3 +444,26 @@ class SegmentAnythingPredictor(ObjectPredictor):
         except ValueError as ve:
             print(f"ValueError: {ve}")
             return None, None
+
+    def predict_point(self, image, point_xy, *, multimask_output=True):
+        """Predict a single best mask for a positive click prompt."""
+        try:
+            image = np.array(image)
+            point_xy = np.asarray(point_xy, dtype=np.float32).reshape(1, 2)
+            point_labels = np.asarray([1], dtype=np.int32)
+            self.predictor.set_image(image)
+            masks, scores, _ = self.predictor.predict(
+                point_coords=point_xy,
+                point_labels=point_labels,
+                box=None,
+                multimask_output=bool(multimask_output),
+            )
+            if masks is None or len(masks) == 0:
+                return None, None
+            best_idx = int(np.argmax(scores))
+            best_mask = np.asarray(masks[best_idx]).astype(np.uint8)
+            best_score = float(np.asarray(scores[best_idx]).item())
+            return best_mask, best_score
+        except ValueError as ve:
+            print(f"ValueError: {ve}")
+            return None, None

@@ -49,12 +49,12 @@
         {
             "label": "Launch GT Annotation GUI",
             "type": "shell",
-            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && export MPLCONFIGDIR=/tmp/matplotlib-${USER} && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 -c \"import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('gradio') else 1)\" || python3 -m pip install --user -r stcm/requirements.txt && export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && export MPLCONFIGDIR=/tmp/matplotlib-${USER} && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 scripts/annotate_stcm_gt.py --host 0.0.0.0 --bag /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed --input-json configs/experiments/ground_truth/meeting_stcm_gt.json",
+            "command": "export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && export MPLCONFIGDIR=/tmp/matplotlib-${USER} && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 -c \"import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('gradio') else 1)\" || python3 -m pip install --user -r stcm/requirements.txt && export PYTHONUSERBASE=\"${PYTHONUSERBASE:-$HOME/.local/stcm_sys_py310}\" && export DISPLAY=:77 && export MPLCONFIGDIR=/tmp/matplotlib-${USER} && source /opt/ros/humble/setup.bash && source install/setup.bash && python3 scripts/annotate_stcm_gt.py --config stcm/config/semantic_mapping_params.yaml --host 0.0.0.0 --bag /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed --input-json configs/experiments/ground_truth/meeting_stcm_gt.json",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [],
-            "detail": "Launch the local Gradio app for meeting-room GT inspection and semantic-object annotation"
+            "detail": "Launch the local Gradio app for meeting-room GT inspection with RGB-click SAM + projected-LiDAR object annotation"
         },
         {
             "label": "Show Experiment Results Table",

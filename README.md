@@ -277,6 +277,7 @@ source /opt/ros/humble/setup.bash
 source install/setup.bash
 
 python3 scripts/annotate_stcm_gt.py \
+  --config stcm/config/semantic_mapping_params.yaml \
   --bag /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed \
   --input-json configs/experiments/ground_truth/meeting_stcm_gt.json
 ```
@@ -284,7 +285,11 @@ python3 scripts/annotate_stcm_gt.py \
 By default the app writes a draft file next to the input JSON
 (`meeting_stcm_gt_draft.json`) and preserves the read-only `place_graph` plus
 top-level metadata while regenerating the `llm` summary from the edited
-semantic graph.
+semantic graph. The RGB panel now supports `Add Object From RGB`: arm the click,
+click the synchronized frame, let MobileSAM segment the object, and the tool
+will estimate `x/y/z` from projected LiDAR points that land inside the mask
+using the densest 3D voxel. If no valid projected-LiDAR pose is available, the
+annotator falls back to the paired depth image when configured.
 
 ## Generating semantic graphs on a new robot
 1. Ensure TF publishes the camera and base frames into `map`.

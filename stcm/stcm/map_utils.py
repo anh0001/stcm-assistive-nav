@@ -156,6 +156,118 @@ def pose_in_map_frame_from_projected(
     return mean_pose.tolist()
 
 
+def pose_in_map_frame_from_projected_mode(
+    projected_cloud,
+    rt_cloud,
+    rt_base,
+    *,
+    segment=None,
+    mask_threshold=0.5,
+    rt_camera=None,
+    voxel_size=0.15,
+):
+    """Estimate an object pose from the densest projected-LiDAR voxel inside a mask."""
+    if projected_cloud is None or rt_cloud is None or rt_base is None:
+        return None
+
+    field_names = _cloud_field_names(projected_cloud)
+    if "u" not in field_names or "v" not in field_names:
+        return None
+
+    xyz = _extract_cloud_xyz(projected_cloud)
+    if xyz is None:
+        return None
+
+    u_coords = np.asarray(projected_cloud["u"], dtype=np.float32)
+    v_coords = np.asarray(projected_cloud["v"], dtype=np.float32)
+    valid = np.isfinite(u_coords) & np.isfinite(v_coords)
+    if xyz.shape[0] != u_coords.shape[0]:
+        return None
+    valid &= np.isfinite(xyz).all(axis=1)
+    valid &= ~(np.all(xyz == 0.0, axis=1))
+    if not np.any(valid):
+        return None
+
+    xyz = xyz[valid]
+    u_coords = u_coords[valid]
+    v_coords = v_coords[valid]
+
+    u_idx = np.rint(u_coords).astype(np.int32)
+    v_idx = np.rint(v_coords).astype(np.int32)
+    if segment is not None:
+        height, width = segment.shape[:2]
+        inside = (u_idx >= 0) & (u_idx < width) & (v_idx >= 0) & (v_idx < height)
+        if not np.any(inside):
+            return None
+        xyz = xyz[inside]
+        u_idx = u_idx[inside]
+        v_idx = v_idx[inside]
+
+        mask = np.asarray(segment[v_idx, u_idx] > mask_threshold, dtype=bool)
+        if not np.any(mask):
+            return None
+        xyz = xyz[mask]
+        u_idx = u_idx[mask]
+        v_idx = v_idx[mask]
+    elif xyz.size == 0:
+        return None
+
+    if xyz.size == 0:
+        return None
+
+    if rt_camera is not None:
+        rt_camera_inv = np.linalg.inv(rt_camera)
+        rt_cloud_to_camera = rt_camera_inv @ rt_cloud
+        xyz_camera = np.dot(rt_cloud_to_camera[:3, :3], xyz.T).T + rt_cloud_to_camera[:3, 3]
+        depth_vals = xyz_camera[:, 2]
+        depth_valid = np.isfinite(depth_vals) & (depth_vals > 0.0)
+        if not np.any(depth_valid):
+            return None
+        xyz = xyz[depth_valid]
+        depth_vals = depth_vals[depth_valid]
+    else:
+        depth_vals = np.linalg.norm(xyz, axis=1)
+
+    if xyz.size == 0:
+        return None
+
+    xyz_base = np.dot(rt_cloud[:3, :3], xyz.T).T
+    xyz_base += rt_cloud[:3, 3]
+
+    xyz_map = np.dot(rt_base[:3, :3], xyz_base.T).T
+    xyz_map += rt_base[:3, 3]
+
+    voxel_size = max(float(voxel_size), 1e-6)
+    voxel_indices = np.floor(xyz_map / voxel_size).astype(np.int64)
+    unique_voxels, inverse = np.unique(voxel_indices, axis=0, return_inverse=True)
+    if unique_voxels.size == 0:
+        return None
+
+    best_choice = None
+    for voxel_id, voxel_index in enumerate(unique_voxels):
+        members = inverse == voxel_id
+        count = int(np.count_nonzero(members))
+        if count <= 0:
+            continue
+        voxel_depth = float(np.median(depth_vals[members]))
+        voxel_centroid = np.mean(xyz_map[members], axis=0)
+        choice = (-count, voxel_depth, tuple(int(value) for value in voxel_index.tolist()), voxel_centroid, count)
+        if best_choice is None or choice[:3] < best_choice[:3]:
+            best_choice = choice
+
+    if best_choice is None:
+        return None
+
+    centroid = best_choice[3]
+    return {
+        "pose": centroid.tolist(),
+        "voxel_count": int(best_choice[4]),
+        "point_count": int(xyz_map.shape[0]),
+        "voxel_index": list(best_choice[2]),
+        "voxel_size": voxel_size,
+    }
+
+
 def pose_to_map_pixel(map_metadata, pose):
     pose_x = pose[0]
     pose_y = pose[1]
