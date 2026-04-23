@@ -24,6 +24,7 @@ DEFAULT_COLUMNS = [
     "benchmark_tp",
     "benchmark_fp",
     "benchmark_fn",
+    "wrong_label_near_gt_count",
     "failure_flags",
 ]
 
@@ -39,6 +40,7 @@ HEADERS = {
     "benchmark_tp": "TP",
     "benchmark_fp": "FP",
     "benchmark_fn": "FN",
+    "wrong_label_near_gt_count": "wrong_label_near_gt",
     "failure_flags": "failure_flags",
 }
 
@@ -51,6 +53,7 @@ NUMERIC_COLUMNS = {
     "benchmark_tp",
     "benchmark_fp",
     "benchmark_fn",
+    "wrong_label_near_gt_count",
 }
 
 

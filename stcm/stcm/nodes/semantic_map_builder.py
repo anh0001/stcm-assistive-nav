@@ -31,6 +31,7 @@ from ..core.perception import (
     SegmentAnythingPredictor,
 )
 from ..core.gng_instance_manager import GngInstanceManager
+from ..core.label_calibration import apply_geometry_priors, choose_label
 from ..core.nyu_grounded_backend import NyuGroundedRgbdProposalBackend
 from ..core.place_gng import PlaceGng
 from ..core.vision_utils import annotate, filter, filter_large_boxes, filter_xyxy, overlay_masks
@@ -93,6 +94,12 @@ class SemanticMapBuilder(Node):
         ).value
         self.nyu_sam_backend = self.declare_parameter("nyu_sam_backend", "mobilesam").value
         self.nyu_sam_model_type = self.declare_parameter("nyu_sam_model_type", "vit_t").value
+        self.label_rerank_enabled = bool(self.declare_parameter("label_rerank_enabled", False).value)
+        self.label_rerank_model = self.declare_parameter(
+            "label_rerank_model",
+            "openai/clip-vit-base-patch32",
+        ).value
+        self.label_margin_min = float(self.declare_parameter("label_margin_min", 0.1).value)
         self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
         self.filter_y_val = float(self.declare_parameter("filter_y_val", 1.0).value)
         self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.9).value)
@@ -118,6 +125,12 @@ class SemanticMapBuilder(Node):
         )
         self.gng_outlier_gate_meters = float(
             self.declare_parameter("gng_outlier_gate_meters", 0.0).value
+        )
+        self.instance_label_voting_enabled = bool(
+            self.declare_parameter("instance_label_voting_enabled", False).value
+        )
+        self.cross_label_merge_distance_m = float(
+            self.declare_parameter("cross_label_merge_distance_m", self.gng_cluster_merge_distance).value
         )
         self.place_gng_enabled = bool(self.declare_parameter("place_gng_enabled", False).value)
         self.place_gng_distance_threshold = float(
@@ -167,6 +180,7 @@ class SemanticMapBuilder(Node):
             self.offline_frame_stride = 1
 
         self.pose_history: Dict[str, List[List[float]]] = {label: [] for label in self.distance_thresholds}
+        self.geometry_priors = self._load_geometry_priors()
         self.graph = nx.Graph()
         self.place_graph = nx.Graph()
         self.iteration = 0
@@ -216,6 +230,9 @@ class SemanticMapBuilder(Node):
                 sam_checkpoint=self._expanduser_if_set(self.mobilesam_checkpoint),
                 box_threshold=self.box_threshold,
                 text_threshold=self.text_threshold,
+                label_rerank_enabled=self.label_rerank_enabled,
+                label_rerank_model=self.label_rerank_model,
+                label_margin_min=self.label_margin_min,
                 device="cuda" if torch.cuda.is_available() else "cpu",
             )
             self.get_logger().info(
@@ -243,6 +260,8 @@ class SemanticMapBuilder(Node):
                 min_observations_to_commit=self.gng_min_observations_to_commit,
                 cluster_merge_distance=self.gng_cluster_merge_distance,
                 outlier_gate_meters=self.gng_outlier_gate_meters,
+                instance_label_voting_enabled=self.instance_label_voting_enabled,
+                cross_label_merge_distance_m=self.cross_label_merge_distance_m,
                 logger=self.get_logger(),
             )
             if not self._gng_manager.enabled:
@@ -334,6 +353,31 @@ class SemanticMapBuilder(Node):
             token_lookup[normalized] = normalized.split()
         self._label_token_lookup = token_lookup
         return lookup
+
+    def _load_geometry_priors(self) -> dict[str, dict[str, float]]:
+        priors: dict[str, dict[str, float]] = {}
+        try:
+            prefix_params = self.get_parameters_by_prefix("per_label_geometry_priors")
+        except Exception:
+            prefix_params = {}
+
+        nested: dict[str, dict[str, float]] = {}
+        for key, param in prefix_params.items():
+            parts = str(key).split(".")
+            if len(parts) != 2:
+                continue
+            label_key, field_name = parts
+            nested.setdefault(label_key, {})[field_name] = float(param.value)
+
+        for label_key, values in nested.items():
+            canonical = self._canonicalize_geometry_label(label_key)
+            if canonical is not None:
+                priors[canonical] = values
+        return priors
+
+    def _canonicalize_geometry_label(self, label_key: str) -> str | None:
+        normalized = self._normalize_label_key(str(label_key).replace("_", " "))
+        return self._label_lookup.get(normalized)
 
     def _normalize_label_key(self, text: str) -> str:
         tokens = []
@@ -455,14 +499,24 @@ class SemanticMapBuilder(Node):
             self._depth_anything_cache = scaled
         return scaled
 
-    def _filter_to_target_labels(self, boxes, masks, scores, phrases):
+    def _filter_to_target_labels(self, boxes, masks, scores, phrases, label_score_maps=None, crop_embeddings=None):
         valid_indices = []
         canonical_phrases = []
+        canonical_score_maps = []
         for idx, phrase in enumerate(phrases):
             canonical_label = self._canonicalize_phrase(phrase)
             if canonical_label is None:
                 continue
             canonical_phrases.append(canonical_label)
+            if label_score_maps is not None:
+                mapped_scores = {
+                    canonical_key: float(score)
+                    for raw_key, score in (label_score_maps[idx] or {}).items()
+                    if (canonical_key := self._canonicalize_phrase(raw_key)) is not None
+                }
+                if canonical_label not in mapped_scores:
+                    mapped_scores[canonical_label] = float(scores[idx].item() if hasattr(scores[idx], "item") else scores[idx])
+                canonical_score_maps.append(mapped_scores)
             valid_indices.append(idx)
 
         if not valid_indices:
@@ -479,7 +533,15 @@ class SemanticMapBuilder(Node):
         filtered_boxes = _select(boxes)
         filtered_masks = _select(masks)
         filtered_scores = _select(scores)
-        return filtered_boxes, filtered_masks, filtered_scores, canonical_phrases
+        filtered_embeddings = _select(crop_embeddings) if crop_embeddings is not None else None
+        return (
+            filtered_boxes,
+            filtered_masks,
+            filtered_scores,
+            canonical_phrases,
+            canonical_score_maps if label_score_maps is not None else None,
+            filtered_embeddings,
+        )
 
     def _run_proposal_backend(self, rgb_image: np.ndarray):
         rgb_for_model = rgb_image[:, :, (2, 1, 0)]
@@ -493,6 +555,8 @@ class SemanticMapBuilder(Node):
             masks = batch.masks
             gdino_conf = batch.scores
             phrases = batch.phrases
+            label_score_maps = batch.label_score_maps
+            crop_embeddings = batch.crop_embeddings
             self.get_logger().info(
                 f"Proposal backend '{self.perception_backend}' detected {len(phrases)} objects: {phrases}"
             )
@@ -516,9 +580,14 @@ class SemanticMapBuilder(Node):
             if keep_mask is not None:
                 index_tensor = torch.nonzero(keep_mask, as_tuple=False).flatten().to(device=masks.device)
                 masks = masks.index_select(0, index_tensor)
+                if crop_embeddings is not None:
+                    crop_embeddings = crop_embeddings.index_select(0, index_tensor.to(device=crop_embeddings.device))
+                if label_score_maps is not None:
+                    kept = index_tensor.detach().cpu().tolist()
+                    label_score_maps = [label_score_maps[idx] for idx in kept]
             self._record_timing("detection_filter", filter_start)
             self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
-            return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection
+            return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings, skip_detection
 
         gdino_start = time.perf_counter()
         bboxes, phrases, gdino_conf = self.gdino.predict(
@@ -543,7 +612,7 @@ class SemanticMapBuilder(Node):
         self._record_timing("detection_filter", filter_start)
         self.get_logger().info(f"After filtering: {len(phrases)} objects remain - {phrases}")
         if skip_detection:
-            return img_pil, None, None, gdino_conf, phrases, True
+            return img_pil, None, None, gdino_conf, phrases, None, None, True
 
         width = rgb_image.shape[1]
         height = rgb_image.shape[0]
@@ -558,9 +627,9 @@ class SemanticMapBuilder(Node):
         except Exception as exc:
             self._count_event("sam_failures")
             self.get_logger().error(f"SAM segmentation failed: {exc}")
-            return img_pil, None, None, gdino_conf, phrases, True
+            return img_pil, None, None, gdino_conf, phrases, None, None, True
 
-        return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, False
+        return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, None, None, False
 
     def _process_frame(self) -> None:
         if self.listener is None:
@@ -585,7 +654,7 @@ class SemanticMapBuilder(Node):
         projected_cloud = frames.get("projected_cloud")
         rt_projected = frames.get("rt_projected")
 
-        img_pil, image_pil_bboxes, masks, gdino_conf, phrases, skip_detection = self._run_proposal_backend(
+        img_pil, image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings, skip_detection = self._run_proposal_backend(
             rgb_image
         )
         place_labels = None
@@ -615,10 +684,22 @@ class SemanticMapBuilder(Node):
         gdino_conf = gdino_conf[keep_index]
         selected_idx = np.where(keep_index_np)[0]
         phrases = [phrases[i] for i in selected_idx]
+        if label_score_maps is not None:
+            label_score_maps = [label_score_maps[i] for i in selected_idx]
+        if crop_embeddings is not None:
+            select_tensor = torch.as_tensor(selected_idx, dtype=torch.long, device=crop_embeddings.device)
+            crop_embeddings = crop_embeddings.index_select(0, select_tensor)
         self.get_logger().info(f"After large box filter: {len(phrases)} detections remain")
 
         self.get_logger().info("Filtering to target labels...")
-        filtered = self._filter_to_target_labels(image_pil_bboxes, masks, gdino_conf, phrases)
+        filtered = self._filter_to_target_labels(
+            image_pil_bboxes,
+            masks,
+            gdino_conf,
+            phrases,
+            label_score_maps=label_score_maps,
+            crop_embeddings=crop_embeddings,
+        )
         self.get_logger().info("Target label filtering complete")
         if filtered is None:
             self._count_event("target_label_empty_frames")
@@ -627,7 +708,7 @@ class SemanticMapBuilder(Node):
                 self._publish_place_graph_markers()
             self._record_timing("frame_total", frame_start)
             return
-        image_pil_bboxes, masks, gdino_conf, phrases = filtered
+        image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings = filtered
         place_labels = phrases
         place_scores = gdino_conf
         self._count_event("target_detections", len(phrases))
@@ -659,6 +740,8 @@ class SemanticMapBuilder(Node):
                 rt_projected=rt_projected,
                 img_pil=img_pil,
                 stamp=frames.get("stamp"),
+                label_score_maps=label_score_maps,
+                appearance_embeddings=crop_embeddings,
             )
             self._record_timing("graph_update", update_start)
             graph_updated = True
@@ -680,6 +763,8 @@ class SemanticMapBuilder(Node):
                 rt_projected=None,
                 img_pil=img_pil,
                 stamp=frames.get("stamp"),
+                label_score_maps=label_score_maps,
+                appearance_embeddings=crop_embeddings,
             )
             self._record_timing("graph_update", update_start)
             graph_updated = True
@@ -749,6 +834,22 @@ class SemanticMapBuilder(Node):
                 depth_method = "Depth Anything"
 
         return pose, depth_method
+
+    def _apply_geometry_label_selection(self, label: str, pose, mask, label_scores):
+        adjusted_scores = dict(label_scores or {})
+        if label not in adjusted_scores:
+            adjusted_scores[label] = 1.0
+        if self.geometry_priors:
+            adjusted_scores = apply_geometry_priors(
+                label_scores=adjusted_scores,
+                pose=pose,
+                mask=mask,
+                priors=self.geometry_priors,
+            )
+        decision = choose_label(adjusted_scores, self.label_margin_min if adjusted_scores else 0.0)
+        if decision.label is None:
+            return None, adjusted_scores, decision.confidence
+        return decision.label, decision.label_scores, decision.confidence
 
     @staticmethod
     def _time_from_header(msg) -> int:
@@ -1216,6 +1317,8 @@ class SemanticMapBuilder(Node):
         rt_projected=None,
         img_pil=None,
         stamp=None,
+        label_score_maps=None,
+        appearance_embeddings=None,
     ):
         # Log transform chain once at startup
         if not hasattr(self, "_debug_logged"):
@@ -1256,20 +1359,40 @@ class SemanticMapBuilder(Node):
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
 
+            score = None
+            if scores is not None:
+                score = scores[idx]
+                if hasattr(score, "item"):
+                    score = float(score.item())
+                else:
+                    score = float(score)
+            label_scores = label_score_maps[idx] if label_score_maps is not None else None
+            selected_label, label_scores, score = self._apply_geometry_label_selection(label, pose, mask, label_scores)
+            if selected_label is None:
+                self._count_event("geometry_veto_frames")
+                self.get_logger().info(f"    Geometry-aware label veto rejected '{label}' at pose {pose}")
+                continue
+            label = selected_label
+            appearance_embedding = None
+            if appearance_embeddings is not None:
+                appearance_embedding = appearance_embeddings[idx]
+                if hasattr(appearance_embedding, "detach"):
+                    appearance_embedding = appearance_embedding.detach().cpu().numpy()
+
             if self._gng_manager is not None and self._gng_manager.enabled:
                 self.get_logger().info(f"    Running GNG update for '{label}'...")
                 self._count_event("gng_update_calls")
-                score = None
-                if scores is not None:
-                    score = scores[idx]
-                    if hasattr(score, "item"):
-                        score = float(score.item())
-                    else:
-                        score = float(score)
                 self.get_logger().info(f"    Calling GNG manager.update() with pose={pose}, score={score}")
                 try:
                     gng_start = time.perf_counter()
-                    assignment = self._gng_manager.update(label, np.asarray(pose), score, stamp)
+                    assignment = self._gng_manager.update(
+                        label,
+                        np.asarray(pose),
+                        score,
+                        stamp,
+                        label_scores=label_scores,
+                        appearance_embedding=appearance_embedding,
+                    )
                     self._record_timing("instance_gng_update", gng_start)
                     self.get_logger().info(f"    GNG update complete: assignment={'committed' if assignment and assignment.committed else 'not committed'}")
                 except Exception as e:
@@ -1287,6 +1410,9 @@ class SemanticMapBuilder(Node):
                     node_data["pose"] = pose_list
                     node_data["robot_pose"] = rt_base.tolist()
                     node_data["stability"] = assignment.stability
+                    node_data["category"] = assignment.label
+                    node_data["label_votes"] = assignment.label_votes
+                    node_data["last_label_scores"] = assignment.last_label_scores
                     continue
                 self.graph.add_node(
                     node_id,
@@ -1294,11 +1420,13 @@ class SemanticMapBuilder(Node):
                     instance_id=assignment.instance_id,
                     pose=pose_list,
                     robot_pose=rt_base.tolist(),
-                    category=label,
+                    category=assignment.label,
                     stability=assignment.stability,
+                    label_votes=assignment.label_votes,
+                    last_label_scores=assignment.last_label_scores,
                 )
                 self.get_logger().info(
-                    f"Added '{label}' at [{pose_list[0]:.2f}, {pose_list[1]:.2f}, {pose_list[2]:.2f}] "
+                    f"Added '{assignment.label}' at [{pose_list[0]:.2f}, {pose_list[1]:.2f}, {pose_list[2]:.2f}] "
                     f"({depth_method})"
                 )
                 continue

@@ -62,6 +62,7 @@ def _benchmark_summary(result: dict[str, Any]) -> dict[str, Any]:
         "xy_error_rmse_m": (summary.get("xy_error") or {}).get("rmse_m"),
         "xy_error_p95_m": (summary.get("xy_error") or {}).get("p95_m"),
         "duplicate_pair_count": summary.get("duplicate_pair_count"),
+        "wrong_label_near_gt_count": len(benchmark.get("wrong_label_near_gt", []) or []),
         "benchmark_error": benchmark.get("error"),
     }
 
@@ -174,6 +175,7 @@ def aggregate(results_dir: Path) -> dict[str, Path]:
             "xy_error_rmse_m",
             "xy_error_p95_m",
             "duplicate_pair_count",
+            "wrong_label_near_gt_count",
             "benchmark_error",
             "failure_flags",
             "result_path",

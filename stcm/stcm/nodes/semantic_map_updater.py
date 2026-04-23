@@ -82,6 +82,12 @@ class SemanticMapUpdater(Node):
         ).value
         self.nyu_sam_backend = self.declare_parameter("nyu_sam_backend", "mobilesam").value
         self.nyu_sam_model_type = self.declare_parameter("nyu_sam_model_type", "vit_t").value
+        self.label_rerank_enabled = bool(self.declare_parameter("label_rerank_enabled", False).value)
+        self.label_rerank_model = self.declare_parameter(
+            "label_rerank_model",
+            "openai/clip-vit-base-patch32",
+        ).value
+        self.label_margin_min = float(self.declare_parameter("label_margin_min", 0.1).value)
         self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
         self.filter_y_val = float(self.declare_parameter("filter_y_val", 0.8).value)
         self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.8).value)
@@ -107,6 +113,12 @@ class SemanticMapUpdater(Node):
         )
         self.gng_outlier_gate_meters = float(
             self.declare_parameter("gng_outlier_gate_meters", 0.0).value
+        )
+        self.instance_label_voting_enabled = bool(
+            self.declare_parameter("instance_label_voting_enabled", False).value
+        )
+        self.cross_label_merge_distance_m = float(
+            self.declare_parameter("cross_label_merge_distance_m", self.gng_cluster_merge_distance).value
         )
         self.place_gng_enabled = bool(self.declare_parameter("place_gng_enabled", False).value)
         self.place_gng_distance_threshold = float(
@@ -205,6 +217,9 @@ class SemanticMapUpdater(Node):
                 sam_checkpoint=self._expanduser_if_set(self.mobilesam_checkpoint),
                 box_threshold=self.box_threshold,
                 text_threshold=self.text_threshold,
+                label_rerank_enabled=self.label_rerank_enabled,
+                label_rerank_model=self.label_rerank_model,
+                label_margin_min=self.label_margin_min,
                 device="cuda" if torch.cuda.is_available() else "cpu",
             )
             self.get_logger().info(
@@ -232,6 +247,8 @@ class SemanticMapUpdater(Node):
                 min_observations_to_commit=self.gng_min_observations_to_commit,
                 cluster_merge_distance=self.gng_cluster_merge_distance,
                 outlier_gate_meters=self.gng_outlier_gate_meters,
+                instance_label_voting_enabled=self.instance_label_voting_enabled,
+                cross_label_merge_distance_m=self.cross_label_merge_distance_m,
                 logger=self.get_logger(),
             )
             if self._gng_manager.enabled:

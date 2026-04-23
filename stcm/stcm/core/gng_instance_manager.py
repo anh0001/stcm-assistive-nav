@@ -1,13 +1,15 @@
-"""Instance management using per-label Growing Neural Gas (GNG) clustering."""
+"""Instance management using GNG clustering with cross-label instance memory."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 import threading
 import time
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
+
+from .label_calibration import normalize_score
 
 try:
     from gng import GNGConfiguration, GrowingNeuralGas
@@ -23,6 +25,9 @@ class InstanceAssignment:
     centroid: np.ndarray
     stability: float
     committed: bool
+    label_votes: dict[str, float]
+    last_label_scores: dict[str, float]
+    appearance_embedding: np.ndarray | None = None
 
 
 @dataclass
@@ -33,12 +38,14 @@ class ClusterState:
     first_seen: float
     last_seen: float
     committed: bool
+    label_votes: dict[str, float]
+    last_label_scores: dict[str, float]
+    appearance_embedding: np.ndarray | None = None
 
 
 @dataclass
 class _LabelState:
     model: "GrowingNeuralGas"
-    clusters: Dict[str, ClusterState]
     sample_count: int = 0  # Track insertions to avoid querying cold models
 
 
@@ -60,6 +67,8 @@ class GngInstanceManager:
         min_observations_to_commit: int,
         cluster_merge_distance: float,
         outlier_gate_meters: float,
+        instance_label_voting_enabled: bool,
+        cross_label_merge_distance_m: float,
         logger=None,
     ) -> None:
         self.enabled = bool(enabled)
@@ -74,8 +83,11 @@ class GngInstanceManager:
         self._min_obs = int(min_observations_to_commit)
         self._merge_distance = float(cluster_merge_distance)
         self._outlier_gate = float(outlier_gate_meters)
+        self._label_voting_enabled = bool(instance_label_voting_enabled)
+        self._cross_label_merge_distance = float(cross_label_merge_distance_m)
         self._logger = logger
         self._states: Dict[str, _LabelState] = {}
+        self._clusters: Dict[str, ClusterState] = {}
         self._instance_counters: Dict[str, int] = {}
         self._used_instance_ids: set[str] = set()
         self._warned_per_label = False
@@ -117,13 +129,16 @@ class GngInstanceManager:
             for node_id, pose in entries:
                 instance_id = str(node_id)
                 self._used_instance_ids.add(instance_id)
-                state.clusters[instance_id] = ClusterState(
+                votes = {label: float(max(1, self._min_obs))}
+                self._clusters[instance_id] = ClusterState(
                     instance_id=instance_id,
                     centroid=pose.copy(),
                     observations=max(1, self._min_obs),
                     first_seen=time.time(),
                     last_seen=time.time(),
                     committed=True,
+                    label_votes=votes,
+                    last_label_scores=dict(votes),
                 )
 
     def update(
@@ -132,6 +147,8 @@ class GngInstanceManager:
         centroid: np.ndarray,
         confidence: Optional[float] = None,
         stamp=None,
+        label_scores: Optional[dict[str, float]] = None,
+        appearance_embedding: Optional[np.ndarray] = None,
     ) -> Optional[InstanceAssignment]:
         if not self.enabled:
             return None
@@ -141,15 +158,17 @@ class GngInstanceManager:
         centroid_arr = np.asarray(centroid, dtype=np.float64).reshape(3)
         stamp_sec = self._stamp_to_seconds(stamp)
 
-        if self._outlier_gate > 0.0 and state.clusters:
+        if self._outlier_gate > 0.0 and self._clusters:
             nearest = min(
                 np.linalg.norm(centroid_arr - cluster.centroid)
-                for cluster in state.clusters.values()
+                for cluster in self._clusters.values()
             )
             if nearest > self._outlier_gate:
                 return None
 
         prob = self._clamp_confidence(confidence)
+        label_score_map = self._normalize_label_scores(label, label_scores, prob)
+        appearance_arr = self._normalize_embedding(appearance_embedding)
         if prob is None:
             state.model.insert(centroid_arr[None, :])
         else:
@@ -163,24 +182,15 @@ class GngInstanceManager:
         min_samples_for_query = max(self._lambda * 2, 20)  # 2x lambda or 20, whichever is larger
         if state.sample_count < min_samples_for_query:
             # Not enough data yet - fall back to simple distance-based clustering
-            cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
-            cluster_state.observations += 1
-            cluster_state.last_seen = stamp_sec
-            if cluster_state.observations == 1:
-                cluster_state.first_seen = stamp_sec
-            cluster_state.centroid = self._blend_centroid(
-                cluster_state.centroid, centroid_arr, prob
-            )
-            if not cluster_state.committed and self._min_obs > 0:
-                if cluster_state.observations >= self._min_obs:
-                    cluster_state.committed = True
-            stability = self._compute_stability(cluster_state)
-            return InstanceAssignment(
-                instance_id=cluster_state.instance_id,
-                label=label,
-                centroid=cluster_state.centroid.copy(),
-                stability=stability,
-                committed=cluster_state.committed or self._min_obs <= 0,
+            cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+            return self._finalize_assignment(
+                cluster_state,
+                observed_label=label,
+                centroid=centroid_arr,
+                confidence=prob,
+                stamp_sec=stamp_sec,
+                label_scores=label_score_map,
+                appearance_embedding=appearance_arr,
             )
 
         # GNG queries must run while the background thread is paused.
@@ -209,17 +219,16 @@ class GngInstanceManager:
                     f"Falling back to distance-based clustering."
                 )
             # Fall back to simple clustering without querying GNG nodes
-            cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
-            cluster_state.observations += 1
-            cluster_state.last_seen = stamp_sec
-            cluster_state.centroid = self._blend_centroid(cluster_state.centroid, centroid_arr, prob)
-            stability = self._compute_stability(cluster_state)
-            return InstanceAssignment(
-                instance_id=cluster_state.instance_id,
-                label=label,
-                centroid=cluster_state.centroid.copy(),
-                stability=stability,
-                committed=True,  # Commit immediately when falling back
+            cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+            return self._finalize_assignment(
+                cluster_state,
+                observed_label=label,
+                centroid=centroid_arr,
+                confidence=prob,
+                stamp_sec=stamp_sec,
+                label_scores=label_score_map,
+                appearance_embedding=appearance_arr,
+                force_commit=True,
             )
         
         if pause_exception[0] is not None:
@@ -230,24 +239,15 @@ class GngInstanceManager:
         try:
             nodes = state.model.nodes()
             if not nodes:
-                cluster_state = self._assign_component(label, state, centroid_arr, stamp_sec)
-                cluster_state.observations += 1
-                cluster_state.last_seen = stamp_sec
-                if cluster_state.observations == 1:
-                    cluster_state.first_seen = stamp_sec
-                cluster_state.centroid = self._blend_centroid(
-                    cluster_state.centroid, centroid_arr, prob
-                )
-                if not cluster_state.committed and self._min_obs > 0:
-                    if cluster_state.observations >= self._min_obs:
-                        cluster_state.committed = True
-                stability = self._compute_stability(cluster_state)
-                return InstanceAssignment(
-                    instance_id=cluster_state.instance_id,
-                    label=label,
-                    centroid=cluster_state.centroid.copy(),
-                    stability=stability,
-                    committed=cluster_state.committed or self._min_obs <= 0,
+                cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+                return self._finalize_assignment(
+                    cluster_state,
+                    observed_label=label,
+                    centroid=centroid_arr,
+                    confidence=prob,
+                    stamp_sec=stamp_sec,
+                    label_scores=label_score_map,
+                    appearance_embedding=appearance_arr,
                 )
 
             node_to_component, component_centroids = self._compute_components(nodes)
@@ -262,26 +262,15 @@ class GngInstanceManager:
                 return None
             component_centroid = component_centroids[component_key]
 
-            cluster_state = self._assign_component(label, state, component_centroid, stamp_sec)
-            cluster_state.observations += 1
-            cluster_state.last_seen = stamp_sec
-            if cluster_state.observations == 1:
-                cluster_state.first_seen = stamp_sec
-
-            cluster_state.centroid = self._blend_centroid(
-                cluster_state.centroid, component_centroid, prob
-            )
-            if not cluster_state.committed and self._min_obs > 0:
-                if cluster_state.observations >= self._min_obs:
-                    cluster_state.committed = True
-
-            stability = self._compute_stability(cluster_state)
-            return InstanceAssignment(
-                instance_id=cluster_state.instance_id,
-                label=label,
-                centroid=cluster_state.centroid.copy(),
-                stability=stability,
-                committed=cluster_state.committed or self._min_obs <= 0,
+            cluster_state = self._assign_component(label, component_centroid, stamp_sec)
+            return self._finalize_assignment(
+                cluster_state,
+                observed_label=label,
+                centroid=component_centroid,
+                confidence=prob,
+                stamp_sec=stamp_sec,
+                label_scores=label_score_map,
+                appearance_embedding=appearance_arr,
             )
         finally:
             state.model.run()
@@ -292,18 +281,15 @@ class GngInstanceManager:
         state_key = label
         if not self._per_label:
             if not self._warned_per_label:
-                self._log_warning(
-                    "gng_per_label is false, but global clustering is not implemented; "
-                    "falling back to per-label models."
-                )
+                self._log_warning("gng_per_label is false; using a shared GNG model.")
                 self._warned_per_label = True
-            state_key = label
+            state_key = "__global__"
 
         state = self._states.get(state_key)
         if state is None:
             config = self._build_config()
             model = GrowingNeuralGas(config)
-            state = _LabelState(model=model, clusters={})
+            state = _LabelState(model=model)
             self._states[state_key] = state
         return state
 
@@ -337,23 +323,20 @@ class GngInstanceManager:
                 return candidate
             counter += 1
 
-    def _assign_component(
-        self,
-        label: str,
-        state: _LabelState,
-        component_centroid: np.ndarray,
-        stamp_sec: float,
-    ) -> ClusterState:
+    def _assign_component(self, label: str, component_centroid: np.ndarray, stamp_sec: float) -> ClusterState:
         best_id = None
         best_dist = None
-        for cluster_id, cluster in state.clusters.items():
+        max_distance = self._cross_label_merge_distance if self._label_voting_enabled else self._merge_distance
+        for cluster_id, cluster in self._clusters.items():
+            if (not self._label_voting_enabled) and self._dominant_label(cluster) != label:
+                continue
             dist = np.linalg.norm(component_centroid - cluster.centroid)
             if best_dist is None or dist < best_dist:
                 best_id = cluster_id
                 best_dist = dist
 
-        if best_id is not None and (self._merge_distance <= 0.0 or best_dist <= self._merge_distance):
-            return state.clusters[best_id]
+        if best_id is not None and (max_distance <= 0.0 or best_dist <= max_distance):
+            return self._clusters[best_id]
 
         instance_id = self._new_instance_id(label)
         cluster_state = ClusterState(
@@ -363,9 +346,73 @@ class GngInstanceManager:
             first_seen=stamp_sec,
             last_seen=stamp_sec,
             committed=self._min_obs <= 0,
+            label_votes={label: 0.0},
+            last_label_scores={label: 0.0},
         )
-        state.clusters[instance_id] = cluster_state
+        self._clusters[instance_id] = cluster_state
         return cluster_state
+
+    def _finalize_assignment(
+        self,
+        cluster_state: ClusterState,
+        *,
+        observed_label: str,
+        centroid: np.ndarray,
+        confidence: Optional[float],
+        stamp_sec: float,
+        label_scores: dict[str, float],
+        appearance_embedding: np.ndarray | None,
+        force_commit: bool = False,
+    ) -> InstanceAssignment:
+        cluster_state.observations += 1
+        cluster_state.last_seen = stamp_sec
+        if cluster_state.observations == 1:
+            cluster_state.first_seen = stamp_sec
+        cluster_state.centroid = self._blend_centroid(cluster_state.centroid, centroid, confidence)
+        self._update_label_memory(cluster_state, observed_label, label_scores)
+        cluster_state.appearance_embedding = self._blend_embedding(
+            cluster_state.appearance_embedding,
+            appearance_embedding,
+            confidence,
+        )
+        if force_commit:
+            cluster_state.committed = True
+        elif not cluster_state.committed and self._min_obs > 0 and cluster_state.observations >= self._min_obs:
+            cluster_state.committed = True
+
+        stability = self._compute_stability(cluster_state)
+        return InstanceAssignment(
+            instance_id=cluster_state.instance_id,
+            label=self._dominant_label(cluster_state),
+            centroid=cluster_state.centroid.copy(),
+            stability=stability,
+            committed=cluster_state.committed or self._min_obs <= 0,
+            label_votes=dict(cluster_state.label_votes),
+            last_label_scores=dict(cluster_state.last_label_scores),
+            appearance_embedding=None if cluster_state.appearance_embedding is None else cluster_state.appearance_embedding.copy(),
+        )
+
+    def _update_label_memory(
+        self,
+        cluster_state: ClusterState,
+        observed_label: str,
+        label_scores: dict[str, float],
+    ) -> None:
+        if not label_scores:
+            label_scores = {observed_label: 1.0}
+        cluster_state.last_label_scores = dict(label_scores)
+        for label, score in label_scores.items():
+            cluster_state.label_votes[label] = cluster_state.label_votes.get(label, 0.0) + normalize_score(score)
+        if observed_label not in cluster_state.label_votes:
+            cluster_state.label_votes[observed_label] = 0.0
+
+    @staticmethod
+    def _dominant_label(cluster_state: ClusterState) -> str:
+        if cluster_state.label_votes:
+            return max(cluster_state.label_votes.items(), key=lambda item: item[1])[0]
+        if cluster_state.last_label_scores:
+            return max(cluster_state.last_label_scores.items(), key=lambda item: item[1])[0]
+        return "unknown"
 
     def _compute_components(self, nodes):
         if not nodes:
@@ -440,6 +487,47 @@ class GngInstanceManager:
         if self._min_obs <= 0:
             return 1.0
         return min(1.0, cluster.observations / float(self._min_obs))
+
+    def _normalize_label_scores(
+        self,
+        label: str,
+        label_scores: Optional[dict[str, float]],
+        confidence: Optional[float],
+    ) -> dict[str, float]:
+        if label_scores:
+            return {str(key): normalize_score(value) for key, value in label_scores.items()}
+        return {label: normalize_score(confidence if confidence is not None else 1.0)}
+
+    @staticmethod
+    def _normalize_embedding(embedding: Optional[np.ndarray]) -> np.ndarray | None:
+        if embedding is None:
+            return None
+        arr = np.asarray(embedding, dtype=np.float32).reshape(-1)
+        if arr.size == 0:
+            return None
+        norm = np.linalg.norm(arr)
+        if not np.isfinite(norm) or norm <= 0.0:
+            return None
+        return arr / norm
+
+    @staticmethod
+    def _blend_embedding(
+        prev: np.ndarray | None,
+        current: np.ndarray | None,
+        confidence: Optional[float],
+    ) -> np.ndarray | None:
+        if current is None:
+            return prev
+        if prev is None:
+            return current
+        weight = 0.4
+        if confidence is not None and np.isfinite(confidence):
+            weight = max(0.1, min(0.9, float(confidence)))
+        blended = prev * (1.0 - weight) + current * weight
+        norm = np.linalg.norm(blended)
+        if not np.isfinite(norm) or norm <= 0.0:
+            return None
+        return blended / norm
 
     @staticmethod
     def _clamp_confidence(confidence: Optional[float]) -> Optional[float]:
