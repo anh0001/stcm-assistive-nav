@@ -41,6 +41,9 @@ HEADERS = {
     "benchmark_fp": "FP",
     "benchmark_fn": "FN",
     "wrong_label_near_gt_count": "wrong_label_near_gt",
+    "false_positive_counts_by_label": "fp_by_label",
+    "false_negative_counts_by_label": "fn_by_label",
+    "wrong_label_pair_counts": "wrong_label_pairs",
     "failure_flags": "failure_flags",
 }
 

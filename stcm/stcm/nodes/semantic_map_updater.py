@@ -120,6 +120,15 @@ class SemanticMapUpdater(Node):
         self.cross_label_merge_distance_m = float(
             self.declare_parameter("cross_label_merge_distance_m", self.gng_cluster_merge_distance).value
         )
+        self.cross_label_merge_min_cosine = float(
+            self.declare_parameter("cross_label_merge_min_cosine", 0.25).value
+        )
+        self.instance_label_switch_margin = float(
+            self.declare_parameter("instance_label_switch_margin", 0.15).value
+        )
+        self.instance_label_switch_min_observations = int(
+            self.declare_parameter("instance_label_switch_min_observations", 2).value
+        )
         self.place_gng_enabled = bool(self.declare_parameter("place_gng_enabled", False).value)
         self.place_gng_distance_threshold = float(
             self.declare_parameter("place_gng_distance_threshold", 1.5).value
@@ -249,6 +258,9 @@ class SemanticMapUpdater(Node):
                 outlier_gate_meters=self.gng_outlier_gate_meters,
                 instance_label_voting_enabled=self.instance_label_voting_enabled,
                 cross_label_merge_distance_m=self.cross_label_merge_distance_m,
+                cross_label_merge_min_cosine=self.cross_label_merge_min_cosine,
+                instance_label_switch_margin=self.instance_label_switch_margin,
+                instance_label_switch_min_observations=self.instance_label_switch_min_observations,
                 logger=self.get_logger(),
             )
             if self._gng_manager.enabled:

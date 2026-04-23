@@ -3,19 +3,30 @@ chunks:
     thresholds: [0.38, 0.38]
     classes:
       - label: meeting table set
-        aliases:
+        detect_aliases:
+          - meeting table
+          - conference table
+          - meeting table set
+        rerank_aliases:
           - meeting table set
           - meeting table
           - meeting table with chairs
           - meeting room table
           - conference table
           - conference table set
+        box_threshold: 0.35
+        text_threshold: 0.35
       - label: chair
-        aliases:
+        detect_aliases:
+          - chair
+          - armless chair
+        rerank_aliases:
           - chair
           - chairs
           - armless chair
           - armless chairs
+        box_threshold: 0.42
+        text_threshold: 0.42
       - label: bench
         aliases:
           - bench
@@ -52,9 +63,14 @@ chunks:
           - metallic fountain
           - metallic water fountain
       - label: emergency exit sign
-        aliases:
+        detect_aliases:
+          - emergency exit sign
+          - exit sign
+        rerank_aliases:
           - emergency exit sign
           - green emergency exit sign
+        box_threshold: 0.5
+        text_threshold: 0.5
       - label: door
         aliases:
           - door
@@ -67,7 +83,11 @@ chunks:
     thresholds: [0.42, 0.42]
     classes:
       - label: trash bin
-        aliases:
+        detect_aliases:
+          - trash bin
+          - trash bins
+          - indoor trash bin
+        rerank_aliases:
           - bin
           - bins
           - trash bin
@@ -76,3 +96,5 @@ chunks:
           - indoor trash bins
           - five indoor trash bins
           - five indoor trash bins aligned against a wall
+        box_threshold: 0.45
+        text_threshold: 0.45

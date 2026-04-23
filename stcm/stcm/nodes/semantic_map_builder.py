@@ -31,7 +31,7 @@ from ..core.perception import (
     SegmentAnythingPredictor,
 )
 from ..core.gng_instance_manager import GngInstanceManager
-from ..core.label_calibration import apply_geometry_priors, choose_label
+from ..core.label_calibration import apply_geometry_hard_rejects, apply_geometry_priors, choose_label
 from ..core.nyu_grounded_backend import NyuGroundedRgbdProposalBackend
 from ..core.place_gng import PlaceGng
 from ..core.vision_utils import annotate, filter, filter_large_boxes, filter_xyxy, overlay_masks
@@ -131,6 +131,15 @@ class SemanticMapBuilder(Node):
         )
         self.cross_label_merge_distance_m = float(
             self.declare_parameter("cross_label_merge_distance_m", self.gng_cluster_merge_distance).value
+        )
+        self.cross_label_merge_min_cosine = float(
+            self.declare_parameter("cross_label_merge_min_cosine", 0.25).value
+        )
+        self.instance_label_switch_margin = float(
+            self.declare_parameter("instance_label_switch_margin", 0.15).value
+        )
+        self.instance_label_switch_min_observations = int(
+            self.declare_parameter("instance_label_switch_min_observations", 2).value
         )
         self.place_gng_enabled = bool(self.declare_parameter("place_gng_enabled", False).value)
         self.place_gng_distance_threshold = float(
@@ -262,6 +271,9 @@ class SemanticMapBuilder(Node):
                 outlier_gate_meters=self.gng_outlier_gate_meters,
                 instance_label_voting_enabled=self.instance_label_voting_enabled,
                 cross_label_merge_distance_m=self.cross_label_merge_distance_m,
+                cross_label_merge_min_cosine=self.cross_label_merge_min_cosine,
+                instance_label_switch_margin=self.instance_label_switch_margin,
+                instance_label_switch_min_observations=self.instance_label_switch_min_observations,
                 logger=self.get_logger(),
             )
             if not self._gng_manager.enabled:
@@ -839,6 +851,15 @@ class SemanticMapBuilder(Node):
         adjusted_scores = dict(label_scores or {})
         if label not in adjusted_scores:
             adjusted_scores[label] = 1.0
+        hard_reject = apply_geometry_hard_rejects(
+            label_scores=adjusted_scores,
+            pose=pose,
+            mask=mask,
+            priors=self.geometry_priors,
+        )
+        adjusted_scores = dict(hard_reject.allowed_scores)
+        if not adjusted_scores:
+            return None, {}, 0.0
         if self.geometry_priors:
             adjusted_scores = apply_geometry_priors(
                 label_scores=adjusted_scores,

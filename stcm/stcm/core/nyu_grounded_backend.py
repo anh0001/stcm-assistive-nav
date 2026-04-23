@@ -32,6 +32,27 @@ class ProposalBatch:
     crop_embeddings: torch.Tensor | None = None
 
 
+@dataclass(frozen=True)
+class PromptClassSpec:
+    """Parsed prompt-bank entry independent of the external repo types."""
+
+    class_id: int
+    label: str
+    detect_aliases: tuple[str, ...]
+    rerank_aliases: tuple[str, ...]
+    box_threshold: float | None = None
+    text_threshold: float | None = None
+
+
+@dataclass(frozen=True)
+class PromptChunkSpec:
+    """Parsed prompt-bank chunk with optional default thresholds."""
+
+    name: str
+    classes: tuple[PromptClassSpec, ...]
+    thresholds: tuple[float, float] | None = None
+
+
 class NyuGroundedRgbdProposalBackend:
     """Wrap the external nyu-grounded-rgbd detector/SAM stack for STCM."""
 
@@ -64,7 +85,7 @@ class NyuGroundedRgbdProposalBackend:
         self._build_prompt = build_prompt
         self._alias_for_label = alias_for_label
 
-        self.chunks, self.class_id_to_label, self.per_chunk_thresholds = self._load_prompt_bank()
+        self.prompt_chunk_specs, self.class_id_to_label = self._load_prompt_bank()
         self.box_threshold = float(box_threshold)
         self.text_threshold = float(text_threshold)
         self.label_rerank_enabled = bool(label_rerank_enabled)
@@ -138,50 +159,113 @@ class NyuGroundedRgbdProposalBackend:
 
         return SAMWrapper, PromptChunk, PromptClass, build_prompt, alias_for_label
 
-    def _load_prompt_bank(
-        self,
-    ) -> tuple[list[Any], dict[int, str], dict[str, tuple[float, float]] | None]:
-        with self.prompt_bank_path.open("r", encoding="utf-8") as handle:
-            payload = yaml.safe_load(handle) or {}
+    @staticmethod
+    def _unique_aliases(values: list[str], fallback: str) -> tuple[str, ...]:
+        aliases = [str(alias).strip().lower() for alias in values if str(alias).strip()]
+        if not aliases:
+            aliases = [fallback.strip().lower()]
+        return tuple(dict.fromkeys(aliases))
 
+    @classmethod
+    def _parse_prompt_bank_payload(
+        cls,
+        payload: dict[str, Any],
+    ) -> tuple[list[PromptChunkSpec], dict[int, str], dict[str, list[str]]]:
         chunk_specs = payload.get("chunks", {})
         if not chunk_specs:
-            raise ValueError(f"Prompt bank has no chunks: {self.prompt_bank_path}")
+            raise ValueError("Prompt bank has no chunks")
 
-        chunks = []
+        parsed_chunks: list[PromptChunkSpec] = []
         class_id_to_label: dict[int, str] = {}
-        per_chunk_thresholds: dict[str, tuple[float, float]] = {}
-        self.label_aliases: dict[str, list[str]] = {}
+        rerank_aliases: dict[str, list[str]] = {}
         next_class_id = 1
 
         for chunk_name, chunk_spec in chunk_specs.items():
             class_entries = chunk_spec.get("classes", [])
             if not class_entries:
                 continue
-            classes = []
+
+            parsed_classes: list[PromptClassSpec] = []
+            thresholds = chunk_spec.get("thresholds")
+            parsed_thresholds = None if thresholds is None else (float(thresholds[0]), float(thresholds[1]))
+
             for entry in class_entries:
                 label = str(entry["label"])
-                aliases = [str(alias).strip().lower() for alias in entry.get("aliases", []) if str(alias).strip()]
-                if not aliases:
-                    aliases = [label.lower()]
-                classes.append(
-                    self._PromptClass(
+                fallback_aliases = entry.get("aliases", [])
+                detect_aliases = cls._unique_aliases(entry.get("detect_aliases", fallback_aliases), label)
+                rerank_alias_values = entry.get("rerank_aliases", fallback_aliases)
+                rerank_alias_tuple = cls._unique_aliases(rerank_alias_values, label)
+                parsed_classes.append(
+                    PromptClassSpec(
                         class_id=next_class_id,
-                        name=label,
-                        aliases=aliases,
+                        label=label,
+                        detect_aliases=detect_aliases,
+                        rerank_aliases=rerank_alias_tuple,
+                        box_threshold=float(entry["box_threshold"]) if "box_threshold" in entry else None,
+                        text_threshold=float(entry["text_threshold"]) if "text_threshold" in entry else None,
                     )
                 )
                 class_id_to_label[next_class_id] = label
-                self.label_aliases[label] = list(dict.fromkeys(aliases))
+                rerank_aliases[label] = list(rerank_alias_tuple)
                 next_class_id += 1
 
-            thresholds = chunk_spec.get("thresholds")
-            if thresholds is not None:
-                per_chunk_thresholds[str(chunk_name)] = (float(thresholds[0]), float(thresholds[1]))
+            parsed_chunks.append(
+                PromptChunkSpec(
+                    name=str(chunk_name),
+                    classes=tuple(parsed_classes),
+                    thresholds=parsed_thresholds,
+                )
+            )
 
-            chunks.append(self._PromptChunk(name=str(chunk_name), classes=classes))
+        return parsed_chunks, class_id_to_label, rerank_aliases
 
-        return chunks, class_id_to_label, (per_chunk_thresholds or None)
+    def _load_prompt_bank(self) -> tuple[list[PromptChunkSpec], dict[int, str]]:
+        with self.prompt_bank_path.open("r", encoding="utf-8") as handle:
+            payload = yaml.safe_load(handle) or {}
+        try:
+            parsed_chunks, class_id_to_label, rerank_aliases = self._parse_prompt_bank_payload(payload)
+        except ValueError as exc:
+            raise ValueError(f"{exc}: {self.prompt_bank_path}") from exc
+        self.label_aliases = rerank_aliases
+        return parsed_chunks, class_id_to_label
+
+    def _effective_thresholds_for_class(
+        self,
+        chunk_spec: PromptChunkSpec,
+        class_spec: PromptClassSpec,
+    ) -> tuple[float, float]:
+        chunk_thresholds = chunk_spec.thresholds or (self.box_threshold, self.text_threshold)
+        box_threshold = (
+            float(class_spec.box_threshold)
+            if class_spec.box_threshold is not None
+            else float(chunk_thresholds[0])
+        )
+        text_threshold = (
+            float(class_spec.text_threshold)
+            if class_spec.text_threshold is not None
+            else float(chunk_thresholds[1])
+        )
+        return box_threshold, text_threshold
+
+    def _build_detection_chunks(
+        self,
+    ) -> list[tuple[Any, tuple[float, float]]]:
+        chunk_groups: list[tuple[Any, tuple[float, float]]] = []
+        for chunk_spec in self.prompt_chunk_specs:
+            grouped_classes: dict[tuple[float, float], list[Any]] = {}
+            for class_spec in chunk_spec.classes:
+                threshold_pair = self._effective_thresholds_for_class(chunk_spec, class_spec)
+                grouped_classes.setdefault(threshold_pair, []).append(
+                    self._PromptClass(
+                        class_id=class_spec.class_id,
+                        name=class_spec.label,
+                        aliases=list(class_spec.detect_aliases),
+                    )
+                )
+            for threshold_pair, classes in grouped_classes.items():
+                prompt_chunk = self._PromptChunk(name=chunk_spec.name, classes=classes)
+                chunk_groups.append((prompt_chunk, threshold_pair))
+        return chunk_groups
 
     def _init_label_reranker(self) -> None:
         try:
@@ -324,12 +408,9 @@ class NyuGroundedRgbdProposalBackend:
         detections: list[tuple[int, np.ndarray, float]] = []
         pil_image = Image.fromarray(image_rgb)
 
-        for chunk in self.chunks:
+        for chunk, threshold_pair in self._build_detection_chunks():
             built_prompt = self._build_prompt(chunk)
-            if self.per_chunk_thresholds and chunk.name in self.per_chunk_thresholds:
-                box_threshold, text_threshold = self.per_chunk_thresholds[chunk.name]
-            else:
-                box_threshold, text_threshold = self.box_threshold, self.text_threshold
+            box_threshold, text_threshold = threshold_pair
 
             inputs = self.processor(images=pil_image, text=built_prompt.text, return_tensors="pt").to(self.device)
             outputs = self.gdino(**inputs)

@@ -21,6 +21,9 @@ text_threshold: 0.3
 gng_min_observations_to_commit: 3
 instance_label_voting_enabled: true
 cross_label_merge_distance_m: 0.6
+cross_label_merge_min_cosine: 0.25
+instance_label_switch_margin: 0.15
+instance_label_switch_min_observations: 2
 
 target_labels:
   - "meeting table set"
@@ -50,10 +53,13 @@ per_label_geometry_priors:
   emergency_exit_sign:
     min_z: 1.2
     max_mask_area_frac: 0.03
+    hard_min_z: 1.6
+    hard_max_mask_area_frac: 0.02
     penalty_factor: 0.2
   trash_bin:
     min_z: 0.0
     max_z: 0.9
+    hard_max_z: 0.8
     min_mask_area_frac: 0.002
     max_mask_area_frac: 0.08
     penalty_factor: 0.35
@@ -61,6 +67,7 @@ per_label_geometry_priors:
     min_z: 0.45
     max_z: 1.1
     min_mask_area_frac: 0.015
+    hard_min_mask_area_frac: 0.02
     penalty_factor: 0.35
   chair:
     min_z: 0.2

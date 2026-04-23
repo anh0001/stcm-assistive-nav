@@ -180,6 +180,9 @@ gng_cluster_merge_distance: 0.5
 gng_outlier_gate_meters: 0.0
 instance_label_voting_enabled: false
 cross_label_merge_distance_m: 0.5
+cross_label_merge_min_cosine: 0.25
+instance_label_switch_margin: 0.15
+instance_label_switch_min_observations: 2
 
 # ============================================================================
 # SPATIAL RELATIONSHIPS - Edge creation between objects

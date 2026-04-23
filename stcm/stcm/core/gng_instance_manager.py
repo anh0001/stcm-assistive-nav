@@ -41,6 +41,9 @@ class ClusterState:
     label_votes: dict[str, float]
     last_label_scores: dict[str, float]
     appearance_embedding: np.ndarray | None = None
+    current_label: str | None = None
+    pending_switch_label: str | None = None
+    pending_switch_count: int = 0
 
 
 @dataclass
@@ -69,6 +72,9 @@ class GngInstanceManager:
         outlier_gate_meters: float,
         instance_label_voting_enabled: bool,
         cross_label_merge_distance_m: float,
+        cross_label_merge_min_cosine: float,
+        instance_label_switch_margin: float,
+        instance_label_switch_min_observations: int,
         logger=None,
     ) -> None:
         self.enabled = bool(enabled)
@@ -85,6 +91,9 @@ class GngInstanceManager:
         self._outlier_gate = float(outlier_gate_meters)
         self._label_voting_enabled = bool(instance_label_voting_enabled)
         self._cross_label_merge_distance = float(cross_label_merge_distance_m)
+        self._cross_label_merge_min_cosine = float(cross_label_merge_min_cosine)
+        self._instance_label_switch_margin = float(instance_label_switch_margin)
+        self._instance_label_switch_min_observations = int(instance_label_switch_min_observations)
         self._logger = logger
         self._states: Dict[str, _LabelState] = {}
         self._clusters: Dict[str, ClusterState] = {}
@@ -139,6 +148,7 @@ class GngInstanceManager:
                     committed=True,
                     label_votes=votes,
                     last_label_scores=dict(votes),
+                    current_label=label,
                 )
 
     def update(
@@ -182,7 +192,7 @@ class GngInstanceManager:
         min_samples_for_query = max(self._lambda * 2, 20)  # 2x lambda or 20, whichever is larger
         if state.sample_count < min_samples_for_query:
             # Not enough data yet - fall back to simple distance-based clustering
-            cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+            cluster_state = self._assign_component(label, centroid_arr, stamp_sec, appearance_arr)
             return self._finalize_assignment(
                 cluster_state,
                 observed_label=label,
@@ -219,7 +229,7 @@ class GngInstanceManager:
                     f"Falling back to distance-based clustering."
                 )
             # Fall back to simple clustering without querying GNG nodes
-            cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+            cluster_state = self._assign_component(label, centroid_arr, stamp_sec, appearance_arr)
             return self._finalize_assignment(
                 cluster_state,
                 observed_label=label,
@@ -239,7 +249,7 @@ class GngInstanceManager:
         try:
             nodes = state.model.nodes()
             if not nodes:
-                cluster_state = self._assign_component(label, centroid_arr, stamp_sec)
+                cluster_state = self._assign_component(label, centroid_arr, stamp_sec, appearance_arr)
                 return self._finalize_assignment(
                     cluster_state,
                     observed_label=label,
@@ -262,7 +272,7 @@ class GngInstanceManager:
                 return None
             component_centroid = component_centroids[component_key]
 
-            cluster_state = self._assign_component(label, component_centroid, stamp_sec)
+            cluster_state = self._assign_component(label, component_centroid, stamp_sec, appearance_arr)
             return self._finalize_assignment(
                 cluster_state,
                 observed_label=label,
@@ -323,14 +333,25 @@ class GngInstanceManager:
                 return candidate
             counter += 1
 
-    def _assign_component(self, label: str, component_centroid: np.ndarray, stamp_sec: float) -> ClusterState:
+    def _assign_component(
+        self,
+        label: str,
+        component_centroid: np.ndarray,
+        stamp_sec: float,
+        appearance_embedding: np.ndarray | None,
+    ) -> ClusterState:
         best_id = None
         best_dist = None
         max_distance = self._cross_label_merge_distance if self._label_voting_enabled else self._merge_distance
         for cluster_id, cluster in self._clusters.items():
-            if (not self._label_voting_enabled) and self._dominant_label(cluster) != label:
+            cluster_label = self._resolved_label(cluster)
+            if (not self._label_voting_enabled) and cluster_label != label:
                 continue
             dist = np.linalg.norm(component_centroid - cluster.centroid)
+            if self._label_voting_enabled and cluster_label != label:
+                cosine = self._appearance_cosine(cluster.appearance_embedding, appearance_embedding)
+                if cosine is None or cosine < self._cross_label_merge_min_cosine:
+                    continue
             if best_dist is None or dist < best_dist:
                 best_id = cluster_id
                 best_dist = dist
@@ -348,6 +369,7 @@ class GngInstanceManager:
             committed=self._min_obs <= 0,
             label_votes={label: 0.0},
             last_label_scores={label: 0.0},
+            current_label=label if self._min_obs <= 0 else None,
         )
         self._clusters[instance_id] = cluster_state
         return cluster_state
@@ -379,11 +401,12 @@ class GngInstanceManager:
             cluster_state.committed = True
         elif not cluster_state.committed and self._min_obs > 0 and cluster_state.observations >= self._min_obs:
             cluster_state.committed = True
+        self._update_resolved_label(cluster_state)
 
         stability = self._compute_stability(cluster_state)
         return InstanceAssignment(
             instance_id=cluster_state.instance_id,
-            label=self._dominant_label(cluster_state),
+            label=self._resolved_label(cluster_state),
             centroid=cluster_state.centroid.copy(),
             stability=stability,
             committed=cluster_state.committed or self._min_obs <= 0,
@@ -407,12 +430,65 @@ class GngInstanceManager:
             cluster_state.label_votes[observed_label] = 0.0
 
     @staticmethod
-    def _dominant_label(cluster_state: ClusterState) -> str:
+    def _vote_leader(cluster_state: ClusterState) -> str:
         if cluster_state.label_votes:
             return max(cluster_state.label_votes.items(), key=lambda item: item[1])[0]
         if cluster_state.last_label_scores:
             return max(cluster_state.last_label_scores.items(), key=lambda item: item[1])[0]
         return "unknown"
+
+    def _resolved_label(self, cluster_state: ClusterState) -> str:
+        if cluster_state.current_label:
+            return cluster_state.current_label
+        return self._vote_leader(cluster_state)
+
+    def _update_resolved_label(self, cluster_state: ClusterState) -> None:
+        leader = self._vote_leader(cluster_state)
+        if cluster_state.current_label is None:
+            cluster_state.current_label = leader
+            cluster_state.pending_switch_label = None
+            cluster_state.pending_switch_count = 0
+            return
+
+        if not cluster_state.committed:
+            cluster_state.current_label = leader
+            cluster_state.pending_switch_label = None
+            cluster_state.pending_switch_count = 0
+            return
+
+        observed_leader = max(
+            cluster_state.last_label_scores.items(),
+            key=lambda item: normalize_score(item[1]),
+        )[0]
+        observed_leader_score = normalize_score(cluster_state.last_label_scores.get(observed_leader))
+        observed_current_score = normalize_score(
+            cluster_state.last_label_scores.get(cluster_state.current_label)
+        )
+        observed_margin = observed_leader_score - observed_current_score
+        if (
+            observed_leader == cluster_state.current_label
+            or observed_margin < self._instance_label_switch_margin
+        ):
+            cluster_state.pending_switch_label = None
+            cluster_state.pending_switch_count = 0
+            return
+
+        if cluster_state.pending_switch_label == observed_leader:
+            cluster_state.pending_switch_count += 1
+        else:
+            cluster_state.pending_switch_label = observed_leader
+            cluster_state.pending_switch_count = 1
+
+        leader_score = float(cluster_state.label_votes.get(observed_leader, 0.0))
+        current_score = float(cluster_state.label_votes.get(cluster_state.current_label, 0.0))
+        cumulative_margin = leader_score - current_score
+        if (
+            cluster_state.pending_switch_count >= self._instance_label_switch_min_observations
+            and cumulative_margin >= self._instance_label_switch_margin
+        ):
+            cluster_state.current_label = observed_leader
+            cluster_state.pending_switch_label = None
+            cluster_state.pending_switch_count = 0
 
     def _compute_components(self, nodes):
         if not nodes:
@@ -528,6 +604,19 @@ class GngInstanceManager:
         if not np.isfinite(norm) or norm <= 0.0:
             return None
         return blended / norm
+
+    @staticmethod
+    def _appearance_cosine(
+        lhs: np.ndarray | None,
+        rhs: np.ndarray | None,
+    ) -> float | None:
+        if lhs is None or rhs is None:
+            return None
+        lhs_arr = np.asarray(lhs, dtype=np.float32).reshape(-1)
+        rhs_arr = np.asarray(rhs, dtype=np.float32).reshape(-1)
+        if lhs_arr.size == 0 or rhs_arr.size == 0 or lhs_arr.shape != rhs_arr.shape:
+            return None
+        return float(np.clip(np.dot(lhs_arr, rhs_arr), -1.0, 1.0))
 
     @staticmethod
     def _clamp_confidence(confidence: Optional[float]) -> Optional[float]:

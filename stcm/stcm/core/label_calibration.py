@@ -16,6 +16,12 @@ class LabelDecision:
     label_scores: dict[str, float]
 
 
+@dataclass(frozen=True)
+class HardRejectDecision:
+    allowed_scores: dict[str, float]
+    rejected_labels: tuple[str, ...]
+
+
 def normalize_score(value: float | int | None) -> float:
     if value is None:
         return 0.0
@@ -131,3 +137,47 @@ def apply_geometry_priors(
                 score *= reward
         adjusted[label] = normalize_score(score)
     return adjusted
+
+
+def apply_geometry_hard_rejects(
+    *,
+    label_scores: dict[str, float] | None,
+    pose: np.ndarray | list[float] | tuple[float, ...] | None,
+    mask: np.ndarray | None,
+    priors: dict[str, dict[str, Any]] | None,
+) -> HardRejectDecision:
+    if not label_scores:
+        return HardRejectDecision(allowed_scores={}, rejected_labels=())
+    if not priors:
+        return HardRejectDecision(
+            allowed_scores={label: normalize_score(score) for label, score in label_scores.items()},
+            rejected_labels=(),
+        )
+
+    pose_arr = None
+    if pose is not None:
+        pose_arr = np.asarray(pose, dtype=float).reshape(-1)
+    z_value = float(pose_arr[2]) if pose_arr is not None and pose_arr.size >= 3 else None
+    area_frac = mask_area_fraction(mask)
+
+    allowed_scores: dict[str, float] = {}
+    rejected: list[str] = []
+    for label, score in label_scores.items():
+        prior = priors.get(label)
+        reject = False
+        if prior:
+            if z_value is not None:
+                if "hard_min_z" in prior and z_value < float(prior["hard_min_z"]):
+                    reject = True
+                if "hard_max_z" in prior and z_value > float(prior["hard_max_z"]):
+                    reject = True
+            if "hard_min_mask_area_frac" in prior and area_frac < float(prior["hard_min_mask_area_frac"]):
+                reject = True
+            if "hard_max_mask_area_frac" in prior and area_frac > float(prior["hard_max_mask_area_frac"]):
+                reject = True
+        if reject:
+            rejected.append(str(label))
+            continue
+        allowed_scores[str(label)] = normalize_score(score)
+
+    return HardRejectDecision(allowed_scores=allowed_scores, rejected_labels=tuple(rejected))

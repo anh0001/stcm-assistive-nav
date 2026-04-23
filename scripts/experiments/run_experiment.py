@@ -406,15 +406,41 @@ def _apply_sensitivity(config: dict[str, Any], sensitivity: str | None) -> str |
     if "=" not in sensitivity:
         raise ValueError("--sensitivity must use key=value")
     key, raw_value = sensitivity.split("=", 1)
+    integer_keys = {
+        "gng_min_observations_to_commit",
+        "instance_label_switch_min_observations",
+    }
+
+    def _coerce_value(name: str, value: str) -> Any:
+        if name in integer_keys:
+            return int(value)
+        lowered = value.lower()
+        if lowered in {"true", "false"}:
+            return lowered == "true"
+        return float(value)
+
+    def _assign_nested(target: dict[str, Any], dotted_key: str, value: Any) -> None:
+        if "." not in dotted_key:
+            target[dotted_key] = value
+            return
+        cursor = target
+        parts = dotted_key.split(".")
+        for part in parts[:-1]:
+            next_cursor = cursor.get(part)
+            if not isinstance(next_cursor, dict):
+                next_cursor = {}
+                cursor[part] = next_cursor
+            cursor = next_cursor
+        cursor[parts[-1]] = value
+
     if key == "box_text_threshold":
         value = float(raw_value)
         config["box_threshold"] = value
         config["text_threshold"] = value
-    elif key == "gng_min_observations_to_commit":
-        config[key] = int(raw_value)
     else:
-        config[key] = float(raw_value)
-    return f"{key}-{raw_value}".replace(".", "p")
+        _assign_nested(config, key, _coerce_value(key, raw_value))
+    key_token = key.replace(".", "_")
+    return f"{key_token}-{raw_value}".replace(".", "p")
 
 
 def _benchmark_metrics(

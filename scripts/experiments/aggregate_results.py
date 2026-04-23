@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import csv
 import json
 from pathlib import Path
@@ -45,6 +46,16 @@ def _event(graph: dict[str, Any], name: str) -> int:
 def _benchmark_summary(result: dict[str, Any]) -> dict[str, Any]:
     benchmark = result.get("benchmark") or {}
     summary = benchmark.get("summary") or {}
+    fp_nodes = benchmark.get("false_positive_nodes", []) or []
+    fn_nodes = benchmark.get("false_negative_gt_nodes", []) or []
+    wrong_label = benchmark.get("wrong_label_near_gt", []) or []
+    fp_counts = Counter(str(node.get("label")) for node in fp_nodes if node.get("label"))
+    fn_counts = Counter(str(node.get("label")) for node in fn_nodes if node.get("label"))
+    wrong_label_counts = Counter(
+        f"{item.get('gt_label')}->{item.get('pred_label')}"
+        for item in wrong_label
+        if item.get("gt_label") and item.get("pred_label")
+    )
     return {
         "benchmark_required": benchmark.get("required"),
         "benchmark_available": benchmark.get("available"),
@@ -63,6 +74,9 @@ def _benchmark_summary(result: dict[str, Any]) -> dict[str, Any]:
         "xy_error_p95_m": (summary.get("xy_error") or {}).get("p95_m"),
         "duplicate_pair_count": summary.get("duplicate_pair_count"),
         "wrong_label_near_gt_count": len(benchmark.get("wrong_label_near_gt", []) or []),
+        "false_positive_counts_by_label": json.dumps(dict(sorted(fp_counts.items())), sort_keys=True),
+        "false_negative_counts_by_label": json.dumps(dict(sorted(fn_counts.items())), sort_keys=True),
+        "wrong_label_pair_counts": json.dumps(dict(sorted(wrong_label_counts.items())), sort_keys=True),
         "benchmark_error": benchmark.get("error"),
     }
 
@@ -176,6 +190,9 @@ def aggregate(results_dir: Path) -> dict[str, Path]:
             "xy_error_p95_m",
             "duplicate_pair_count",
             "wrong_label_near_gt_count",
+            "false_positive_counts_by_label",
+            "false_negative_counts_by_label",
+            "wrong_label_pair_counts",
             "benchmark_error",
             "failure_flags",
             "result_path",
