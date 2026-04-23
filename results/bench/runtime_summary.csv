@@ -104,3 +104,10 @@ run_id,scenario,variant,module,n,mean_ms,p50_ms,p95_ms
 20260423_131906_meeting_full-nyu-proposals,meeting,full-nyu-proposals,place_gng_update,350,18.182977489195764,21.692704525776207,22.351046290714294
 20260423_131906_meeting_full-nyu-proposals,meeting,full-nyu-proposals,pose_association,1614,2.040839431775085,1.2234841706231236,1.7659709206782273
 20260423_131906_meeting_full-nyu-proposals,meeting,full-nyu-proposals,sam_predict,,,,
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,frame_total,350,2378.769775774064,2794.977794517763,3329.609637474641
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,graph_update,232,34.422920489932636,26.833533542230725,130.14081006404012
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,groundingdino_predict,,,,
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,instance_gng_update,407,14.501032596270964,21.862479858100414,22.657274222001433
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,place_gng_update,350,17.955515451862343,21.7180869076401,22.51237912569195
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,pose_association,427,2.353872521507796,1.3389319647103548,3.425171761773507
+20260423_135111_meeting_full-nyu-proposals,meeting,full-nyu-proposals,sam_predict,,,,

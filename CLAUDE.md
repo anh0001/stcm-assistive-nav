@@ -68,6 +68,7 @@ Domain knowledge also in `.claude/skills/`:
 - `pytorch-patterns` — reproducible GDINO/SAM benchmark
 - `deep-research` — cited SOTA capability matrix → Table F
 - `documentation-lookup` — verify Nav2/FAST-LIO2 API claims (Context7)
+- `brainstorming-research-ideas` — structured ideation frameworks for new research directions
 - `article-writing` — trim Intro/Related Work prose
 
 Inner-loop commands in `.claude/commands/`:
@@ -88,7 +89,7 @@ Revision agents in `.claude/agents/` (invoke via Agent tool):
 
 Codex-specific experiment harness:
 - `.agents/skills/` — project-local Codex/plugin-style skills for STCM
-  experiments, quality gating, ROS 2 debugging, and tuning.
+  experiments, quality gating, ROS 2 debugging, tuning, and research ideation.
 - `.codex/config.toml` — slim Codex config for reviewer experiments.
 - `.codex/agents/` — read-only explorer/reviewer/docs-researcher roles.
 - `configs/experiments/manifest.yaml` — scenario bags, variants, required topics,

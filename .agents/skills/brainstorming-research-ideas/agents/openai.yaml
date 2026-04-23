@@ -1,0 +1,7 @@
+interface:
+  display_name: "Brainstorm Research Ideas"
+  short_description: "Structured research ideation and candidate refinement"
+  brand_color: "#0EA5A4"
+  default_prompt: "Brainstorm and refine high-impact research ideas"
+policy:
+  allow_implicit_invocation: true

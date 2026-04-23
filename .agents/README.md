@@ -12,4 +12,4 @@ Current project-local skills:
 - `stcm-quality-gate` — check whether experiment evidence is complete.
 - `stcm-ros2-debug` — diagnose ROS 2 topic/TF/sync failures.
 - `stcm-tuning` — map graph/perception symptoms to tuning knobs.
-
+- `brainstorming-research-ideas` — structure new research directions and refine idea candidates.
