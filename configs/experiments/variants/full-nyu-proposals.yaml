@@ -13,23 +13,30 @@ nyu_gdino_model_id: IDEA-Research/grounding-dino-base
 nyu_sam_backend: mobilesam
 nyu_sam_model_type: vit_t
 
-box_threshold: 0.25
-text_threshold: 0.25
+box_threshold: 0.3
+text_threshold: 0.3
+gng_min_observations_to_commit: 3
 
 target_labels:
+  - "meeting table set"
   - "chair"
   - "bottle"
   - "cup"
   - "water fountain"
   - "cardboard box"
   - "emergency exit sign"
-  - "trash bins"
+  - "trash bin"
+  - "bench"
+  - "door"
 
 target_label_thresholds:
+  - 1.6  # meeting table set
   - 0.6  # chair
   - 0.3  # bottle
   - 0.5  # cup
   - 0.5  # water fountain
   - 1.0  # cardboard box
   - 0.3  # emergency exit sign
-  - 2.0  # trash bins
+  - 0.25 # trash bin
+  - 0.8  # bench
+  - 1.0  # door

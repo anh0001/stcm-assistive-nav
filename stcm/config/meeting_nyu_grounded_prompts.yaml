@@ -1,15 +1,30 @@
 chunks:
   furniture:
-    thresholds: [0.33, 0.33]
+    thresholds: [0.38, 0.38]
     classes:
+      - label: meeting table set
+        aliases:
+          - meeting table set
+          - meeting table
+          - meeting table with chairs
+          - meeting room table
+          - conference table
+          - conference table set
       - label: chair
         aliases:
           - chair
           - chairs
           - armless chair
           - armless chairs
+      - label: bench
+        aliases:
+          - bench
+          - benches
+          - metal bench
+          - metallic bench
+          - waiting bench
   portable_items:
-    thresholds: [0.25, 0.25]
+    thresholds: [0.28, 0.28]
     classes:
       - label: bottle
         aliases:
@@ -29,7 +44,7 @@ chunks:
           - brown cardboard
           - brown cardboard box
   fixtures:
-    thresholds: [0.35, 0.35]
+    thresholds: [0.38, 0.38]
     classes:
       - label: water fountain
         aliases:
@@ -40,10 +55,18 @@ chunks:
         aliases:
           - emergency exit sign
           - green emergency exit sign
+      - label: door
+        aliases:
+          - door
+          - doors
+          - dark door
+          - dark door surface
+          - elevator sliding door
+          - elevator sliding doors
   bins:
-    thresholds: [0.35, 0.35]
+    thresholds: [0.42, 0.42]
     classes:
-      - label: trash bins
+      - label: trash bin
         aliases:
           - bin
           - bins
