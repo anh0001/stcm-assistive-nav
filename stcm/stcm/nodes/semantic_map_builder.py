@@ -34,6 +34,11 @@ from ..core.gng_instance_manager import GngInstanceManager
 from ..core.label_calibration import apply_geometry_hard_rejects, apply_geometry_priors, choose_label
 from ..core.nyu_grounded_backend import NyuGroundedRgbdProposalBackend
 from ..core.place_gng import PlaceGng
+from ..core.supervised_semantic_prior import (
+    SupervisedSemanticPrior,
+    extract_prior_candidates,
+    fuse_label_scores_with_semantic_prior,
+)
 from ..core.vision_utils import annotate, filter, filter_large_boxes, filter_xyxy, overlay_masks
 from ..image_listener import ImageListener
 from ..map_utils import (
@@ -100,6 +105,40 @@ class SemanticMapBuilder(Node):
             "openai/clip-vit-base-patch32",
         ).value
         self.label_margin_min = float(self.declare_parameter("label_margin_min", 0.1).value)
+        self.semantic_prior_backend = str(
+            self.declare_parameter("semantic_prior_backend", "none").value
+        ).strip().lower()
+        self.semantic_prior_checkpoint = self.declare_parameter("semantic_prior_checkpoint", "").value
+        self.semantic_prior_experiment_config = self.declare_parameter(
+            "semantic_prior_experiment_config", ""
+        ).value
+        self.semantic_prior_fusion_enabled = bool(
+            self.declare_parameter("semantic_prior_fusion_enabled", True).value
+        )
+        self.semantic_prior_agreement_boost = float(
+            self.declare_parameter("semantic_prior_agreement_boost", 0.35).value
+        )
+        self.semantic_prior_disagreement_penalty = float(
+            self.declare_parameter("semantic_prior_disagreement_penalty", 0.45).value
+        )
+        self.semantic_prior_min_agreement = float(
+            self.declare_parameter("semantic_prior_min_agreement", 0.08).value
+        )
+        self.semantic_prior_fallback_enabled = bool(
+            self.declare_parameter("semantic_prior_fallback_enabled", True).value
+        )
+        self.semantic_prior_fallback_min_area_px = int(
+            self.declare_parameter("semantic_prior_fallback_min_area_px", 400).value
+        )
+        self.semantic_prior_fallback_max_area_frac = float(
+            self.declare_parameter("semantic_prior_fallback_max_area_frac", 0.25).value
+        )
+        self.semantic_prior_fallback_max_per_label = int(
+            self.declare_parameter("semantic_prior_fallback_max_per_label", 3).value
+        )
+        self.semantic_prior_fallback_score = float(
+            self.declare_parameter("semantic_prior_fallback_score", 0.35).value
+        )
         self.filter_conf_bound = float(self.declare_parameter("filter_conf_bound", 1.0).value)
         self.filter_y_val = float(self.declare_parameter("filter_y_val", 1.0).value)
         self.filter_percent_width = float(self.declare_parameter("filter_percent_width", 0.9).value)
@@ -207,6 +246,7 @@ class SemanticMapBuilder(Node):
         self._runtime_samples: Dict[str, List[float]] = {}
         self._event_counts: Dict[str, int] = {}
         self._proposal_backend = None
+        self._semantic_prior = None
 
         self.listener = None
         self.timer = None
@@ -253,6 +293,18 @@ class SemanticMapBuilder(Node):
             )
             self.sam = SegmentAnythingPredictor(
                 checkpoint_path=self._expanduser_if_set(self.mobilesam_checkpoint)
+            )
+        if self.semantic_prior_backend not in ("", "none", "off", "disabled"):
+            self._semantic_prior = SupervisedSemanticPrior(
+                backend=self.semantic_prior_backend,
+                nyu_grounded_repo_path=self.nyu_grounded_repo_path,
+                checkpoint_path=self._expanduser_if_set(self.semantic_prior_checkpoint),
+                experiment_config=self._expanduser_if_set(self.semantic_prior_experiment_config),
+                device="cuda" if torch.cuda.is_available() else "cpu",
+            )
+            self.get_logger().info(
+                f"Using semantic prior backend '{self.semantic_prior_backend}' "
+                f"via {self.nyu_grounded_repo_path}"
             )
 
         if self.gng_enabled:
@@ -643,6 +695,94 @@ class SemanticMapBuilder(Node):
 
         return img_pil, image_pil_bboxes, masks, gdino_conf, phrases, None, None, False
 
+    def _predict_semantic_prior(self, rgb_image: np.ndarray, depth_image: np.ndarray | None):
+        if self._semantic_prior is None:
+            return None
+        if depth_image is None:
+            self._count_event("semantic_prior_missing_depth_frames")
+            return None
+        try:
+            prior_start = time.perf_counter()
+            prediction = self._semantic_prior.predict(image_bgr=rgb_image, depth_m=depth_image)
+            self._record_timing("semantic_prior_predict", prior_start)
+            if prediction is not None:
+                self._count_event("semantic_prior_frames")
+            return prediction
+        except Exception as exc:  # noqa: BLE001 - preserve ROS run instead of losing the whole bag.
+            self._count_event("semantic_prior_failures")
+            self.get_logger().error(f"Semantic prior prediction failed: {exc}")
+            return None
+
+    def _append_semantic_prior_candidates(
+        self,
+        boxes,
+        masks,
+        scores,
+        phrases,
+        label_score_maps,
+        crop_embeddings,
+        prediction,
+    ):
+        if not self.semantic_prior_fallback_enabled:
+            return boxes, masks, scores, phrases, label_score_maps, crop_embeddings
+        candidates = extract_prior_candidates(
+            prediction=prediction,
+            target_labels=self.distance_thresholds.keys(),
+            existing_labels=phrases,
+            min_area_px=self.semantic_prior_fallback_min_area_px,
+            max_area_frac=self.semantic_prior_fallback_max_area_frac,
+            max_per_label=self.semantic_prior_fallback_max_per_label,
+            score=self.semantic_prior_fallback_score,
+        )
+        if not candidates:
+            return boxes, masks, scores, phrases, label_score_maps, crop_embeddings
+
+        device = masks.device if hasattr(masks, "device") else torch.device("cpu")
+        fallback_boxes = torch.as_tensor(
+            [item.box_xyxy for item in candidates],
+            dtype=torch.float32,
+            device=device,
+        )
+        fallback_masks = torch.as_tensor(
+            np.stack([item.mask for item in candidates], axis=0)[:, None, :, :],
+            dtype=torch.bool,
+            device=device,
+        )
+        fallback_scores = torch.full(
+            (len(candidates),),
+            float(self.semantic_prior_fallback_score),
+            dtype=scores.dtype if hasattr(scores, "dtype") else torch.float32,
+            device=scores.device if hasattr(scores, "device") else device,
+        )
+        fallback_phrases = [item.label for item in candidates]
+        fallback_maps = [item.label_scores for item in candidates]
+
+        boxes = torch.cat([boxes.to(device), fallback_boxes], dim=0)
+        masks = torch.cat([masks.to(device), fallback_masks], dim=0)
+        scores = torch.cat([scores.to(fallback_scores.device), fallback_scores], dim=0)
+        original_phrases = list(phrases)
+        phrases = list(phrases) + fallback_phrases
+        if label_score_maps is None:
+            original_scores = scores[: len(original_phrases)]
+            label_score_maps = [
+                {phrase: float(score.item())}
+                for phrase, score in zip(original_phrases, original_scores)
+            ]
+        label_score_maps = list(label_score_maps) + fallback_maps
+        if crop_embeddings is not None:
+            embedding_dim = int(crop_embeddings.shape[1]) if len(crop_embeddings.shape) > 1 else 0
+            zeros = torch.zeros(
+                (len(candidates), embedding_dim),
+                dtype=crop_embeddings.dtype,
+                device=crop_embeddings.device,
+            )
+            crop_embeddings = torch.cat([crop_embeddings, zeros], dim=0)
+        self._count_event("semantic_prior_fallback_candidates", len(candidates))
+        self.get_logger().info(
+            f"Semantic prior added {len(candidates)} fallback candidates: {fallback_phrases}"
+        )
+        return boxes, masks, scores, phrases, label_score_maps, crop_embeddings
+
     def _process_frame(self) -> None:
         if self.listener is None:
             return
@@ -665,19 +805,42 @@ class SemanticMapBuilder(Node):
         intrinsics = frames.get("intrinsics")
         projected_cloud = frames.get("projected_cloud")
         rt_projected = frames.get("rt_projected")
+        semantic_prior_prediction = self._predict_semantic_prior(rgb_image, depth_image)
 
-        img_pil, image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings, skip_detection = self._run_proposal_backend(
-            rgb_image
-        )
+        (
+            img_pil,
+            image_pil_bboxes,
+            masks,
+            gdino_conf,
+            phrases,
+            label_score_maps,
+            crop_embeddings,
+            skip_detection,
+        ) = self._run_proposal_backend(rgb_image)
         place_labels = None
         place_scores = None
         if skip_detection or len(phrases) == 0:
-            self._count_event("zero_detection_frames")
-            self.get_logger().debug("Skipping frame: no detections after filtering")
-            if self._maybe_update_place_graph(rt_base):
-                self._publish_place_graph_markers()
-            self._record_timing("frame_total", frame_start)
-            return
+            empty_boxes = torch.empty((0, 4), dtype=torch.float32)
+            empty_masks = torch.empty((0, 1, rgb_image.shape[0], rgb_image.shape[1]), dtype=torch.bool)
+            empty_scores = torch.empty((0,), dtype=torch.float32)
+            image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings = (
+                self._append_semantic_prior_candidates(
+                    empty_boxes,
+                    empty_masks,
+                    empty_scores,
+                    [],
+                    [],
+                    None,
+                    semantic_prior_prediction,
+                )
+            )
+            if len(phrases) == 0:
+                self._count_event("zero_detection_frames")
+                self.get_logger().debug("Skipping frame: no detections after filtering")
+                if self._maybe_update_place_graph(rt_base):
+                    self._publish_place_graph_markers()
+                self._record_timing("frame_total", frame_start)
+                return
 
         width = rgb_image.shape[1]
         height = rgb_image.shape[0]
@@ -702,6 +865,32 @@ class SemanticMapBuilder(Node):
             select_tensor = torch.as_tensor(selected_idx, dtype=torch.long, device=crop_embeddings.device)
             crop_embeddings = crop_embeddings.index_select(0, select_tensor)
         self.get_logger().info(f"After large box filter: {len(phrases)} detections remain")
+
+        image_pil_bboxes, masks, gdino_conf, phrases, label_score_maps, crop_embeddings = (
+            self._append_semantic_prior_candidates(
+                image_pil_bboxes,
+                masks,
+                gdino_conf,
+                phrases,
+                label_score_maps,
+                crop_embeddings,
+                semantic_prior_prediction,
+            )
+        )
+
+        if self.semantic_prior_fusion_enabled:
+            gdino_conf, label_score_maps = fuse_label_scores_with_semantic_prior(
+                phrases=phrases,
+                scores=gdino_conf,
+                masks=masks,
+                prediction=semantic_prior_prediction,
+                target_labels=self.distance_thresholds.keys(),
+                canonicalize=self._canonicalize_phrase,
+                label_score_maps=label_score_maps,
+                agreement_boost=self.semantic_prior_agreement_boost,
+                disagreement_penalty=self.semantic_prior_disagreement_penalty,
+                min_agreement=self.semantic_prior_min_agreement,
+            )
 
         self.get_logger().info("Filtering to target labels...")
         filtered = self._filter_to_target_labels(

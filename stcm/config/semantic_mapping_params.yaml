@@ -137,6 +137,23 @@ label_rerank_enabled: false
 label_rerank_model: "openai/clip-vit-base-patch32"
 label_margin_min: 0.1
 
+# Optional frozen supervised RGB-D semantic prior.
+# "none" keeps the original detector/SAM path unchanged.
+# "dformerv2" and "esanet" reuse the supervised NYUv2 backends from
+# /home/anhar/codes/nyu-grounded-rgbd as conservative proposal priors.
+semantic_prior_backend: "none"
+semantic_prior_checkpoint: ""
+semantic_prior_experiment_config: ""
+semantic_prior_fusion_enabled: true
+semantic_prior_agreement_boost: 0.35
+semantic_prior_disagreement_penalty: 0.45
+semantic_prior_min_agreement: 0.08
+semantic_prior_fallback_enabled: true
+semantic_prior_fallback_min_area_px: 400
+semantic_prior_fallback_max_area_frac: 0.25
+semantic_prior_fallback_max_per_label: 3
+semantic_prior_fallback_score: 0.35
+
 # ============================================================================
 # DETECTION FILTERING - Additional pruning before segmentation
 # ============================================================================

@@ -44,6 +44,12 @@ variants:
   full-nyu-proposals:
     description: "Full STCM with nyu-grounded-rgbd proposal generation and meeting-label prompt bank."
     overlay: configs/experiments/variants/full-nyu-proposals.yaml
+  full-nyu-proposals-dformerv2-prior:
+    description: "Full STCM with nyu-grounded-rgbd proposals plus frozen DFormerV2 NYUv2 semantic prior."
+    overlay: configs/experiments/variants/full-nyu-proposals-dformerv2-prior.yaml
+  full-nyu-proposals-esanet-prior:
+    description: "Full STCM with nyu-grounded-rgbd proposals plus frozen ESANet NYUv2 semantic prior."
+    overlay: configs/experiments/variants/full-nyu-proposals-esanet-prior.yaml
 
 sensitivity:
   box_text_threshold: [0.3, 0.38, 0.45]
