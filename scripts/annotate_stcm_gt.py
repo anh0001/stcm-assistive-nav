@@ -34,6 +34,7 @@ from stcm.gt_annotation import (
     AnnotationSession,
     RosbagRgbIndex,
     default_output_json_path,
+    resolve_rosbag_storage_id,
 )
 
 
@@ -72,6 +73,14 @@ def _parse_args() -> argparse.Namespace:
             "rosbag_path", "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed"
         ),
         help="Path to the rosbag2 directory for synchronized RGB/TF inspection.",
+    )
+    parser.add_argument(
+        "--rosbag-storage-id",
+        default="auto",
+        help=(
+            "Rosbag2 storage id: auto, sqlite3, or mcap. Defaults to auto so "
+            "--bag overrides do not inherit an incompatible config storage id."
+        ),
     )
     parser.add_argument(
         "--input-json",
@@ -119,20 +128,24 @@ def main() -> int:
     input_json = Path(args.input_json).expanduser()
     output_json = Path(args.output_json).expanduser() if args.output_json else default_output_json_path(input_json)
 
-    rosbag_index = RosbagRgbIndex(
-        args.bag,
-        rgb_topic=args.rgb_topic,
-        depth_topic=args.depth_topic,
-        camera_info_topic=args.camera_info_topic,
-        tf_topic=args.tf_topic,
-        tf_static_topic=args.tf_static_topic,
-        projected_lidar_topic=args.projected_lidar_topic,
-        projected_lidar_frame=args.projected_lidar_frame,
-        camera_frame=args.camera_frame,
-        synchronizer_slop_sec=args.sync_slop_sec,
-        world_frame=args.world_frame,
-        base_frame=args.base_frame,
-    )
+    def make_rosbag_index(bag_path_value, storage_id_value):
+        return RosbagRgbIndex(
+            bag_path_value,
+            rgb_topic=args.rgb_topic,
+            depth_topic=args.depth_topic,
+            camera_info_topic=args.camera_info_topic,
+            tf_topic=args.tf_topic,
+            tf_static_topic=args.tf_static_topic,
+            projected_lidar_topic=args.projected_lidar_topic,
+            projected_lidar_frame=args.projected_lidar_frame,
+            camera_frame=args.camera_frame,
+            synchronizer_slop_sec=args.sync_slop_sec,
+            world_frame=args.world_frame,
+            base_frame=args.base_frame,
+            storage_id=storage_id_value,
+        )
+
+    rosbag_index = make_rosbag_index(args.bag, args.rosbag_storage_id)
     session = AnnotationSession(
         input_json=input_json,
         output_json=output_json,
@@ -143,7 +156,11 @@ def main() -> int:
         from stcm.core.perception import SegmentAnythingPredictor
 
         session._sam_predictor = SegmentAnythingPredictor(checkpoint_path=args.mobilesam_checkpoint)
-    session_state = {"session": session}
+    session_state = {
+        "session": session,
+        "bag_path": str(Path(args.bag).expanduser()),
+        "storage_id": rosbag_index.storage_id,
+    }
 
     sort_choices = ["id", "category", "x", "y", "z"]
     rgb_idle_hint = (
@@ -214,6 +231,8 @@ def main() -> int:
         initial_desc,
         status_message=(
             f"Loaded {len(session.objects)} semantic objects from {input_json.name}. "
+            f"Loaded {len(session.rosbag_index.frames)} RGB frames from "
+            f"{session.rosbag_index.bag_path} ({session.rosbag_index.storage_id}). "
             f"Draft saves will go to {output_json}."
         ),
     )
@@ -294,6 +313,15 @@ def main() -> int:
                 with gr.Row():
                     input_path = gr.Textbox(label="Input JSON Path", value=str(input_json))
                     load_input_button = gr.Button("Load Input File")
+                with gr.Row():
+                    rosbag_path = gr.Textbox(label="Rosbag Path", value=session_state["bag_path"])
+                    rosbag_storage_id = gr.Dropdown(
+                        choices=["auto", "sqlite3", "mcap"],
+                        value=session_state["storage_id"],
+                        allow_custom_value=True,
+                        label="Storage ID",
+                    )
+                    load_rosbag_button = gr.Button("Load Rosbag")
                 with gr.Row():
                     output_path = gr.Textbox(label="Draft Output Path", value=str(output_json))
                     save_button = gr.Button("Save Draft", variant="primary")
@@ -554,7 +582,7 @@ def main() -> int:
             next_session = AnnotationSession(
                 input_json=next_input,
                 output_json=next_output,
-                rosbag_index=rosbag_index,
+                rosbag_index=active_session.rosbag_index,
                 sam_predictor=active_session._sam_predictor,
                 lidar_voxel_size=args.lidar_voxel_size,
             )
@@ -592,6 +620,96 @@ def main() -> int:
                 status,
                 input_path,
                 output_path,
+            ],
+        )
+
+        def on_load_rosbag(
+            rosbag_path_value,
+            rosbag_storage_value,
+            search_value,
+            category_filter_value,
+            sort_value,
+            desc_value,
+        ):
+            active_session = session_state["session"]
+            next_bag_path = Path(str(rosbag_path_value or "").strip()).expanduser()
+            requested_storage_id = str(rosbag_storage_value or "auto").strip() or "auto"
+            if not next_bag_path.exists():
+                refreshed = list(
+                    _refresh(
+                        search_value,
+                        category_filter_value,
+                        sort_value,
+                        desc_value,
+                        status_message=f"Rosbag path not found: {next_bag_path}",
+                    )
+                )
+                refreshed.extend([session_state["bag_path"], session_state["storage_id"]])
+                return tuple(refreshed)
+
+            try:
+                resolved_storage_id = resolve_rosbag_storage_id(next_bag_path, requested_storage_id)
+                next_rosbag_index = make_rosbag_index(next_bag_path, requested_storage_id)
+                next_session = AnnotationSession(
+                    input_json=active_session.input_json,
+                    output_json=active_session.output_json,
+                    rosbag_index=next_rosbag_index,
+                    sam_predictor=active_session._sam_predictor,
+                    lidar_voxel_size=args.lidar_voxel_size,
+                )
+            except Exception as exc:
+                refreshed = list(
+                    _refresh(
+                        search_value,
+                        category_filter_value,
+                        sort_value,
+                        desc_value,
+                        status_message=f"Failed to load rosbag {next_bag_path}: {exc}",
+                    )
+                )
+                refreshed.extend([session_state["bag_path"], session_state["storage_id"]])
+                return tuple(refreshed)
+
+            session_state["session"] = next_session
+            session_state["bag_path"] = str(next_bag_path)
+            session_state["storage_id"] = next_rosbag_index.storage_id
+            refreshed = list(
+                _refresh(
+                    search_value,
+                    category_filter_value,
+                    sort_value,
+                    desc_value,
+                    status_message=(
+                        f"Loaded {len(next_rosbag_index.frames)} RGB frames from {next_bag_path} "
+                        f"({resolved_storage_id})."
+                    ),
+                )
+            )
+            refreshed[10] = gr.update(
+                maximum=max(0, len(next_rosbag_index.frames) - 1),
+                value=next_session.current_frame_index,
+            )
+            refreshed.extend([str(next_bag_path), next_rosbag_index.storage_id])
+            return tuple(refreshed)
+
+        load_rosbag_button.click(
+            on_load_rosbag,
+            inputs=[rosbag_path, rosbag_storage_id, search_text, category_filter, sort_field, sort_desc],
+            outputs=[
+                map_image,
+                rgb_image,
+                object_table,
+                table_ids_state,
+                object_id,
+                object_category,
+                pos_x,
+                pos_y,
+                pos_z,
+                category_filter,
+                frame_slider,
+                status,
+                rosbag_path,
+                rosbag_storage_id,
             ],
         )
 

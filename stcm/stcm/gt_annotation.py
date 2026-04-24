@@ -15,6 +15,8 @@ from typing import Any
 import cv2
 import networkx as nx
 import numpy as np
+import rosbag2_py
+import yaml
 from PIL import Image, ImageDraw
 from cv_bridge import CvBridge
 from networkx.readwrite import json_graph
@@ -44,6 +46,28 @@ DEFAULT_LIDAR_VOXEL_SIZE = 0.15
 MAP_IMAGE_SIZE = (980, 720)
 RGB_PREVIEW_MAX_WIDTH = 900
 RGB_PREVIEW_MAX_HEIGHT = 520
+
+
+def resolve_rosbag_storage_id(bag_path: str | Path, storage_id: str = "auto") -> str:
+    """Resolve a rosbag2 storage id, using metadata.yaml when requested."""
+
+    requested = str(storage_id or "auto").strip()
+    if requested and requested.lower() != "auto":
+        return requested
+
+    path = Path(bag_path).expanduser()
+    metadata_path = path / "metadata.yaml" if path.is_dir() else path.parent / "metadata.yaml"
+    if metadata_path.exists():
+        with metadata_path.open("r", encoding="utf-8") as handle:
+            metadata = yaml.safe_load(handle) or {}
+        info = metadata.get("rosbag2_bagfile_information", {})
+        metadata_storage_id = str(info.get("storage_identifier", "")).strip()
+        if metadata_storage_id:
+            return metadata_storage_id
+
+    if path.is_file() and path.suffix == ".mcap":
+        return "mcap"
+    return "sqlite3"
 
 
 @dataclass(frozen=True)
@@ -260,7 +284,7 @@ class RosbagRgbIndex:
         synchronizer_slop_sec: float = DEFAULT_SYNC_SLOP_SEC,
         world_frame: str = DEFAULT_WORLD_FRAME,
         base_frame: str = DEFAULT_BASE_FRAME,
-        storage_id: str = "sqlite3",
+        storage_id: str = "auto",
     ) -> None:
         self.bag_path = Path(bag_path).expanduser()
         self.rgb_topic = str(rgb_topic)
@@ -273,7 +297,7 @@ class RosbagRgbIndex:
         self.camera_frame = str(camera_frame or "")
         self.world_frame = str(world_frame)
         self.base_frame = str(base_frame)
-        self.storage_id = str(storage_id)
+        self.storage_id = resolve_rosbag_storage_id(self.bag_path, storage_id)
         self.synchronizer_slop_sec = max(0.0, float(synchronizer_slop_sec))
         self._sync_slop_ns = int(self.synchronizer_slop_sec * 1e9)
         self._bridge = CvBridge()
@@ -281,13 +305,29 @@ class RosbagRgbIndex:
         self._message_type_cache: dict[str, Any] = {}
         self._dynamic_transforms: dict[str, TransformRecord] = {}
         self._static_transforms: dict[str, TransformRecord] = {}
-        self._db_path = self._resolve_db_path()
+        self._db_path: Path | None = None
         self._thread_local = threading.local()
         self._cache_lock = threading.Lock()
-        self._conn = self._open_connection()
-        self._rgb_rows, self._rgb_timestamps = self._load_topic_rows(self.rgb_topic)
-        self._depth_rows, self._depth_timestamps = self._load_topic_rows(self.depth_topic)
-        self._projected_rows, self._projected_timestamps = self._load_topic_rows(self.projected_lidar_topic)
+        self._conn: sqlite3.Connection | None = None
+        self._message_data_cache: dict[int, bytes] | None = None
+        self._rgb_rows: list[tuple[int, int]] = []
+        self._rgb_timestamps: list[int] = []
+        self._depth_rows: list[tuple[int, int]] = []
+        self._depth_timestamps: list[int] = []
+        self._projected_rows: list[tuple[int, int]] = []
+        self._projected_timestamps: list[int] = []
+        if self.storage_id == "sqlite3":
+            self._db_path = self._resolve_db_path()
+            self._conn = self._open_connection()
+            self._rgb_rows, self._rgb_timestamps = self._load_topic_rows(self.rgb_topic)
+            self._depth_rows, self._depth_timestamps = self._load_topic_rows(self.depth_topic)
+            self._projected_rows, self._projected_timestamps = self._load_topic_rows(self.projected_lidar_topic)
+        elif self.storage_id == "mcap":
+            self._message_data_cache = {}
+        else:
+            raise RuntimeError(
+                f"GT annotation backend supports sqlite3 and mcap rosbag storage only, got '{self.storage_id}'"
+            )
         self._rgb_message_type = None
         self._depth_message_type = None
         self._projected_message_type = None
@@ -298,6 +338,8 @@ class RosbagRgbIndex:
         self._build_index()
 
     def _open_connection(self) -> sqlite3.Connection:
+        if self._db_path is None:
+            raise RuntimeError("SQLite connection requested for non-sqlite rosbag storage")
         conn = sqlite3.connect(str(self._db_path))
         conn.row_factory = sqlite3.Row
         return conn
@@ -318,7 +360,7 @@ class RosbagRgbIndex:
         return candidates[0]
 
     def _load_topic_rows(self, topic_name: str) -> tuple[list[tuple[int, int]], list[int]]:
-        if not topic_name:
+        if not topic_name or self._conn is None:
             return [], []
         cursor = self._conn.execute(
             """
@@ -346,10 +388,12 @@ class RosbagRgbIndex:
         return coords
 
     def _build_index(self) -> None:
-        if self.storage_id != "sqlite3":
-            raise RuntimeError(
-                f"GT annotation backend currently supports sqlite3 rosbag storage only, got '{self.storage_id}'"
-            )
+        if self.storage_id == "mcap":
+            self._build_sequential_index()
+            return
+
+        if self._conn is None:
+            raise RuntimeError("SQLite rosbag connection was not initialized")
         topic_types = {
             str(row["name"]): str(row["type"])
             for row in self._conn.execute("SELECT name, type FROM topics")
@@ -393,34 +437,7 @@ class RosbagRgbIndex:
             if next_rgb_ts is not None and (next_aux_ts is None or next_rgb_ts <= next_aux_ts):
                 message_id, timestamp_ns = self._rgb_rows[rgb_index]
                 rgb_index += 1
-                rt_camera = self._resolve_transform_matrix(self.base_frame, self.camera_frame) if self.camera_frame else None
-                rt_base = self._resolve_transform_matrix(self.world_frame, self.base_frame)
-                rt_projected = (
-                    self._resolve_transform_matrix(self.base_frame, self.projected_lidar_frame)
-                    if self.projected_lidar_frame
-                    else None
-                )
-                robot_pose = None
-                if rt_base is not None:
-                    x, y, z = rt_base[:3, 3]
-                    robot_pose = (float(x), float(y), float(z))
-                self._frames.append(
-                    FrameRecord(
-                        frame_index=len(self._frames),
-                        message_id=int(message_id),
-                        timestamp_ns=int(timestamp_ns),
-                        robot_pose=robot_pose,
-                        depth_message_id=self._nearest_message_id(
-                            self._depth_rows, self._depth_timestamps, timestamp_ns
-                        ),
-                        projected_cloud_message_id=self._nearest_message_id(
-                            self._projected_rows, self._projected_timestamps, timestamp_ns
-                        ),
-                        rt_camera=rt_camera.copy() if rt_camera is not None else None,
-                        rt_base=rt_base.copy() if rt_base is not None else None,
-                        rt_projected=rt_projected.copy() if rt_projected is not None else None,
-                    )
-                )
+                self._append_frame_record(message_id, timestamp_ns)
                 continue
 
             row = aux_rows[aux_index]
@@ -434,20 +451,135 @@ class RosbagRgbIndex:
                 self._ingest_tf_message(msg, is_static=True)
             elif topic == self.tf_topic:
                 self._ingest_tf_message(msg, is_static=False)
-            elif topic == self.camera_info_topic and getattr(msg, "width", None):
-                self.image_width = int(msg.width)
-                self.image_height = int(msg.height)
-                k = list(getattr(msg, "k", []))
-                if len(k) >= 9:
-                    self.intrinsics = {
-                        "fx": float(k[0]),
-                        "fy": float(k[4]),
-                        "px": float(k[2]),
-                        "py": float(k[5]),
-                    }
+            elif topic == self.camera_info_topic:
+                self._ingest_camera_info(msg)
 
         if not self._frames:
             raise RuntimeError(f"No RGB frames found on topic '{self.rgb_topic}'")
+
+    def _build_sequential_index(self) -> None:
+        reader = rosbag2_py.SequentialReader()
+        storage_options = rosbag2_py.StorageOptions(uri=str(self.bag_path), storage_id=self.storage_id)
+        converter_options = rosbag2_py.ConverterOptions(
+            input_serialization_format="cdr",
+            output_serialization_format="cdr",
+        )
+        try:
+            reader.open(storage_options, converter_options)
+        except Exception as exc:
+            raise RuntimeError(f"Failed to open rosbag {self.bag_path} with storage '{self.storage_id}': {exc}") from exc
+
+        topic_types = {str(topic.name): str(topic.type) for topic in reader.get_all_topics_and_types()}
+        required_topics = [self.rgb_topic, self.tf_topic, self.tf_static_topic]
+        optional_topics = [self.camera_info_topic, self.depth_topic, self.projected_lidar_topic]
+        for topic in required_topics + optional_topics:
+            if not topic:
+                continue
+            type_name = topic_types.get(topic)
+            if type_name is None:
+                if topic in required_topics:
+                    raise RuntimeError(f"Required topic '{topic}' not found in rosbag {self.bag_path}")
+                continue
+            self._message_type_cache[topic] = get_message(type_name)
+
+        self._rgb_message_type = self._message_type_cache[self.rgb_topic]
+        self._depth_message_type = self._message_type_cache.get(self.depth_topic)
+        self._projected_message_type = self._message_type_cache.get(self.projected_lidar_topic)
+
+        events: list[tuple[int, int, str, int | bytes]] = []
+        cache_topics = {self.rgb_topic, self.depth_topic, self.projected_lidar_topic}
+        aux_topics = {self.tf_topic, self.tf_static_topic, self.camera_info_topic}
+        message_id = 1
+        sequence = 0
+        while reader.has_next():
+            topic, data, timestamp_ns = reader.read_next()
+            if topic not in self._message_type_cache:
+                sequence += 1
+                continue
+
+            timestamp_ns = int(timestamp_ns)
+            if topic in cache_topics:
+                if self._message_data_cache is None:
+                    raise RuntimeError("Sequential rosbag message cache was not initialized")
+                self._message_data_cache[message_id] = bytes(data)
+                if topic == self.rgb_topic:
+                    self._rgb_rows.append((message_id, timestamp_ns))
+                    events.append((timestamp_ns, sequence, topic, message_id))
+                elif topic == self.depth_topic:
+                    self._depth_rows.append((message_id, timestamp_ns))
+                elif topic == self.projected_lidar_topic:
+                    self._projected_rows.append((message_id, timestamp_ns))
+                message_id += 1
+            elif topic in aux_topics:
+                events.append((timestamp_ns, sequence, topic, bytes(data)))
+            sequence += 1
+
+        self._rgb_timestamps = [timestamp for _, timestamp in self._rgb_rows]
+        self._depth_timestamps = [timestamp for _, timestamp in self._depth_rows]
+        self._projected_timestamps = [timestamp for _, timestamp in self._projected_rows]
+
+        for timestamp_ns, _, topic, payload in sorted(events, key=lambda item: (item[0], item[1])):
+            msg_type = self._message_type_cache.get(topic)
+            if msg_type is None:
+                continue
+            if topic == self.rgb_topic:
+                self._append_frame_record(int(payload), timestamp_ns)
+                continue
+
+            msg = deserialize_message(payload, msg_type)
+            if topic == self.tf_static_topic:
+                self._ingest_tf_message(msg, is_static=True)
+            elif topic == self.tf_topic:
+                self._ingest_tf_message(msg, is_static=False)
+            elif topic == self.camera_info_topic:
+                self._ingest_camera_info(msg)
+
+        if not self._frames:
+            raise RuntimeError(f"No RGB frames found on topic '{self.rgb_topic}'")
+
+    def _ingest_camera_info(self, msg) -> None:
+        if not getattr(msg, "width", None):
+            return
+        self.image_width = int(msg.width)
+        self.image_height = int(msg.height)
+        k = list(getattr(msg, "k", []))
+        if len(k) >= 9:
+            self.intrinsics = {
+                "fx": float(k[0]),
+                "fy": float(k[4]),
+                "px": float(k[2]),
+                "py": float(k[5]),
+            }
+
+    def _append_frame_record(self, message_id: int, timestamp_ns: int) -> None:
+        rt_camera = self._resolve_transform_matrix(self.base_frame, self.camera_frame) if self.camera_frame else None
+        rt_base = self._resolve_transform_matrix(self.world_frame, self.base_frame)
+        rt_projected = (
+            self._resolve_transform_matrix(self.base_frame, self.projected_lidar_frame)
+            if self.projected_lidar_frame
+            else None
+        )
+        robot_pose = None
+        if rt_base is not None:
+            x, y, z = rt_base[:3, 3]
+            robot_pose = (float(x), float(y), float(z))
+        self._frames.append(
+            FrameRecord(
+                frame_index=len(self._frames),
+                message_id=int(message_id),
+                timestamp_ns=int(timestamp_ns),
+                robot_pose=robot_pose,
+                depth_message_id=self._nearest_message_id(
+                    self._depth_rows, self._depth_timestamps, timestamp_ns
+                ),
+                projected_cloud_message_id=self._nearest_message_id(
+                    self._projected_rows, self._projected_timestamps, timestamp_ns
+                ),
+                rt_camera=rt_camera.copy() if rt_camera is not None else None,
+                rt_base=rt_base.copy() if rt_base is not None else None,
+                rt_projected=rt_projected.copy() if rt_projected is not None else None,
+            )
+        )
 
     def _ingest_tf_message(self, msg, *, is_static: bool) -> None:
         for transform in getattr(msg, "transforms", []):
@@ -511,6 +643,14 @@ class RosbagRgbIndex:
         return best_id
 
     def _load_message(self, message_id: int, msg_type) -> Any:
+        if self._message_data_cache is not None:
+            data = self._message_data_cache.get(int(message_id))
+            if data is None:
+                raise KeyError(f"Message id {message_id} not found")
+            return deserialize_message(data, msg_type)
+
+        if self._conn is None:
+            raise RuntimeError("SQLite rosbag connection was not initialized")
         conn = self._get_thread_connection()
         cursor = conn.execute("SELECT data FROM messages WHERE id = ?", (int(message_id),))
         row = cursor.fetchone()

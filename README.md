@@ -278,7 +278,16 @@ source install/setup.bash
 
 python3 scripts/annotate_stcm_gt.py \
   --config stcm/config/semantic_mapping_params.yaml \
-  --bag /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed \
+  --input-json configs/experiments/ground_truth/meeting_stcm_gt.json
+```
+
+To override the rosbag at startup, pass the bag path and storage id explicitly:
+
+```bash
+python3 scripts/annotate_stcm_gt.py \
+  --config stcm/config/semantic_mapping_params.yaml \
+  --bag /media/dl-box/STREAM1/robotics_living_lab_20260417_171737 \
+  --rosbag-storage-id mcap \
   --input-json configs/experiments/ground_truth/meeting_stcm_gt.json
 ```
 
@@ -290,6 +299,8 @@ click the synchronized frame, let MobileSAM segment the object, and the tool
 will estimate `x/y/z` from projected LiDAR points that land inside the mask
 using the densest 3D voxel. If no valid projected-LiDAR pose is available, the
 annotator falls back to the paired depth image when configured.
+Use the `Rosbag Path`, `Storage ID`, and `Load Rosbag` controls in the app to
+switch bags without reloading the ground-truth JSON.
 
 ## Generating semantic graphs on a new robot
 1. Ensure TF publishes the camera and base frames into `map`.

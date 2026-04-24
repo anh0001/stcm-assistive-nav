@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 # Allow running directly from the repo root.
 TEST_DIR = Path(__file__).resolve().parent
@@ -23,12 +24,14 @@ from stcm.gt_annotation import (
     FrameRecord,
     RosbagRgbIndex,
     map_preview_point_to_original,
+    resolve_rosbag_storage_id,
 )
 from stcm.map_utils import pose_in_map_frame_from_projected_mode
 
 
 MEETING_GT = REPO_ROOT / "configs" / "experiments" / "ground_truth" / "meeting_stcm_gt.json"
 MEETING_BAG = Path("/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed")
+LIVING_LAB_MCAP_BAG = Path("/media/dl-box/STREAM1/robotics_living_lab_20260417_171737")
 
 
 class _StubSamPredictor:
@@ -120,6 +123,19 @@ def test_map_preview_point_to_original_handles_resized_preview() -> None:
     x, y = map_preview_point_to_original(preview_shape, original_shape, 403, 260)
     assert x == 1440
     assert y == 930
+
+
+def test_resolve_rosbag_storage_id_reads_metadata(tmp_path: Path) -> None:
+    bag_path = tmp_path / "sample_bag"
+    bag_path.mkdir()
+    (bag_path / "metadata.yaml").write_text(
+        "rosbag2_bagfile_information:\n"
+        "  storage_identifier: mcap\n",
+        encoding="utf-8",
+    )
+
+    assert resolve_rosbag_storage_id(bag_path, "auto") == "mcap"
+    assert resolve_rosbag_storage_id(bag_path, "sqlite3") == "sqlite3"
 
 
 def test_projected_mode_pose_uses_densest_voxel() -> None:
@@ -327,5 +343,25 @@ def test_rosbag_rgb_index_resolves_meeting_robot_poses() -> None:
 
     frame = next(frame for frame in index.frames if frame.robot_pose is not None)
     image = index.get_frame_image(frame.frame_index, max_width=320, max_height=240)
+    assert image.ndim == 3
+    assert image.shape[2] == 3
+
+
+def test_rosbag_rgb_index_loads_living_lab_mcap_bag() -> None:
+    if not LIVING_LAB_MCAP_BAG.exists():
+        pytest.skip(f"External MCAP bag not available: {LIVING_LAB_MCAP_BAG}")
+
+    index = RosbagRgbIndex(
+        LIVING_LAB_MCAP_BAG,
+        storage_id="mcap",
+        camera_frame="camera_link",
+    )
+
+    assert index.storage_id == "mcap"
+    assert len(index.frames) > 0
+    assert any(frame.robot_pose is not None for frame in index.frames)
+    assert any(frame.projected_cloud_message_id is not None for frame in index.frames)
+
+    image = index.get_frame_image(0, max_width=320, max_height=240)
     assert image.ndim == 3
     assert image.shape[2] == 3
