@@ -501,6 +501,8 @@ def _benchmark_metrics(
             prediction_path=graph_path,
             ground_truth_path=ground_truth_path,
             match_threshold_m=threshold_m,
+            label_aliases=scenario.get("benchmark_label_aliases"),
+            composite_covers=scenario.get("benchmark_composite_covers"),
         )
     except Exception as exc:  # noqa: BLE001 - preserve failure evidence in result JSON.
         record["error"] = f"{type(exc).__name__}: {exc}"
@@ -512,10 +514,12 @@ def _benchmark_metrics(
         {
             "available": True,
             "metric_name": benchmark.get("metric_name"),
+            "match_policy": benchmark.get("match_policy", {}),
             "summary": benchmark.get("summary", {}),
             "per_label": benchmark.get("per_label", {}),
             "matched_pairs": benchmark.get("matched_pairs", []),
             "false_positive_nodes": benchmark.get("false_positive_nodes", []),
+            "covered_false_positive_nodes": benchmark.get("covered_false_positive_nodes", []),
             "false_negative_gt_nodes": benchmark.get("false_negative_gt_nodes", []),
             "wrong_label_near_gt": benchmark.get("wrong_label_near_gt", []),
             "duplicate_pairs": benchmark.get("duplicate_pairs", []),

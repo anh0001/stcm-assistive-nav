@@ -236,6 +236,187 @@ def _group_by_label(nodes: list[dict[str, Any]]) -> dict[str, list[dict[str, Any
     return grouped
 
 
+def _label_key(label: str) -> str:
+    return str(label).strip().lower()
+
+
+def _normalize_label_aliases(label_aliases: dict[str, Any] | None) -> dict[str, set[str]]:
+    normalized: dict[str, set[str]] = {}
+    for gt_label, aliases in (label_aliases or {}).items():
+        allowed = {_label_key(gt_label)}
+        if isinstance(aliases, str):
+            allowed.add(_label_key(aliases))
+        else:
+            allowed.update(_label_key(alias) for alias in aliases or [])
+        normalized[_label_key(gt_label)] = {label for label in allowed if label}
+    return normalized
+
+
+def _is_acceptable_label_pair(
+    gt_label: str,
+    pred_label: str,
+    label_aliases: dict[str, set[str]] | None,
+) -> bool:
+    gt_key = _label_key(gt_label)
+    pred_key = _label_key(pred_label)
+    if gt_key == pred_key:
+        return True
+    if not label_aliases:
+        return False
+    return pred_key in label_aliases.get(gt_key, set())
+
+
+def _match_with_label_aliases(
+    *,
+    gt_nodes: list[dict[str, Any]],
+    pred_nodes: list[dict[str, Any]],
+    threshold_m: float,
+    label_aliases: dict[str, set[str]],
+) -> dict[str, Any]:
+    labels = sorted({node["label"] for node in gt_nodes} | {node["label"] for node in pred_nodes})
+    matches = []
+    if gt_nodes and pred_nodes:
+        reject_cost = float(threshold_m) + 1_000_000.0
+        cost_matrix = np.full((len(gt_nodes), len(pred_nodes)), reject_cost, dtype=float)
+        acceptable = np.zeros((len(gt_nodes), len(pred_nodes)), dtype=bool)
+        for gt_index, gt_node in enumerate(gt_nodes):
+            for pred_index, pred_node in enumerate(pred_nodes):
+                if not _is_acceptable_label_pair(gt_node["label"], pred_node["label"], label_aliases):
+                    continue
+                acceptable[gt_index, pred_index] = True
+                cost_matrix[gt_index, pred_index] = _xy_distance(gt_node["pose"], pred_node["pose"])
+
+        for gt_index, pred_index in Munkres().compute(cost_matrix):
+            if gt_index >= len(gt_nodes) or pred_index >= len(pred_nodes):
+                continue
+            xy_error = cost_matrix[gt_index][pred_index]
+            if acceptable[gt_index, pred_index] and xy_error <= threshold_m:
+                gt_node = gt_nodes[gt_index]
+                pred_node = pred_nodes[pred_index]
+                matches.append(
+                    {
+                        "label": gt_node["label"],
+                        "gt_id": gt_node["id"],
+                        "pred_id": pred_node["id"],
+                        "gt_label": gt_node["label"],
+                        "pred_label": pred_node["label"],
+                        "gt_pose": gt_node["pose"],
+                        "pred_pose": pred_node["pose"],
+                        "xy_error_m": xy_error,
+                        "xyz_error_m": _xyz_distance(gt_node["pose"], pred_node["pose"]),
+                    }
+                )
+
+    matched_gt_ids = {match["gt_id"] for match in matches}
+    matched_pred_ids = {match["pred_id"] for match in matches}
+    false_negative_gt_nodes = [
+        {"id": node["id"], "label": node["label"], "pose": node["pose"]}
+        for node in gt_nodes
+        if node["id"] not in matched_gt_ids
+    ]
+    false_positive_nodes = [
+        {"id": node["id"], "label": node["label"], "pose": node["pose"]}
+        for node in pred_nodes
+        if node["id"] not in matched_pred_ids
+    ]
+
+    per_label = {}
+    for label in labels:
+        label_gt_nodes = [node for node in gt_nodes if node["label"] == label]
+        label_pred_nodes = [node for node in pred_nodes if node["label"] == label]
+        label_matches = [match for match in matches if match["gt_label"] == label]
+        label_false_negatives = [
+            {"id": node["id"], "label": node["label"], "pose": node["pose"]}
+            for node in label_gt_nodes
+            if node["id"] not in matched_gt_ids
+        ]
+        label_false_positives = [
+            {"id": node["id"], "label": node["label"], "pose": node["pose"]}
+            for node in label_pred_nodes
+            if node["id"] not in matched_pred_ids
+        ]
+        tp = len(label_matches)
+        fp = len(label_false_positives)
+        fn = len(label_false_negatives)
+        precision = _safe_ratio(tp, tp + fp)
+        recall = _safe_ratio(tp, tp + fn)
+        per_label[label] = {
+            "label": label,
+            "gt_count": len(label_gt_nodes),
+            "pred_count": len(label_pred_nodes),
+            "tp": tp,
+            "fp": fp,
+            "fn": fn,
+            "precision": precision,
+            "recall": recall,
+            "f1": _f1(precision, recall),
+            "matched_pairs": label_matches,
+            "false_positive_nodes": label_false_positives,
+            "false_negative_gt_nodes": label_false_negatives,
+            "xy_error": _distance_summary([match["xy_error_m"] for match in label_matches]),
+            "xyz_error": _distance_summary([match["xyz_error_m"] for match in label_matches]),
+            "count_error": len(label_pred_nodes) - len(label_gt_nodes),
+        }
+
+    return {
+        "per_label": per_label,
+        "matched_pairs": matches,
+        "false_positive_nodes": false_positive_nodes,
+        "false_negative_gt_nodes": false_negative_gt_nodes,
+    }
+
+
+def _composite_cover_false_positives(
+    *,
+    gt_nodes: list[dict[str, Any]],
+    false_positive_nodes: list[dict[str, Any]],
+    composite_covers: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if not composite_covers:
+        return []
+
+    covered = []
+    covered_ids = set()
+    gt_by_label = _group_by_label(gt_nodes)
+    for gt_label, rule in composite_covers.items():
+        if not isinstance(rule, dict):
+            continue
+        try:
+            radius_m = float(rule.get("radius_m", 0.0))
+        except (TypeError, ValueError):
+            continue
+        if radius_m <= 0.0:
+            continue
+        allowed_labels = {
+            _label_key(label)
+            for label in (
+                rule.get("covered_pred_labels")
+                or rule.get("pred_labels")
+                or rule.get("labels")
+                or []
+            )
+        }
+        if not allowed_labels:
+            allowed_labels = {_label_key(gt_label)}
+        for gt_node in gt_by_label.get(str(gt_label), []):
+            for pred_node in false_positive_nodes:
+                pred_id = pred_node["id"]
+                if pred_id in covered_ids or _label_key(pred_node["label"]) not in allowed_labels:
+                    continue
+                distance = _xy_distance(gt_node["pose"], pred_node["pose"])
+                if distance <= radius_m:
+                    covered_ids.add(pred_id)
+                    covered.append(
+                        {
+                            **pred_node,
+                            "covered_by_gt_id": gt_node["id"],
+                            "covered_by_gt_label": gt_node["label"],
+                            "xy_error_m": distance,
+                        }
+                    )
+    return covered
+
+
 def _duplicate_pairs(nodes: list[dict[str, Any]], threshold_m: float) -> list[dict[str, Any]]:
     pairs = []
     grouped = _group_by_label(nodes)
@@ -259,12 +440,13 @@ def _nearest_wrong_label(
     gt_nodes: list[dict[str, Any]],
     pred_nodes: list[dict[str, Any]],
     threshold_m: float,
+    label_aliases: dict[str, set[str]] | None = None,
 ) -> list[dict[str, Any]]:
     near = []
     for gt_node in gt_nodes:
         best = None
         for pred_node in pred_nodes:
-            if pred_node["label"] == gt_node["label"]:
+            if _is_acceptable_label_pair(gt_node["label"], pred_node["label"], label_aliases):
                 continue
             distance = _xy_distance(gt_node["pose"], pred_node["pose"])
             if distance <= threshold_m and (best is None or distance < best["xy_error_m"]):
@@ -287,6 +469,8 @@ def evaluate_graphs(
     match_threshold_m: float = 1.0,
     duplicate_threshold_m: float = 0.5,
     wrong_label_threshold_m: float = 1.0,
+    label_aliases: dict[str, Any] | None = None,
+    composite_covers: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     prediction_path = Path(prediction_path).expanduser()
     ground_truth_path = Path(ground_truth_path).expanduser()
@@ -295,19 +479,62 @@ def evaluate_graphs(
     pred_by_label = _group_by_label(pred_raw)
     gt_by_label = _group_by_label(gt_raw)
     labels = sorted(set(pred_by_label) | set(gt_by_label))
-    per_label = {
-        label: _match_label(
-            label,
-            gt_by_label.get(label, []),
-            pred_by_label.get(label, []),
-            match_threshold_m,
+    normalized_aliases = _normalize_label_aliases(label_aliases)
+    if normalized_aliases:
+        match_result = _match_with_label_aliases(
+            gt_nodes=gt_raw,
+            pred_nodes=pred_raw,
+            threshold_m=match_threshold_m,
+            label_aliases=normalized_aliases,
         )
-        for label in labels
-    }
+        per_label = match_result["per_label"]
+        matched_pairs = match_result["matched_pairs"]
+        false_positive_nodes = match_result["false_positive_nodes"]
+        false_negative_gt_nodes = match_result["false_negative_gt_nodes"]
+    else:
+        per_label = {
+            label: _match_label(
+                label,
+                gt_by_label.get(label, []),
+                pred_by_label.get(label, []),
+                match_threshold_m,
+            )
+            for label in labels
+        }
+        matched_pairs = [
+            match for item in per_label.values() for match in item["matched_pairs"]
+        ]
+        false_positive_nodes = [
+            node for item in per_label.values() for node in item["false_positive_nodes"]
+        ]
+        false_negative_gt_nodes = [
+            node for item in per_label.values() for node in item["false_negative_gt_nodes"]
+        ]
+
+    covered_false_positive_nodes = _composite_cover_false_positives(
+        gt_nodes=gt_raw,
+        false_positive_nodes=false_positive_nodes,
+        composite_covers=composite_covers,
+    )
+    covered_false_positive_ids = {node["id"] for node in covered_false_positive_nodes}
+    if covered_false_positive_ids:
+        false_positive_nodes = [
+            node for node in false_positive_nodes if node["id"] not in covered_false_positive_ids
+        ]
+        for label, payload in per_label.items():
+            label_false_positives = [
+                node
+                for node in payload["false_positive_nodes"]
+                if node["id"] not in covered_false_positive_ids
+            ]
+            payload["false_positive_nodes"] = label_false_positives
+            payload["fp"] = len(label_false_positives)
+            payload["precision"] = _safe_ratio(payload["tp"], payload["tp"] + payload["fp"])
+            payload["f1"] = _f1(payload["precision"], payload["recall"])
 
     tp = sum(item["tp"] for item in per_label.values())
-    fp = sum(item["fp"] for item in per_label.values())
-    fn = sum(item["fn"] for item in per_label.values())
+    fp = len(false_positive_nodes)
+    fn = len(false_negative_gt_nodes)
     precision = _safe_ratio(tp, tp + fp)
     recall = _safe_ratio(tp, tp + fn)
     xy_errors = [
@@ -326,9 +553,15 @@ def evaluate_graphs(
         "prediction_path": str(prediction_path),
         "ground_truth_path": str(ground_truth_path),
         "match_policy": {
-            "label": "category_or_label_exact_match",
+            "label": "category_or_label_exact_match"
+            if not normalized_aliases
+            else "category_or_label_exact_match_with_configured_gt_aliases",
+            "label_aliases": {label: sorted(aliases) for label, aliases in normalized_aliases.items()},
+            "composite_covers": composite_covers or {},
             "position": "xy_distance_m",
-            "assignment": "one_to_one_hungarian_per_label",
+            "assignment": "one_to_one_hungarian_per_label"
+            if not normalized_aliases
+            else "one_to_one_hungarian_global_with_label_constraints",
             "match_threshold_m": match_threshold_m,
             "duplicate_threshold_m": duplicate_threshold_m,
             "wrong_label_threshold_m": wrong_label_threshold_m,
@@ -348,18 +581,19 @@ def evaluate_graphs(
             "duplicate_pair_count": len(duplicate_pairs),
             "invalid_prediction_nodes": len(pred_invalid),
             "invalid_ground_truth_nodes": len(gt_invalid),
+            "covered_false_positive_nodes": len(covered_false_positive_nodes),
         },
         "per_label": per_label,
-        "matched_pairs": [
-            match for item in per_label.values() for match in item["matched_pairs"]
-        ],
-        "false_positive_nodes": [
-            node for item in per_label.values() for node in item["false_positive_nodes"]
-        ],
-        "false_negative_gt_nodes": [
-            node for item in per_label.values() for node in item["false_negative_gt_nodes"]
-        ],
-        "wrong_label_near_gt": _nearest_wrong_label(gt_raw, pred_raw, wrong_label_threshold_m),
+        "matched_pairs": matched_pairs,
+        "false_positive_nodes": false_positive_nodes,
+        "covered_false_positive_nodes": covered_false_positive_nodes,
+        "false_negative_gt_nodes": false_negative_gt_nodes,
+        "wrong_label_near_gt": _nearest_wrong_label(
+            gt_raw,
+            pred_raw,
+            wrong_label_threshold_m,
+            normalized_aliases,
+        ),
         "duplicate_pairs": duplicate_pairs,
         "invalid_prediction_nodes": pred_invalid,
         "invalid_ground_truth_nodes": gt_invalid,

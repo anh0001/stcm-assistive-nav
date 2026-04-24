@@ -26,8 +26,96 @@ scenarios:
     storage_id: mcap
     config_overrides:
       camera_frame: camera_optical_frame
-    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt_draft.json
+      nyu_prompt_bank_path: stcm/config/livinglab_nyu_grounded_prompts.yaml
+      label_margin_min: 0.05
+      gng_min_observations_to_commit: 2
+      cross_label_merge_distance_m: 0.45
+      cross_label_merge_min_cosine: 0.2
+      target_labels:
+        - "meeting table set"
+        - "chair"
+        - "cardboard box"
+        - "trash bin"
+        - "vacuum cleaner"
+        - "plant pot"
+        - "shoes"
+        - "bench"
+        - "electric vehicle"
+        - "large power bank"
+        - "door"
+      target_label_thresholds:
+        - 1.6  # meeting table set
+        - 0.6  # chair
+        - 1.0  # cardboard box
+        - 0.25 # trash bin
+        - 0.8  # vacuum cleaner
+        - 0.5  # plant pot
+        - 0.3  # shoes
+        - 0.8  # bench
+        - 1.0  # electric vehicle
+        - 0.5  # large power bank
+        - 1.0  # door
+      per_label_geometry_priors:
+        meeting_table_set:
+          min_z: 0.35
+          max_z: 1.1
+          min_mask_area_frac: 0.01
+          hard_min_mask_area_frac: 0.012
+          penalty_factor: 0.35
+        chair:
+          min_z: 0.15
+          max_z: 1.2
+          max_mask_area_frac: 0.08
+          penalty_factor: 0.35
+        trash_bin:
+          min_z: 0.0
+          max_z: 0.95
+          hard_max_z: 1.1
+          min_mask_area_frac: 0.002
+          max_mask_area_frac: 0.08
+          penalty_factor: 0.3
+        vacuum_cleaner:
+          min_z: 0.0
+          max_z: 0.8
+          max_mask_area_frac: 0.12
+          penalty_factor: 0.35
+        plant_pot:
+          min_z: 0.0
+          max_z: 0.9
+          max_mask_area_frac: 0.12
+          penalty_factor: 0.35
+        shoes:
+          max_z: 0.25
+          max_mask_area_frac: 0.04
+          penalty_factor: 0.25
+        large_power_bank:
+          max_z: 0.35
+          max_mask_area_frac: 0.05
+          penalty_factor: 0.25
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
     benchmark_match_threshold_m: 1.0
+    benchmark_label_aliases:
+      meeting table set:
+        - meeting table set
+        - table
+        - chair
+      chair:
+        - chair
+        - meeting table set
+      trash bin:
+        - trash bin
+        - cardboard box
+      large power bank:
+        - large power bank
+        - electric vehicle
+    benchmark_composite_covers:
+      meeting table set:
+        radius_m: 2.0
+        covered_pred_labels:
+          - meeting table set
+          - table
+          - chair
+          - bench
 
 required_topics:
   - /camera/image_raw

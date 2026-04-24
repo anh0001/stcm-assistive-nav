@@ -1,0 +1,99 @@
+chunks:
+  furniture:
+    thresholds: [0.34, 0.34]
+    classes:
+      - label: meeting table set
+        detect_aliases:
+          - meeting table
+          - conference table
+          - table with chairs
+          - meeting table set
+        rerank_aliases:
+          - meeting table set
+          - table with chairs
+          - meeting table
+          - conference table
+          - conference table set
+        box_threshold: 0.32
+        text_threshold: 0.32
+      - label: chair
+        detect_aliases:
+          - chair
+          - chairs
+          - armless chair
+        rerank_aliases:
+          - chair
+          - chairs
+          - armless chair
+          - armless chairs
+        box_threshold: 0.36
+        text_threshold: 0.36
+      - label: bench
+        aliases:
+          - bench
+          - metal bench
+          - waiting bench
+  livinglab_objects:
+    thresholds: [0.3, 0.3]
+    classes:
+      - label: cardboard box
+        aliases:
+          - cardboard box
+          - brown cardboard box
+          - cardboard package
+      - label: trash bin
+        detect_aliases:
+          - trash bin
+          - trash can
+          - waste bin
+          - recycling bin
+          - row of trash bins
+        rerank_aliases:
+          - trash bin
+          - trash bins
+          - trash can
+          - recycling bin
+          - indoor waste bin
+          - five trash bins aligned against a wall
+        box_threshold: 0.3
+        text_threshold: 0.3
+      - label: vacuum cleaner
+        aliases:
+          - vacuum cleaner
+          - upright vacuum cleaner
+          - cordless vacuum
+          - floor cleaner
+      - label: plant pot
+        aliases:
+          - plant pot
+          - potted plant
+          - flower pot
+          - indoor plant pot
+      - label: shoes
+        aliases:
+          - shoes
+          - pair of shoes
+          - footwear
+          - black shoes
+      - label: large power bank
+        aliases:
+          - large power bank
+          - portable power station
+          - battery pack
+          - power bank
+  fixtures:
+    thresholds: [0.36, 0.36]
+    classes:
+      - label: door
+        aliases:
+          - door
+          - doors
+          - dark door
+          - elevator sliding door
+          - sliding door
+      - label: electric vehicle
+        aliases:
+          - electric vehicle
+          - small electric vehicle
+          - mobility scooter
+          - scooter
