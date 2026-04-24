@@ -20,6 +20,14 @@ scenarios:
     storage_id: sqlite3
     ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
     benchmark_match_threshold_m: 1.0
+  livinglab:
+    description: "Living-lab MCAP run from 2026-04-17; draft ground truth under review."
+    bag_path: /media/dl-box/STREAM1/robotics_living_lab_20260417_171737
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt_draft.json
+    benchmark_match_threshold_m: 1.0
 
 required_topics:
   - /camera/image_raw

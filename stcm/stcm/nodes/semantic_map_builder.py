@@ -13,6 +13,7 @@ import torch
 import ros2_numpy as ros_numpy
 import rosbag2_py
 import rclpy
+from cv_bridge import CvBridge
 from PIL import Image as PILImg
 from rclpy.duration import Duration
 from rclpy.node import Node
@@ -247,6 +248,7 @@ class SemanticMapBuilder(Node):
         self._event_counts: Dict[str, int] = {}
         self._proposal_backend = None
         self._semantic_prior = None
+        self._cv_bridge = CvBridge()
 
         self.listener = None
         self.timer = None
@@ -1091,12 +1093,13 @@ class SemanticMapBuilder(Node):
     def _lookup_tf(self, target_frame: str, source_frame: str, stamp: Time) -> Optional[np.ndarray]:
         if self._tf_buffer is None:
             return None
+        timeout = Duration(seconds=0.0 if self.offline_sequential else 0.2)
         try:
             transform = self._tf_buffer.lookup_transform(
                 target_frame,
                 source_frame,
                 stamp,
-                timeout=Duration(seconds=0.2),
+                timeout=timeout,
             )
         except (LookupException, ConnectivityException, ExtrapolationException) as exc:
             try:
@@ -1104,7 +1107,7 @@ class SemanticMapBuilder(Node):
                     target_frame,
                     source_frame,
                     Time(),
-                    timeout=Duration(seconds=0.2),
+                    timeout=timeout,
                 )
                 self._count_event("tf_lookup_latest_fallbacks")
                 self.get_logger().warning(
@@ -1154,6 +1157,14 @@ class SemanticMapBuilder(Node):
             return depth_cv
         self.get_logger().error(f"Unsupported depth type: {depth_msg.encoding}")
         return None
+
+    def _parse_rgb_image(self, rgb_msg: Image) -> Optional[np.ndarray]:
+        try:
+            return np.asarray(self._cv_bridge.imgmsg_to_cv2(rgb_msg, desired_encoding="rgb8"))
+        except Exception as exc:
+            self._count_event("rgb_decode_failures")
+            self.get_logger().error(f"Failed to decode RGB image ({rgb_msg.encoding}): {exc}")
+            return None
 
     def _parse_pointcloud2_all_fields(self, cloud: PointCloud2) -> Optional[np.ndarray]:
         type_map = {
@@ -1293,7 +1304,7 @@ class SemanticMapBuilder(Node):
         pending_cloud,
         slop_ns: int,
     ):
-        rgb_image = ros_numpy.numpify(rgb_msg)
+        rgb_image = self._parse_rgb_image(rgb_msg)
         if rgb_image is None:
             return None
 
@@ -1389,11 +1400,20 @@ class SemanticMapBuilder(Node):
                 self._trim_queue(pending_depth, rgb_stamp_ns - slop_ns)
                 self._trim_queue(pending_cloud, rgb_stamp_ns - slop_ns)
                 continue
+            if not getattr(self, "_offline_first_frame_build_logged", False):
+                self.get_logger().info(
+                    f"Preparing offline frame at stamp {rgb_stamp_ns}; "
+                    f"depth_queue={len(pending_depth)}, cloud_queue={len(pending_cloud)}"
+                )
+                self._offline_first_frame_build_logged = True
             frames = self._build_offline_frames(
                 rgb_msg, rgb_stamp_ns, pending_depth, pending_cloud, slop_ns
             )
             if frames is None:
                 continue
+            if not getattr(self, "_offline_first_frame_built_logged", False):
+                self.get_logger().info("Offline frame built; handing to perception pipeline")
+                self._offline_first_frame_built_logged = True
             self._process_frame_data(frames)
             processed += 1
         return processed
@@ -1416,6 +1436,8 @@ class SemanticMapBuilder(Node):
         self._intrinsics = None
         self._intrinsics_warned = False
         self._cloud_field_warning_emitted = False
+        self._offline_first_frame_build_logged = False
+        self._offline_first_frame_built_logged = False
 
         reader = rosbag2_py.SequentialReader()
         storage_id = self.rosbag_storage_id or "sqlite3"
@@ -1425,12 +1447,14 @@ class SemanticMapBuilder(Node):
             output_serialization_format="cdr",
         )
         try:
+            self.get_logger().info(f"Opening rosbag '{bag_path}' with storage_id='{storage_id}'")
             reader.open(storage_options, converter_options)
         except Exception as exc:
             self.get_logger().error(f"Failed to open rosbag: {exc}")
             return
 
         topic_types = {topic.name: topic.type for topic in reader.get_all_topics_and_types()}
+        self.get_logger().info("Rosbag opened; available topics: " + ", ".join(sorted(topic_types)))
         tf_topic = "/tf"
         tf_static_topic = "/tf_static"
 
@@ -1460,9 +1484,17 @@ class SemanticMapBuilder(Node):
         slop_ns = int(self.synchronizer_slop * 1e9)
         current_time_ns = None
         processed_frames = 0
+        scanned_messages = 0
+        self.get_logger().info("Starting offline rosbag scan")
 
         while reader.has_next() and rclpy.ok():
             topic, data, timestamp = reader.read_next()
+            scanned_messages += 1
+            if scanned_messages % 5000 == 0:
+                self.get_logger().info(
+                    f"Offline scan progress: read {scanned_messages} messages, "
+                    f"processed {processed_frames} frames"
+                )
             current_time_ns = timestamp
             msg_type = type_cache.get(topic)
             if msg_type is None:

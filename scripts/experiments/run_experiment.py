@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import selectors
 import shutil
 import shlex
 import signal
@@ -281,6 +282,8 @@ def _failure_flags(result: dict[str, Any]) -> list[str]:
         flags.append("gng_update_failures_present")
     if not result.get("log", {}).get("completion_marker_seen") and result.get("executed"):
         flags.append("completion_marker_missing")
+    if result.get("launch", {}).get("timed_out"):
+        flags.append("launch_timeout")
     benchmark = result.get("benchmark") or {}
     if result.get("executed") and benchmark.get("required") and not benchmark.get("available"):
         flags.append("benchmark_missing")
@@ -331,6 +334,7 @@ def _run_launch(command: list[str], log_path: Path, timeout_sec: int) -> dict[st
     start = time.perf_counter()
     completion_seen = False
     graph_saved_seen = False
+    timed_out = False
     returncode = None
     with log_path.open("w", encoding="utf-8") as log_handle:
         process = subprocess.Popen(
@@ -344,7 +348,26 @@ def _run_launch(command: list[str], log_path: Path, timeout_sec: int) -> dict[st
         )
         try:
             assert process.stdout is not None
-            for line in process.stdout:
+            selector = selectors.DefaultSelector()
+            selector.register(process.stdout, selectors.EVENT_READ)
+            while True:
+                if timeout_sec > 0 and time.perf_counter() - start > timeout_sec:
+                    timed_out = True
+                    os.killpg(process.pid, signal.SIGINT)
+                    break
+
+                events = selector.select(timeout=0.5)
+                if not events:
+                    if process.poll() is not None:
+                        break
+                    continue
+
+                line = process.stdout.readline()
+                if line == "":
+                    if process.poll() is not None:
+                        break
+                    continue
+
                 log_handle.write(line)
                 log_handle.flush()
                 if COMPLETION_MARKER in line:
@@ -353,9 +376,6 @@ def _run_launch(command: list[str], log_path: Path, timeout_sec: int) -> dict[st
                     graph_saved_seen = True
                 if graph_saved_seen:
                     time.sleep(2.0)
-                    os.killpg(process.pid, signal.SIGINT)
-                    break
-                if time.perf_counter() - start > timeout_sec:
                     os.killpg(process.pid, signal.SIGINT)
                     break
             try:
@@ -372,6 +392,7 @@ def _run_launch(command: list[str], log_path: Path, timeout_sec: int) -> dict[st
         "elapsed_sec": time.perf_counter() - start,
         "completion_seen": completion_seen,
         "graph_saved_seen": graph_saved_seen,
+        "timed_out": timed_out,
     }
 
 
@@ -397,6 +418,10 @@ def _materialize_run_config(
             "place_gng_output_path": str(graph_path),
         }
     )
+    scenario_overrides = scenario.get("config_overrides") or {}
+    if not isinstance(scenario_overrides, dict):
+        raise TypeError("scenario config_overrides must be a mapping")
+    config = _deep_merge(config, scenario_overrides)
     return config
 
 

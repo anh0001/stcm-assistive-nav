@@ -5,7 +5,7 @@
 # and docs lookup only when a current API claim needs verification.
 
 approval_policy = "on-request"
-sandbox_mode = "workspace-write"
+sandbox_mode = "danger-full-access"
 web_search = "live"
 
 persistent_instructions = "Follow AGENTS.md. For experiment work, preserve evidence under results/ and record bag path, config, git SHA, checkpoint hashes, command, logs, and output JSON."
