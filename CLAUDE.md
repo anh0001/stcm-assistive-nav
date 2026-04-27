@@ -127,8 +127,8 @@ See `response_to_reviewers.pdf` for AE-1..AE-13 + R1/R2 items. Workflow:
 6. Submission preflight → `/verify` then `/quality-gate paper` (AE-11..13)
 
 Harness rules (permissions, env, hooks) in `.claude/settings.json`. Project
-profile in `.claude/identity.json`. MCP servers (scite, context7) in
-`.mcp.json` (also mirrored in `.codex/config.toml` for Codex parity).
+profile in `.claude/identity.json`. MCP servers (scite, context7) come from
+user-level Claude config; Codex parity via `.codex/config.toml`.
 
 Hooks active:
 - **SessionStart** — preflight: PYTHONUSERBASE check, models/ dir check,
