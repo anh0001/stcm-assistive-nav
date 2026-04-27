@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "technicalLevel": "advanced",
+  "preferredStyle": {
+    "verbosity": "minimal",
+    "codeComments": false,
+    "explanations": false
+  },
+  "domains": [
+    "robotics",
+    "ros2",
+    "python",
+    "computer-vision",
+    "research-paper"
+  ],
+  "context": {
+    "project": "stcm-assistive-nav",
+    "framework": "ROS 2 Humble",
+    "interpreter": "/usr/bin/python3",
+    "envIsolation": "PYTHONUSERBASE=$HOME/.local/stcm_sys_py310",
+    "primaryGoal": "JACIII Jc26-0002 paper revision evidence",
+    "branchModel": "main + feature branches per AE-/R- item"
+  },
+  "suggestedBy": "manual-from-everything-claude-code-transplant",
+  "createdAt": "2026-04-27T00:00:00.000Z"
+}

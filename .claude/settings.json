@@ -74,13 +74,24 @@
     "PYTHONUSERBASE": "${HOME}/.local/stcm_sys_py310"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'errs=0; [ \"${PYTHONUSERBASE:-}\" = \"$HOME/.local/stcm_sys_py310\" ] || { echo \"WARN: PYTHONUSERBASE not set to $HOME/.local/stcm_sys_py310 (current: ${PYTHONUSERBASE:-unset})\" >&2; errs=$((errs+1)); }; [ -d models ] || echo \"WARN: models/ dir missing — run /download-ckpts\" >&2; [ -d install/stcm ] || echo \"INFO: install/stcm/ absent — run /build before launch\" >&2; if [ -d install ] && [ stcm/setup.py -nt install ]; then echo \"WARN: stcm/setup.py newer than install/ — install may be stale, consider /clean-build\" >&2; fi; exit 0'"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cmd=$(jq -r \".tool_input.command // empty\"); case \"$cmd\" in *\"rm -rf /\"*|*\"rm -rf ~\"*|*\"rm -rf $HOME\"*) echo \"Blocked: destructive rm outside project scope\" >&2; exit 2;; *\"rm -rf models\"*|*\"rm -rf output\"*|*\"rm -rf stcm\"*) echo \"Blocked: cannot delete models/, output/, or stcm/ source\" >&2; exit 2;; esac; exit 0'"
+            "command": "bash -c 'cmd=$(jq -r \".tool_input.command // empty\"); case \"$cmd\" in *\"rm -rf /\"*|*\"rm -rf ~\"*|*\"rm -rf $HOME\"*) echo \"Blocked: destructive rm outside project scope\" >&2; exit 2;; *\"rm -rf models\"*|*\"rm -rf output\"*|*\"rm -rf stcm\"*) echo \"Blocked: cannot delete models/, output/, or stcm/ source\" >&2; exit 2;; esac; case \"$cmd\" in *\"git commit\"*|*\"git push\"*) if git diff --cached -U0 2>/dev/null | grep -E \"^\\+\" | grep -Eiq \"(api[_-]?key|secret|password|token|hf_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})\"; then echo \"BLOCK: staged diff looks like a secret. Inspect: git diff --cached\" >&2; exit 2; fi; if git diff --cached --name-only 2>/dev/null | grep -Eq \"^(models/|output/|build/|install/|log/|\\.env)\"; then echo \"BLOCK: staged file under restricted path (models/output/build/install/log/.env). Unstage first.\" >&2; exit 2; fi;; esac; exit 0'"
           }
         ]
       }
@@ -92,6 +103,15 @@
           {
             "type": "command",
             "command": "bash -c 'f=$(jq -r \".tool_input.file_path // empty\"); case \"$f\" in *.py) python3 -m py_compile \"$f\" 2>&1 | head -20 || echo \"py_compile failed for $f\" >&2;; esac; exit 0'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(jq -r \".tool_input.file_path // empty\"); case \"$f\" in stcm/nodes/*.py|stcm/stcm/nodes/*.py|stcm/image_listener.py|stcm/stcm/image_listener.py) if grep -nE \"^[[:space:]]*print\\(\" \"$f\" 2>/dev/null | head -5 | grep -q .; then echo \"NOTE: $f contains bare print() — prefer self.get_logger() in ROS nodes\" >&2; fi;; esac; exit 0'"
           }
         ]
       }

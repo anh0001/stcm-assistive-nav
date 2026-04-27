@@ -71,6 +71,18 @@ Domain knowledge also in `.claude/skills/`:
 - `brainstorming-research-ideas` — structured ideation frameworks for new research directions
 - `article-writing` — trim Intro/Related Work prose
 
+Workflow + meta skills (transplanted from `everything-claude-code`):
+- `verification-loop` — build → test → eval check loop (pairs with `/experiment-loop`)
+- `tdd-workflow` — TDD discipline for new perception/graph code
+- `git-workflow` — branch/commit hygiene for AE-/R- revision branches
+- `security-review` — pre-release sweep for secrets / unsafe deserialization
+- `context-budget` — audit harness token consumption when sessions blow context
+- `token-budget-advisor` — pick response depth interactively
+- `mcp-server-patterns` — build/maintain custom MCP servers (scite, context7)
+- `rules-distill` — compress `.claude/rules/*.md` when they grow
+- `hookify-rules` — convert recurring rule violations into hooks
+- `skill-stocktake` — periodic audit of skills, drop dead ones
+
 Inner-loop commands in `.claude/commands/`:
 - `/build`, `/clean-build` — colcon build
 - `/launch` — `ros2 launch stcm semantic_mapping.launch.py`
@@ -83,9 +95,13 @@ Inner-loop commands in `.claude/commands/`:
 - `/experiment-loop` — long-horizon run→diagnose→fix→rerun cycle
 - `/verify` — submission preflight (figs dpi, acronyms, track-changes)
 - `/quality-gate` — block until every AE-/R- item has evidence
+- `/checkpoint` — snapshot conversation/work state mid-session
+- `/code-review` — invoke `code-reviewer` subagent on local diff or PR
 
 Revision agents in `.claude/agents/` (invoke via Agent tool):
-- `planner`, `python-reviewer`, `silent-failure-hunter`, `comment-analyzer`, `doc-updater`
+- Existing: `planner`, `python-reviewer`, `silent-failure-hunter`, `comment-analyzer`, `doc-updater`
+- Added (Tier 1): `build-error-resolver` (colcon/Python/ROS 2), `code-reviewer` (general review)
+- Added (Tier 2): `refactor-cleaner`, `code-explorer`, `harness-optimizer`, `conversation-analyzer`
 
 Codex-specific experiment harness:
 - `.agents/skills/` — project-local Codex/plugin-style skills for STCM
@@ -110,7 +126,20 @@ See `response_to_reviewers.pdf` for AE-1..AE-13 + R1/R2 items. Workflow:
 5. Trim Intro/Related Work + glossary → `article-writing` skill + `doc-updater` agent (AE-5, AE-7, AE-8, AE-10)
 6. Submission preflight → `/verify` then `/quality-gate paper` (AE-11..13)
 
-Harness rules (permissions, env, hooks) in `.claude/settings.json`.
+Harness rules (permissions, env, hooks) in `.claude/settings.json`. Project
+profile in `.claude/identity.json`. MCP servers (scite, context7) in
+`.mcp.json` (also mirrored in `.codex/config.toml` for Codex parity).
+
+Hooks active:
+- **SessionStart** — preflight: PYTHONUSERBASE check, models/ dir check,
+  install/ staleness warning vs `stcm/setup.py`
+- **PreToolUse(Bash)** — blocks destructive `rm -rf` outside scope; on
+  `git commit`/`git push`, scans staged diff for secret patterns
+  (`api[_-]?key`, `sk-…`, `hf_…`, `AKIA…`, etc.) and refuses staged paths
+  under `models/`, `output/`, `build/`, `install/`, `log/`, `.env*`
+- **PostToolUse(Edit|Write)** — `py_compile` on edited `.py`; nags if
+  bare `print()` introduced in ROS node files
+- **Stop** — reminder to verify with colcon build + dry-run launch
 
 ## Experiment mode for Codex
 
