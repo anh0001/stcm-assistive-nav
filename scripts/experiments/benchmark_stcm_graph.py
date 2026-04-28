@@ -669,6 +669,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--wrong-label-threshold-m", type=float, default=1.0)
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-csv", default=str(DEFAULT_OUTPUT_CSV))
+    parser.add_argument(
+        "--label-aliases",
+        default=None,
+        help="Optional JSON file mapping GT label -> list of acceptable predicted labels.",
+    )
     return parser.parse_args()
 
 
@@ -678,12 +683,16 @@ def _format_metric(value: float | None) -> str:
 
 def main() -> int:
     args = _parse_args()
+    aliases = None
+    if args.label_aliases:
+        aliases = json.loads(_resolve_path(args.label_aliases).read_text())
     result = evaluate_graphs(
         prediction_path=_resolve_path(args.prediction),
         ground_truth_path=_resolve_path(args.ground_truth),
         match_threshold_m=args.match_threshold_m,
         duplicate_threshold_m=args.duplicate_threshold_m,
         wrong_label_threshold_m=args.wrong_label_threshold_m,
+        label_aliases=aliases,
     )
     output_json = _resolve_path(args.output_json)
     output_csv = _resolve_path(args.output_csv)

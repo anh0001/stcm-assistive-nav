@@ -54,7 +54,7 @@ scenarios:
         - 0.8  # bench
         - 1.0  # electric vehicle
         - 0.5  # large power bank
-        - 1.0  # door
+        - 1.5  # door
       per_label_geometry_priors:
         meeting_table_set:
           min_z: 0.35

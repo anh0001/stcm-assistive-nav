@@ -1,0 +1,70 @@
+{
+  "cards": [
+    {
+      "scene": "meeting",
+      "bag_path": "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed",
+      "storage_id": "sqlite3",
+      "duration_s": 174.793355588,
+      "metadata_path": "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed/metadata.yaml",
+      "gt_instance_count": 20,
+      "label_distribution": {
+        "emergency exit sign": 1,
+        "bottle": 1,
+        "cup": 1,
+        "water fountain": 1,
+        "cardboard box": 2,
+        "chair": 3,
+        "door": 2,
+        "meeting table set": 3,
+        "bench": 1,
+        "trash bin": 5
+      },
+      "label_vocabulary": [
+        "bench",
+        "bottle",
+        "cardboard box",
+        "chair",
+        "cup",
+        "door",
+        "emergency exit sign",
+        "meeting table set",
+        "trash bin",
+        "water fountain"
+      ]
+    },
+    {
+      "scene": "livinglab",
+      "bag_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737",
+      "storage_id": "mcap",
+      "duration_s": 153.252430832,
+      "metadata_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737/metadata.yaml",
+      "gt_instance_count": 23,
+      "label_distribution": {
+        "cardboard box": 1,
+        "trash bin": 5,
+        "vacuum cleaner": 1,
+        "plant pot": 1,
+        "chair": 5,
+        "shoes": 2,
+        "meeting table set": 3,
+        "bench": 1,
+        "electric vehicle": 1,
+        "large power bank": 1,
+        "door": 2
+      },
+      "label_vocabulary": [
+        "bench",
+        "cardboard box",
+        "chair",
+        "door",
+        "electric vehicle",
+        "large power bank",
+        "meeting table set",
+        "plant pot",
+        "shoes",
+        "trash bin",
+        "vacuum cleaner"
+      ]
+    }
+  ]
+}

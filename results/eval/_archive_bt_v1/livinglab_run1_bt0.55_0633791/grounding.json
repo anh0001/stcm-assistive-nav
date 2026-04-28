@@ -1,0 +1,207 @@
+{
+  "overall": {
+    "n": 15,
+    "top1": 3,
+    "top2": 5,
+    "top1_acc": 0.2,
+    "top2_acc": 0.3333333333333333
+  },
+  "by_subset": {
+    "simple": {
+      "n": 5,
+      "top1": 1,
+      "top2": 1,
+      "top1_acc": 0.2,
+      "top2_acc": 0.2
+    },
+    "disambiguation": {
+      "n": 5,
+      "top1": 1,
+      "top2": 2,
+      "top1_acc": 0.2,
+      "top2_acc": 0.4
+    },
+    "compositional": {
+      "n": 5,
+      "top1": 1,
+      "top2": 2,
+      "top1_acc": 0.2,
+      "top2_acc": 0.4
+    }
+  },
+  "trials": [
+    {
+      "id": "l_simple_01",
+      "subset": "simple",
+      "text": "go to the vacuum cleaner",
+      "gt_object_id": "vacuum cleaner_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_simple_02",
+      "subset": "simple",
+      "text": "go to the plant pot",
+      "gt_object_id": "plant pot_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_simple_03",
+      "subset": "simple",
+      "text": "go to the bench",
+      "gt_object_id": "bench_1_0",
+      "ranked": [
+        "bench_inst_0"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "l_simple_04",
+      "subset": "simple",
+      "text": "go to the electric vehicle",
+      "gt_object_id": "electric vehicle_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_simple_05",
+      "subset": "simple",
+      "text": "go to the large power bank",
+      "gt_object_id": "large power bank_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_disambig_01",
+      "subset": "disambiguation",
+      "text": "go to the chair near the vacuum cleaner",
+      "gt_object_id": "chair_1_0",
+      "ranked": [
+        "chair_inst_3",
+        "chair_inst_4"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_disambig_02",
+      "subset": "disambiguation",
+      "text": "go to the chair near the shoes",
+      "gt_object_id": "chair_5_0",
+      "ranked": [
+        "chair_inst_3",
+        "chair_inst_4"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_disambig_03",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the cardboard box",
+      "gt_object_id": "trash bin_1_0",
+      "ranked": [
+        "trash bin_inst_1",
+        "trash bin_inst_2"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_disambig_04",
+      "subset": "disambiguation",
+      "text": "go to the door near the meeting table set",
+      "gt_object_id": "door_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_disambig_05",
+      "subset": "disambiguation",
+      "text": "go to the meeting table set near the bench",
+      "gt_object_id": "meeting table set_3_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_compose_01",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cardboard box and the vacuum cleaner",
+      "gt_object_id": "trash bin_3_0",
+      "ranked": [
+        "trash bin_inst_1",
+        "trash bin_inst_2"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_compose_02",
+      "subset": "compositional",
+      "text": "go to the chair between the vacuum cleaner and the shoes",
+      "gt_object_id": "chair_3_0",
+      "ranked": [
+        "chair_inst_3",
+        "chair_inst_4"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_compose_03",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the door and the chair",
+      "gt_object_id": "meeting table set_4_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_compose_04",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the trash bin",
+      "gt_object_id": "door_2_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_compose_05",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the shoes",
+      "gt_object_id": "chair_4_0",
+      "ranked": [
+        "chair_inst_3",
+        "chair_inst_4"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 2
+    }
+  ],
+  "scene": "livinglab",
+  "commands_path": "configs/eval/commands_livinglab.yaml",
+  "prediction_path": "results/eval/livinglab_run1_bt0.55_0633791/stcm.json"
+}

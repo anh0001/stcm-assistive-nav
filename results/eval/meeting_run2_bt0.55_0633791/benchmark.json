@@ -1,0 +1,1198 @@
+{
+  "covered_false_positive_nodes": [],
+  "duplicate_pairs": [
+    {
+      "label": "chair",
+      "node_a": "chair_inst_1",
+      "node_b": "chair_inst_2",
+      "xy_distance_m": 0.47032170772326987
+    },
+    {
+      "label": "trash bin",
+      "node_a": "trash bin_inst_0",
+      "node_b": "trash bin_inst_2",
+      "xy_distance_m": 0.23360390829223607
+    },
+    {
+      "label": "trash bin",
+      "node_a": "trash bin_inst_2",
+      "node_b": "trash bin_inst_3",
+      "xy_distance_m": 0.4297013691161505
+    }
+  ],
+  "false_negative_gt_nodes": [
+    {
+      "id": "emergency exit sign_168_0",
+      "label": "emergency exit sign",
+      "pose": [
+        -6.680136811577527,
+        0.1147350389735538,
+        2.2125592603084714
+      ]
+    },
+    {
+      "id": "cup_2_0",
+      "label": "cup",
+      "pose": [
+        10.146999354683963,
+        0.7930300462750738,
+        -0.002083638555213108
+      ]
+    },
+    {
+      "id": "cardboard box_4_0",
+      "label": "cardboard box",
+      "pose": [
+        10.57647701090829,
+        -1.2934930132985678,
+        0.07895756461250242
+      ]
+    },
+    {
+      "id": "chair_2_0",
+      "label": "chair",
+      "pose": [
+        9.196054781165868,
+        4.269918204643249,
+        0.6683493967001427
+      ]
+    },
+    {
+      "id": "door_2_0",
+      "label": "door",
+      "pose": [
+        4.75704806729406,
+        -2.297033533838739,
+        2.2998055850099175
+      ]
+    },
+    {
+      "id": "meeting table set_1_0",
+      "label": "meeting table set",
+      "pose": [
+        5.294882811655107,
+        1.9011215616752248,
+        0.6519823489695851
+      ]
+    },
+    {
+      "id": "meeting table set_2_0",
+      "label": "meeting table set",
+      "pose": [
+        3.6829525436044,
+        2.0589938331638002,
+        0.6449412995369364
+      ]
+    },
+    {
+      "id": "meeting table set_3_0",
+      "label": "meeting table set",
+      "pose": [
+        4.994456480401336,
+        5.337384230221681,
+        0.6611371621062375
+      ]
+    },
+    {
+      "id": "trash bin_1_0",
+      "label": "trash bin",
+      "pose": [
+        10.724145528563435,
+        -0.9652378800265361,
+        0.39751143618379614
+      ]
+    },
+    {
+      "id": "trash bin_2_0",
+      "label": "trash bin",
+      "pose": [
+        10.682247258263603,
+        -0.6719635155486117,
+        0.38515351264975484
+      ]
+    },
+    {
+      "id": "trash bin_3_0",
+      "label": "trash bin",
+      "pose": [
+        10.630040939982692,
+        -0.22027307010639927,
+        0.5199983012968988
+      ]
+    },
+    {
+      "id": "trash bin_4_0",
+      "label": "trash bin",
+      "pose": [
+        10.565192712788125,
+        0.06769484952976577,
+        0.5443104388341848
+      ]
+    },
+    {
+      "id": "trash bin_5_0",
+      "label": "trash bin",
+      "pose": [
+        10.490321762183415,
+        0.3826888693869142,
+        0.0859494284016781
+      ]
+    }
+  ],
+  "false_positive_nodes": [
+    {
+      "id": "trash bin_inst_0",
+      "label": "trash bin",
+      "pose": [
+        3.319665098469923,
+        5.610920987932694,
+        0.14046733322894114
+      ]
+    },
+    {
+      "id": "trash bin_inst_1",
+      "label": "trash bin",
+      "pose": [
+        2.567324695034137,
+        4.4445696333285944,
+        -0.030338054424685377
+      ]
+    },
+    {
+      "id": "trash bin_inst_2",
+      "label": "trash bin",
+      "pose": [
+        3.1494628164818392,
+        5.450914834377725,
+        0.04703286645629628
+      ]
+    },
+    {
+      "id": "chair_inst_0",
+      "label": "chair",
+      "pose": [
+        7.976364776775781,
+        3.0414659837782843,
+        0.6776096572229002
+      ]
+    },
+    {
+      "id": "chair_inst_1",
+      "label": "chair",
+      "pose": [
+        9.873772179622252,
+        3.138960060490068,
+        0.31946299410333046
+      ]
+    },
+    {
+      "id": "door_inst_3",
+      "label": "door",
+      "pose": [
+        8.879924731344412,
+        -2.101685339535626,
+        0.5950619171377545
+      ]
+    },
+    {
+      "id": "vacuum cleaner_inst_0",
+      "label": "vacuum cleaner",
+      "pose": [
+        10.069710119821478,
+        -1.7940160991501097,
+        0.5549009121452273
+      ]
+    },
+    {
+      "id": "emergency exit sign_inst_0",
+      "label": "emergency exit sign",
+      "pose": [
+        10.295245391023641,
+        0.21087421211503493,
+        0.784069714232272
+      ]
+    },
+    {
+      "id": "emergency exit sign_inst_1",
+      "label": "emergency exit sign",
+      "pose": [
+        6.558251762985674,
+        -2.1041690053576723,
+        1.6009161204954603
+      ]
+    },
+    {
+      "id": "chair_inst_4",
+      "label": "chair",
+      "pose": [
+        6.435893859616913,
+        5.402166250643086,
+        0.29594418011972196
+      ]
+    },
+    {
+      "id": "chair_inst_6",
+      "label": "chair",
+      "pose": [
+        3.0950139739752767,
+        4.369614666397051,
+        0.3350696638561789
+      ]
+    },
+    {
+      "id": "trash bin_inst_3",
+      "label": "trash bin",
+      "pose": [
+        2.811463845018971,
+        5.1855849229272115,
+        0.11702125963045977
+      ]
+    }
+  ],
+  "ground_truth_path": "/home/anhar/codes/stcm-assistive-nav/configs/experiments/ground_truth/meeting_stcm_gt.json",
+  "invalid_ground_truth_nodes": [],
+  "invalid_prediction_nodes": [],
+  "match_policy": {
+    "assignment": "one_to_one_hungarian_global_with_label_constraints",
+    "composite_covers": {},
+    "duplicate_threshold_m": 0.5,
+    "label": "category_or_label_exact_match_with_configured_gt_aliases",
+    "label_aliases": {
+      "door": [
+        "door",
+        "elevator door",
+        "elevator sliding door"
+      ],
+      "meeting table set": [
+        "conference table",
+        "desk",
+        "meeting table",
+        "meeting table set",
+        "table",
+        "tables"
+      ],
+      "trash bin": [
+        "trash bin",
+        "trash bins",
+        "trashbin"
+      ]
+    },
+    "match_threshold_m": 1.0,
+    "position": "xy_distance_m",
+    "wrong_label_threshold_m": 1.0
+  },
+  "matched_pairs": [
+    {
+      "gt_id": "bottle_2_0",
+      "gt_label": "bottle",
+      "gt_pose": [
+        10.231876284644311,
+        0.6305032681527385,
+        0.08050059147056489
+      ],
+      "label": "bottle",
+      "pred_id": "bottle_inst_0",
+      "pred_label": "bottle",
+      "pred_pose": [
+        10.16176366279996,
+        0.7669338017188012,
+        0.032409618947593706
+      ],
+      "xy_error_m": 0.15339188450178734,
+      "xyz_error_m": 0.1607538860159058
+    },
+    {
+      "gt_id": "water fountain_1_0",
+      "gt_label": "water fountain",
+      "gt_pose": [
+        -3.767283997652957,
+        0.9729858395669363,
+        0.38049913935677254
+      ],
+      "label": "water fountain",
+      "pred_id": "water fountain_inst_0",
+      "pred_label": "water fountain",
+      "pred_pose": [
+        -3.501816731612891,
+        1.0851164402374032,
+        0.33623040363825724
+      ],
+      "xy_error_m": 0.2881772734715681,
+      "xyz_error_m": 0.2915576476575819
+    },
+    {
+      "gt_id": "cardboard box_5_0",
+      "gt_label": "cardboard box",
+      "gt_pose": [
+        4.133035709162213,
+        -0.9550573442933681,
+        0.09537381636436265
+      ],
+      "label": "cardboard box",
+      "pred_id": "cardboard box_inst_0",
+      "pred_label": "cardboard box",
+      "pred_pose": [
+        4.194633654861875,
+        -1.1789112779445743,
+        0.04689979920744314
+      ],
+      "xy_error_m": 0.2321742675783367,
+      "xyz_error_m": 0.2371805659510627
+    },
+    {
+      "gt_id": "chair_1_0",
+      "gt_label": "chair",
+      "gt_pose": [
+        9.979655586564075,
+        2.92278734658988,
+        0.3677969103287533
+      ],
+      "label": "chair",
+      "pred_id": "chair_inst_2",
+      "pred_label": "chair",
+      "pred_pose": [
+        9.979088377688935,
+        2.680581388232608,
+        0.44609403264789094
+      ],
+      "xy_error_m": 0.24220662251406877,
+      "xyz_error_m": 0.25454761313579555
+    },
+    {
+      "gt_id": "chair_3_0",
+      "gt_label": "chair",
+      "gt_pose": [
+        8.483516670792808,
+        4.708772541016023,
+        0.356015672311732
+      ],
+      "label": "chair",
+      "pred_id": "chair_inst_3",
+      "pred_label": "chair",
+      "pred_pose": [
+        8.45271141285531,
+        4.9431281151953375,
+        0.3703437600944106
+      ],
+      "xy_error_m": 0.23637152761174943,
+      "xyz_error_m": 0.23680539091207398
+    },
+    {
+      "gt_id": "door_1_0",
+      "gt_label": "door",
+      "gt_pose": [
+        7.730098964680677,
+        -2.4428836067737834,
+        0.3750178601565508
+      ],
+      "label": "door",
+      "pred_id": "door_inst_1",
+      "pred_label": "door",
+      "pred_pose": [
+        8.20452933232326,
+        -2.287728480886614,
+        0.9972404229619273
+      ],
+      "xy_error_m": 0.49915657546559455,
+      "xyz_error_m": 0.7976955587783038
+    },
+    {
+      "gt_id": "bench_2_0",
+      "gt_label": "bench",
+      "gt_pose": [
+        0.8045026476682465,
+        3.8275128727199634,
+        0.2563253075126408
+      ],
+      "label": "bench",
+      "pred_id": "bench_inst_0",
+      "pred_label": "bench",
+      "pred_pose": [
+        0.28960809460698567,
+        3.572694540606027,
+        0.18757238867166004
+      ],
+      "xy_error_m": 0.57449872336976,
+      "xyz_error_m": 0.5785980876244222
+    }
+  ],
+  "metric_name": "STCM Object Map F1@1m",
+  "per_label": {
+    "bench": {
+      "count_error": 0,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "bench",
+      "matched_pairs": [
+        {
+          "gt_id": "bench_2_0",
+          "gt_label": "bench",
+          "gt_pose": [
+            0.8045026476682465,
+            3.8275128727199634,
+            0.2563253075126408
+          ],
+          "label": "bench",
+          "pred_id": "bench_inst_0",
+          "pred_label": "bench",
+          "pred_pose": [
+            0.28960809460698567,
+            3.572694540606027,
+            0.18757238867166004
+          ],
+          "xy_error_m": 0.57449872336976,
+          "xyz_error_m": 0.5785980876244222
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.57449872336976,
+        "mean_m": 0.57449872336976,
+        "median_m": 0.57449872336976,
+        "p95_m": 0.57449872336976,
+        "rmse_m": 0.57449872336976
+      },
+      "xyz_error": {
+        "max_m": 0.5785980876244222,
+        "mean_m": 0.5785980876244222,
+        "median_m": 0.5785980876244222,
+        "p95_m": 0.5785980876244222,
+        "rmse_m": 0.5785980876244222
+      }
+    },
+    "bottle": {
+      "count_error": 0,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "bottle",
+      "matched_pairs": [
+        {
+          "gt_id": "bottle_2_0",
+          "gt_label": "bottle",
+          "gt_pose": [
+            10.231876284644311,
+            0.6305032681527385,
+            0.08050059147056489
+          ],
+          "label": "bottle",
+          "pred_id": "bottle_inst_0",
+          "pred_label": "bottle",
+          "pred_pose": [
+            10.16176366279996,
+            0.7669338017188012,
+            0.032409618947593706
+          ],
+          "xy_error_m": 0.15339188450178734,
+          "xyz_error_m": 0.1607538860159058
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.15339188450178734,
+        "mean_m": 0.15339188450178734,
+        "median_m": 0.15339188450178734,
+        "p95_m": 0.15339188450178734,
+        "rmse_m": 0.15339188450178734
+      },
+      "xyz_error": {
+        "max_m": 0.1607538860159058,
+        "mean_m": 0.1607538860159058,
+        "median_m": 0.1607538860159058,
+        "p95_m": 0.1607538860159058,
+        "rmse_m": 0.1607538860159058
+      }
+    },
+    "cardboard box": {
+      "count_error": -1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [
+        {
+          "id": "cardboard box_4_0",
+          "label": "cardboard box",
+          "pose": [
+            10.57647701090829,
+            -1.2934930132985678,
+            0.07895756461250242
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 2,
+      "label": "cardboard box",
+      "matched_pairs": [
+        {
+          "gt_id": "cardboard box_5_0",
+          "gt_label": "cardboard box",
+          "gt_pose": [
+            4.133035709162213,
+            -0.9550573442933681,
+            0.09537381636436265
+          ],
+          "label": "cardboard box",
+          "pred_id": "cardboard box_inst_0",
+          "pred_label": "cardboard box",
+          "pred_pose": [
+            4.194633654861875,
+            -1.1789112779445743,
+            0.04689979920744314
+          ],
+          "xy_error_m": 0.2321742675783367,
+          "xyz_error_m": 0.2371805659510627
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 0.5,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.2321742675783367,
+        "mean_m": 0.2321742675783367,
+        "median_m": 0.2321742675783367,
+        "p95_m": 0.2321742675783367,
+        "rmse_m": 0.2321742675783367
+      },
+      "xyz_error": {
+        "max_m": 0.2371805659510627,
+        "mean_m": 0.2371805659510627,
+        "median_m": 0.2371805659510627,
+        "p95_m": 0.2371805659510627,
+        "rmse_m": 0.2371805659510627
+      }
+    },
+    "chair": {
+      "count_error": 3,
+      "f1": 0.4444444444444444,
+      "false_negative_gt_nodes": [
+        {
+          "id": "chair_2_0",
+          "label": "chair",
+          "pose": [
+            9.196054781165868,
+            4.269918204643249,
+            0.6683493967001427
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "pose": [
+            7.976364776775781,
+            3.0414659837782843,
+            0.6776096572229002
+          ]
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "pose": [
+            9.873772179622252,
+            3.138960060490068,
+            0.31946299410333046
+          ]
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "pose": [
+            6.435893859616913,
+            5.402166250643086,
+            0.29594418011972196
+          ]
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "pose": [
+            3.0950139739752767,
+            4.369614666397051,
+            0.3350696638561789
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 4,
+      "gt_count": 3,
+      "label": "chair",
+      "matched_pairs": [
+        {
+          "gt_id": "chair_1_0",
+          "gt_label": "chair",
+          "gt_pose": [
+            9.979655586564075,
+            2.92278734658988,
+            0.3677969103287533
+          ],
+          "label": "chair",
+          "pred_id": "chair_inst_2",
+          "pred_label": "chair",
+          "pred_pose": [
+            9.979088377688935,
+            2.680581388232608,
+            0.44609403264789094
+          ],
+          "xy_error_m": 0.24220662251406877,
+          "xyz_error_m": 0.25454761313579555
+        },
+        {
+          "gt_id": "chair_3_0",
+          "gt_label": "chair",
+          "gt_pose": [
+            8.483516670792808,
+            4.708772541016023,
+            0.356015672311732
+          ],
+          "label": "chair",
+          "pred_id": "chair_inst_3",
+          "pred_label": "chair",
+          "pred_pose": [
+            8.45271141285531,
+            4.9431281151953375,
+            0.3703437600944106
+          ],
+          "xy_error_m": 0.23637152761174943,
+          "xyz_error_m": 0.23680539091207398
+        }
+      ],
+      "precision": 0.3333333333333333,
+      "pred_count": 6,
+      "recall": 0.6666666666666666,
+      "tp": 2,
+      "xy_error": {
+        "max_m": 0.24220662251406877,
+        "mean_m": 0.23928907506290908,
+        "median_m": 0.23928907506290908,
+        "p95_m": 0.24220662251406877,
+        "rmse_m": 0.23930686059449344
+      },
+      "xyz_error": {
+        "max_m": 0.25454761313579555,
+        "mean_m": 0.24567650202393476,
+        "median_m": 0.24567650202393476,
+        "p95_m": 0.25454761313579555,
+        "rmse_m": 0.24583661293443537
+      }
+    },
+    "cup": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "cup_2_0",
+          "label": "cup",
+          "pose": [
+            10.146999354683963,
+            0.7930300462750738,
+            -0.002083638555213108
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "cup",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "door": {
+      "count_error": 0,
+      "f1": 0.5,
+      "false_negative_gt_nodes": [
+        {
+          "id": "door_2_0",
+          "label": "door",
+          "pose": [
+            4.75704806729406,
+            -2.297033533838739,
+            2.2998055850099175
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "pose": [
+            8.879924731344412,
+            -2.101685339535626,
+            0.5950619171377545
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 1,
+      "gt_count": 2,
+      "label": "door",
+      "matched_pairs": [
+        {
+          "gt_id": "door_1_0",
+          "gt_label": "door",
+          "gt_pose": [
+            7.730098964680677,
+            -2.4428836067737834,
+            0.3750178601565508
+          ],
+          "label": "door",
+          "pred_id": "door_inst_1",
+          "pred_label": "door",
+          "pred_pose": [
+            8.20452933232326,
+            -2.287728480886614,
+            0.9972404229619273
+          ],
+          "xy_error_m": 0.49915657546559455,
+          "xyz_error_m": 0.7976955587783038
+        }
+      ],
+      "precision": 0.5,
+      "pred_count": 2,
+      "recall": 0.5,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.49915657546559455,
+        "mean_m": 0.49915657546559455,
+        "median_m": 0.49915657546559455,
+        "p95_m": 0.49915657546559455,
+        "rmse_m": 0.49915657546559455
+      },
+      "xyz_error": {
+        "max_m": 0.7976955587783038,
+        "mean_m": 0.7976955587783038,
+        "median_m": 0.7976955587783038,
+        "p95_m": 0.7976955587783038,
+        "rmse_m": 0.7976955587783038
+      }
+    },
+    "emergency exit sign": {
+      "count_error": 1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "emergency exit sign_168_0",
+          "label": "emergency exit sign",
+          "pose": [
+            -6.680136811577527,
+            0.1147350389735538,
+            2.2125592603084714
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "pose": [
+            10.295245391023641,
+            0.21087421211503493,
+            0.784069714232272
+          ]
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "pose": [
+            6.558251762985674,
+            -2.1041690053576723,
+            1.6009161204954603
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 2,
+      "gt_count": 1,
+      "label": "emergency exit sign",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 2,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "meeting table set": {
+      "count_error": -3,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "meeting table set_1_0",
+          "label": "meeting table set",
+          "pose": [
+            5.294882811655107,
+            1.9011215616752248,
+            0.6519823489695851
+          ]
+        },
+        {
+          "id": "meeting table set_2_0",
+          "label": "meeting table set",
+          "pose": [
+            3.6829525436044,
+            2.0589938331638002,
+            0.6449412995369364
+          ]
+        },
+        {
+          "id": "meeting table set_3_0",
+          "label": "meeting table set",
+          "pose": [
+            4.994456480401336,
+            5.337384230221681,
+            0.6611371621062375
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 3,
+      "fp": 0,
+      "gt_count": 3,
+      "label": "meeting table set",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "trash bin": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "trash bin_1_0",
+          "label": "trash bin",
+          "pose": [
+            10.724145528563435,
+            -0.9652378800265361,
+            0.39751143618379614
+          ]
+        },
+        {
+          "id": "trash bin_2_0",
+          "label": "trash bin",
+          "pose": [
+            10.682247258263603,
+            -0.6719635155486117,
+            0.38515351264975484
+          ]
+        },
+        {
+          "id": "trash bin_3_0",
+          "label": "trash bin",
+          "pose": [
+            10.630040939982692,
+            -0.22027307010639927,
+            0.5199983012968988
+          ]
+        },
+        {
+          "id": "trash bin_4_0",
+          "label": "trash bin",
+          "pose": [
+            10.565192712788125,
+            0.06769484952976577,
+            0.5443104388341848
+          ]
+        },
+        {
+          "id": "trash bin_5_0",
+          "label": "trash bin",
+          "pose": [
+            10.490321762183415,
+            0.3826888693869142,
+            0.0859494284016781
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "pose": [
+            3.319665098469923,
+            5.610920987932694,
+            0.14046733322894114
+          ]
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "pose": [
+            2.567324695034137,
+            4.4445696333285944,
+            -0.030338054424685377
+          ]
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "pose": [
+            3.1494628164818392,
+            5.450914834377725,
+            0.04703286645629628
+          ]
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "pose": [
+            2.811463845018971,
+            5.1855849229272115,
+            0.11702125963045977
+          ]
+        }
+      ],
+      "fn": 5,
+      "fp": 4,
+      "gt_count": 5,
+      "label": "trash bin",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 4,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "vacuum cleaner": {
+      "count_error": 1,
+      "f1": null,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "pose": [
+            10.069710119821478,
+            -1.7940160991501097,
+            0.5549009121452273
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 1,
+      "gt_count": 0,
+      "label": "vacuum cleaner",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 1,
+      "recall": null,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "water fountain": {
+      "count_error": 0,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "water fountain",
+      "matched_pairs": [
+        {
+          "gt_id": "water fountain_1_0",
+          "gt_label": "water fountain",
+          "gt_pose": [
+            -3.767283997652957,
+            0.9729858395669363,
+            0.38049913935677254
+          ],
+          "label": "water fountain",
+          "pred_id": "water fountain_inst_0",
+          "pred_label": "water fountain",
+          "pred_pose": [
+            -3.501816731612891,
+            1.0851164402374032,
+            0.33623040363825724
+          ],
+          "xy_error_m": 0.2881772734715681,
+          "xyz_error_m": 0.2915576476575819
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.2881772734715681,
+        "mean_m": 0.2881772734715681,
+        "median_m": 0.2881772734715681,
+        "p95_m": 0.2881772734715681,
+        "rmse_m": 0.2881772734715681
+      },
+      "xyz_error": {
+        "max_m": 0.2915576476575819,
+        "mean_m": 0.2915576476575819,
+        "median_m": 0.2915576476575819,
+        "p95_m": 0.2915576476575819,
+        "rmse_m": 0.2915576476575819
+      }
+    }
+  },
+  "prediction_path": "/home/anhar/codes/stcm-assistive-nav/results/eval/meeting_run2_bt0.55_0633791/stcm.json",
+  "summary": {
+    "count_error": -1,
+    "covered_false_positive_nodes": 0,
+    "duplicate_pair_count": 3,
+    "f1": 0.358974358974359,
+    "fn": 13,
+    "fp": 12,
+    "gt_nodes": 20,
+    "invalid_ground_truth_nodes": 0,
+    "invalid_prediction_nodes": 0,
+    "precision": 0.3684210526315789,
+    "pred_nodes": 19,
+    "recall": 0.35,
+    "tp": 7,
+    "xy_error": {
+      "max_m": 0.57449872336976,
+      "mean_m": 0.3179966963589807,
+      "median_m": 0.24220662251406877,
+      "p95_m": 0.57449872336976,
+      "rmse_m": 0.34933032233960826
+    },
+    "xyz_error": {
+      "max_m": 0.7976955587783038,
+      "mean_m": 0.36530553572502084,
+      "median_m": 0.25454761313579555,
+      "p95_m": 0.7976955587783038,
+      "rmse_m": 0.42410704960239254
+    }
+  },
+  "wrong_label_near_gt": [
+    {
+      "gt_id": "bottle_2_0",
+      "gt_label": "bottle",
+      "pred_id": "emergency exit sign_inst_0",
+      "pred_label": "emergency exit sign",
+      "xy_error_m": 0.4243868380551039
+    },
+    {
+      "gt_id": "cup_2_0",
+      "gt_label": "cup",
+      "pred_id": "bottle_inst_0",
+      "pred_label": "bottle",
+      "xy_error_m": 0.029983308257843386
+    },
+    {
+      "gt_id": "cardboard box_4_0",
+      "gt_label": "cardboard box",
+      "pred_id": "vacuum cleaner_inst_0",
+      "pred_label": "vacuum cleaner",
+      "xy_error_m": 0.712275256745693
+    },
+    {
+      "gt_id": "trash bin_2_0",
+      "gt_label": "trash bin",
+      "pred_id": "emergency exit sign_inst_0",
+      "pred_label": "emergency exit sign",
+      "xy_error_m": 0.9639361486289056
+    },
+    {
+      "gt_id": "trash bin_3_0",
+      "gt_label": "trash bin",
+      "pred_id": "emergency exit sign_inst_0",
+      "pred_label": "emergency exit sign",
+      "xy_error_m": 0.5458718151450218
+    },
+    {
+      "gt_id": "trash bin_4_0",
+      "gt_label": "trash bin",
+      "pred_id": "emergency exit sign_inst_0",
+      "pred_label": "emergency exit sign",
+      "xy_error_m": 0.30556813707934544
+    },
+    {
+      "gt_id": "trash bin_5_0",
+      "gt_label": "trash bin",
+      "pred_id": "emergency exit sign_inst_0",
+      "pred_label": "emergency exit sign",
+      "xy_error_m": 0.25995204757477675
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+scene: meeting
+description: 15 grounding commands. 5 simple, 5 disambiguation, 5 compositional.
+commands:
+  # --- simple: label-only, single instance or arbitrary instance ---
+  - id: m_simple_01
+    subset: simple
+    text: "go to the water fountain"
+    target_label: water fountain
+    gt_object_id: water fountain_1_0
+  - id: m_simple_02
+    subset: simple
+    text: "go to the bench"
+    target_label: bench
+    gt_object_id: bench_2_0
+  - id: m_simple_03
+    subset: simple
+    text: "go to the bottle"
+    target_label: bottle
+    gt_object_id: bottle_2_0
+  - id: m_simple_04
+    subset: simple
+    text: "go to the cup"
+    target_label: cup
+    gt_object_id: cup_2_0
+  - id: m_simple_05
+    subset: simple
+    text: "go to the emergency exit sign"
+    target_label: emergency exit sign
+    gt_object_id: emergency exit sign_168_0
+
+  # --- disambiguation: multi-instance, picked by spatial qualifier ---
+  - id: m_disambig_01
+    subset: disambiguation
+    text: "go to the chair near the meeting table set"
+    target_label: chair
+    relation:
+      type: near
+      anchor_label: meeting table set
+    gt_object_id: chair_1_0
+  - id: m_disambig_02
+    subset: disambiguation
+    text: "go to the door near the meeting table set"
+    target_label: door
+    relation:
+      type: near
+      anchor_label: meeting table set
+    gt_object_id: door_2_0
+  - id: m_disambig_03
+    subset: disambiguation
+    text: "go to the cardboard box near the trash bin"
+    target_label: cardboard box
+    relation:
+      type: near
+      anchor_label: trash bin
+    gt_object_id: cardboard box_4_0
+  - id: m_disambig_04
+    subset: disambiguation
+    text: "go to the trash bin near the bottle"
+    target_label: trash bin
+    relation:
+      type: near
+      anchor_label: bottle
+    gt_object_id: trash bin_5_0
+  - id: m_disambig_05
+    subset: disambiguation
+    text: "go to the chair near the bench"
+    target_label: chair
+    relation:
+      type: near
+      anchor_label: bench
+    gt_object_id: chair_3_0
+
+  # --- compositional: between two anchors ---
+  - id: m_compose_01
+    subset: compositional
+    text: "go to the trash bin between the bottle and the cardboard box"
+    target_label: trash bin
+    relation:
+      type: between
+      anchor_labels: [bottle, cardboard box]
+    gt_object_id: trash bin_3_0
+  - id: m_compose_02
+    subset: compositional
+    text: "go to the chair between the meeting table set and the bench"
+    target_label: chair
+    relation:
+      type: between
+      anchor_labels: [meeting table set, bench]
+    gt_object_id: chair_2_0
+  - id: m_compose_03
+    subset: compositional
+    text: "go to the door between the meeting table set and the cardboard box"
+    target_label: door
+    relation:
+      type: between
+      anchor_labels: [meeting table set, cardboard box]
+    gt_object_id: door_2_0
+  - id: m_compose_04
+    subset: compositional
+    text: "go to the meeting table set between the chair and the door"
+    target_label: meeting table set
+    relation:
+      type: between
+      anchor_labels: [chair, door]
+    gt_object_id: meeting table set_1_0
+  - id: m_compose_05
+    subset: compositional
+    text: "go to the trash bin between the cardboard box and the water fountain"
+    target_label: trash bin
+    relation:
+      type: between
+      anchor_labels: [cardboard box, water fountain]
+    gt_object_id: trash bin_1_0

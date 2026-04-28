@@ -14,6 +14,8 @@ text_prompt: >-
   meeting table set . armless chair . dark thermos bottle . white drinking cup .
   metallic water fountain . brown cardboard box . green emergency exit sign .
   indoor trash bin . metal bench . dark door surface .
+  upright vacuum cleaner . potted plant in plastic pot . pair of indoor shoes .
+  small electric vehicle . portable power bank battery .
 
 target_labels:
   - "meeting table set"
@@ -26,6 +28,11 @@ target_labels:
   - "trash bin"
   - "bench"
   - "door"
+  - "vacuum cleaner"
+  - "plant pot"
+  - "shoes"
+  - "electric vehicle"
+  - "large power bank"
 
 target_label_thresholds:
   - 1.6  # meeting table set
@@ -37,4 +44,9 @@ target_label_thresholds:
   - 0.3  # emergency exit sign
   - 0.25 # trash bin
   - 0.8  # bench
-  - 1.0  # door
+  - 1.5  # door
+  - 0.8  # vacuum cleaner
+  - 0.5  # plant pot
+  - 0.3  # shoes
+  - 1.0  # electric vehicle
+  - 0.5  # large power bank

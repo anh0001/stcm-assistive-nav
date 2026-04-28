@@ -1,0 +1,112 @@
+{
+  "per_label": [
+    {
+      "label": "bench",
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "iou": 0.5,
+      "f1": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "label": "bottle",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "cardboard box",
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "iou": 0.6666666666666666,
+      "f1": 0.8,
+      "precision": 0.6666666666666666,
+      "recall": 1.0
+    },
+    {
+      "label": "chair",
+      "tp": 3,
+      "fp": 5,
+      "fn": 0,
+      "iou": 0.375,
+      "f1": 0.5454545454545454,
+      "precision": 0.375,
+      "recall": 1.0
+    },
+    {
+      "label": "cup",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "door",
+      "tp": 2,
+      "fp": 5,
+      "fn": 0,
+      "iou": 0.2857142857142857,
+      "f1": 0.4444444444444444,
+      "precision": 0.2857142857142857,
+      "recall": 1.0
+    },
+    {
+      "label": "emergency exit sign",
+      "tp": 0,
+      "fp": 3,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "meeting table set",
+      "tp": 0,
+      "fp": 0,
+      "fn": 3,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "trash bin",
+      "tp": 0,
+      "fp": 6,
+      "fn": 5,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "water fountain",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  ],
+  "macro_iou": 0.3827380952380952,
+  "macro_f1": 0.44565656565656564,
+  "micro_iou": 0.24390243902439024,
+  "micro_f1": 0.39215686274509803,
+  "total_tp": 10,
+  "total_fp": 21,
+  "total_fn": 10,
+  "n_labels": 10
+}
