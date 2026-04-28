@@ -1,0 +1,122 @@
+{
+  "per_label": [
+    {
+      "label": "bench",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "cardboard box",
+      "tp": 0,
+      "fp": 1,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "chair",
+      "tp": 2,
+      "fp": 1,
+      "fn": 3,
+      "iou": 0.3333333333333333,
+      "f1": 0.5,
+      "precision": 0.6666666666666666,
+      "recall": 0.4
+    },
+    {
+      "label": "door",
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "electric vehicle",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "large power bank",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "meeting table set",
+      "tp": 0,
+      "fp": 0,
+      "fn": 3,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "plant pot",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "shoes",
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "trash bin",
+      "tp": 0,
+      "fp": 2,
+      "fn": 5,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "vacuum cleaner",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  ],
+  "macro_iou": 0.2121212121212121,
+  "macro_f1": 0.22727272727272727,
+  "micro_iou": 0.14814814814814814,
+  "micro_f1": 0.25806451612903225,
+  "total_tp": 4,
+  "total_fp": 4,
+  "total_fn": 19,
+  "n_labels": 11
+}

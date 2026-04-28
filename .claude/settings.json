@@ -71,7 +71,7 @@
     ]
   },
   "env": {
-    "PYTHONUSERBASE": "${HOME}/.local/stcm_sys_py310"
+    "PYTHONUSERBASE": "/home/anhar/.local/stcm_sys_py310"
   },
   "hooks": {
     "SessionStart": [

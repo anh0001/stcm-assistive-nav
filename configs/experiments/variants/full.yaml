@@ -11,7 +11,8 @@ text_threshold: 0.45
 gng_min_observations_to_commit: 2
 
 text_prompt: >-
-  meeting table set . armless chair . dark thermos bottle . white drinking cup .
+  meeting table set . large meeting table . conference table . metallic desk . tables .
+  armless chair . dark thermos bottle . white drinking cup .
   metallic water fountain . brown cardboard box . green emergency exit sign .
   indoor trash bin . metal bench . dark door surface .
   upright vacuum cleaner . potted plant in plastic pot . pair of indoor shoes .
@@ -19,6 +20,8 @@ text_prompt: >-
 
 target_labels:
   - "meeting table set"
+  - "table"
+  - "desk"
   - "chair"
   - "bottle"
   - "cup"
@@ -36,6 +39,8 @@ target_labels:
 
 target_label_thresholds:
   - 1.6  # meeting table set
+  - 1.6  # table
+  - 1.6  # desk
   - 0.6  # chair
   - 0.3  # bottle
   - 0.5  # cup

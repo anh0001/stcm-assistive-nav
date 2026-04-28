@@ -16,7 +16,8 @@ SCENES=("meeting" "livinglab")
 # Sweep over box_threshold rather than processing_period: STCM is deterministic
 # in graph building once frames are fixed, so processing_period gives sigma=0.
 # box_threshold genuinely perturbs detection counts -> real run-to-run variation.
-BOX_THRESHOLDS=("0.45" "0.50" "0.55")
+BOX_THRESHOLDS=("0.30" "0.35" "0.40")
+VARIANT="${VARIANT:-full-nyu-proposals}"
 GOAL_LABELS_meeting=(chair "meeting table set" door "trash bin" "water fountain")
 GOAL_LABELS_livinglab=(chair "cardboard box" "trash bin" "vacuum cleaner" door)
 
@@ -60,14 +61,14 @@ for scene in "${SCENES[@]}"; do
     else
       python3 scripts/experiments/run_experiment.py \
         --scenario "$scene" \
-        --variant full \
+        --variant "$VARIANT" \
         --sensitivity "box_threshold=${bt}" \
         --skip-bag-hash \
         --timeout-sec 1800 \
         || { echo "run_experiment failed for $run_id"; continue; }
 
       # locate latest stcm.json artifact for this scenario (timestamp-prefixed dirs)
-      latest_artifact="$(ls -td results/eval/artifacts/*${scene}_full*/ 2>/dev/null | head -n1)"
+      latest_artifact="$(ls -td results/eval/artifacts/**${scene}_${VARIANT}*/ 2>/dev/null | head -n1)"
       if [[ -z "${latest_artifact:-}" || ! -f "${latest_artifact}stcm.json" ]]; then
         echo "no stcm.json artifact found; skip scoring for $run_id" >&2
         continue

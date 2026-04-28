@@ -1,0 +1,2363 @@
+{
+    "stcm_version": "1.0",
+    "semantic_graph": {
+        "directed": false,
+        "multigraph": false,
+        "graph": {},
+        "nodes": [
+            {
+                "id": "vacuum cleaner_inst_1",
+                "instance_id": "vacuum cleaner_inst_1",
+                "pose": [
+                    10.06552239681547,
+                    2.808857175939427,
+                    0.13718020296656921
+                ],
+                "robot_pose": [
+                    [
+                        0.2026102450768179,
+                        -0.9792034398817197,
+                        0.010474345503144356,
+                        8.943060963039319
+                    ],
+                    [
+                        0.9792190338073242,
+                        0.20268748023341043,
+                        0.006918756107953308,
+                        1.9860457322098368
+                    ],
+                    [
+                        -0.00889788847773702,
+                        0.008854867612693957,
+                        0.9999212063458798,
+                        -0.04588374228945663
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "vacuum cleaner",
+                "stability": 1.0,
+                "label_votes": {
+                    "vacuum cleaner": 3.0
+                },
+                "last_label_scores": {
+                    "vacuum cleaner": 1.0
+                }
+            },
+            {
+                "id": "cardboard box_inst_0",
+                "instance_id": "cardboard box_inst_0",
+                "pose": [
+                    8.106697536844335,
+                    3.323252410928884,
+                    0.016932080626483752
+                ],
+                "robot_pose": [
+                    [
+                        0.2713183482303547,
+                        -0.9624100263833378,
+                        0.01238123702927308,
+                        7.161495932705082
+                    ],
+                    [
+                        0.9624518086762549,
+                        0.2713993181599603,
+                        0.005378296952961884,
+                        3.045200244600003
+                    ],
+                    [
+                        -0.00853638620011904,
+                        0.010457113326903328,
+                        0.9999088852948106,
+                        -0.052313648317139215
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "cardboard box",
+                "stability": 1.0,
+                "label_votes": {
+                    "cardboard box": 4.0
+                },
+                "last_label_scores": {
+                    "cardboard box": 1.0
+                }
+            },
+            {
+                "id": "trash bin_inst_1",
+                "instance_id": "trash bin_inst_1",
+                "pose": [
+                    7.734072924499587,
+                    4.446261385950401,
+                    -0.028136052793102228
+                ],
+                "robot_pose": [
+                    [
+                        0.18411479682052279,
+                        -0.9827830900342065,
+                        0.015464137045254537,
+                        7.3010943306088
+                    ],
+                    [
+                        0.9828777743579749,
+                        0.18420351188796136,
+                        0.004510751739530652,
+                        3.5302055737834364
+                    ],
+                    [
+                        -0.007281638885005716,
+                        0.01436886046137498,
+                        0.9998702483743528,
+                        -0.05815362303927658
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "trash bin",
+                "stability": 1.0,
+                "label_votes": {
+                    "trash bin": 5.0
+                },
+                "last_label_scores": {
+                    "trash bin": 1.0
+                }
+            },
+            {
+                "id": "chair_inst_3",
+                "instance_id": "chair_inst_3",
+                "pose": [
+                    9.36558958785022,
+                    4.328510629152159,
+                    0.16696902806228353
+                ],
+                "robot_pose": [
+                    [
+                        0.36868114050756384,
+                        -0.9294713549191855,
+                        0.012538621085873891,
+                        7.332702095725223
+                    ],
+                    [
+                        0.9295299319201196,
+                        0.36873816270056636,
+                        0.0025046023213851284,
+                        3.4650527904673014
+                    ],
+                    [
+                        -0.006951424215195291,
+                        0.010731623963958374,
+                        0.9999182516328405,
+                        -0.06219972044072267
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "chair",
+                "stability": 1.0,
+                "label_votes": {
+                    "chair": 4.0
+                },
+                "last_label_scores": {
+                    "chair": 1.0
+                }
+            },
+            {
+                "id": "trash bin_inst_2",
+                "instance_id": "trash bin_inst_2",
+                "pose": [
+                    8.082548246689846,
+                    4.9440216453319845,
+                    -0.10980076168429538
+                ],
+                "robot_pose": [
+                    [
+                        -0.27401634406687636,
+                        -0.9616154114490217,
+                        0.014520456189516948,
+                        7.114824311371064
+                    ],
+                    [
+                        0.9617021679411314,
+                        -0.2738744780522344,
+                        0.011032245870353922,
+                        3.826415497474054
+                    ],
+                    [
+                        -0.006631995291842867,
+                        0.016987369877193948,
+                        0.9998337091252246,
+                        -0.05752647906450172
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "trash bin",
+                "stability": 1.0,
+                "label_votes": {
+                    "trash bin": 2.0
+                },
+                "last_label_scores": {
+                    "trash bin": 1.0
+                }
+            },
+            {
+                "id": "chair_inst_4",
+                "instance_id": "chair_inst_4",
+                "pose": [
+                    8.015439542711048,
+                    6.068731289564716,
+                    0.22127243002245228
+                ],
+                "robot_pose": [
+                    [
+                        -0.05451247047998664,
+                        -0.998414238492554,
+                        0.014049873220149393,
+                        6.861991431502923
+                    ],
+                    [
+                        0.9984991422319246,
+                        -0.054431941221357194,
+                        0.006052002725189482,
+                        5.122392312763926
+                    ],
+                    [
+                        -0.005277643818938225,
+                        0.014358695978688146,
+                        0.9998829803159528,
+                        -0.0736993466636096
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "chair",
+                "stability": 1.0,
+                "label_votes": {
+                    "chair": 2.0
+                },
+                "last_label_scores": {
+                    "chair": 1.0
+                }
+            },
+            {
+                "id": "chair_inst_5",
+                "instance_id": "chair_inst_5",
+                "pose": [
+                    3.941168921279649,
+                    6.803770094197137,
+                    0.4396163685625918
+                ],
+                "robot_pose": [
+                    [
+                        -0.5716312793799079,
+                        -0.8201779051630889,
+                        0.02336416736750327,
+                        6.610843020284089
+                    ],
+                    [
+                        0.820499715920916,
+                        -0.5715387023617182,
+                        0.011123303303394382,
+                        5.441737852846134
+                    ],
+                    [
+                        0.004230438297113146,
+                        0.025528720786015258,
+                        0.9996651378370879,
+                        -0.08049816048998287
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "chair",
+                "stability": 1.0,
+                "label_votes": {
+                    "chair": 2.0
+                },
+                "last_label_scores": {
+                    "chair": 1.0
+                }
+            },
+            {
+                "id": "bench_inst_0",
+                "instance_id": "bench_inst_0",
+                "pose": [
+                    -0.811521669038422,
+                    3.082583885019565,
+                    0.26980230029801666
+                ],
+                "robot_pose": [
+                    [
+                        -0.9999675642458312,
+                        -0.004946927462536489,
+                        0.00635597081014663,
+                        5.225565854617577
+                    ],
+                    [
+                        0.0050618465820355075,
+                        -0.9998216719321056,
+                        0.018193461574658003,
+                        5.495210551734892
+                    ],
+                    [
+                        0.006264835627450186,
+                        0.01822504440513175,
+                        0.9998142825500104,
+                        -0.08134414318876772
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "category": "bench",
+                "stability": 1.0,
+                "label_votes": {
+                    "bench": 2.0
+                },
+                "last_label_scores": {
+                    "bench": 1.0
+                }
+            }
+        ],
+        "links": []
+    },
+    "place_graph": {
+        "directed": false,
+        "multigraph": false,
+        "graph": {},
+        "nodes": [
+            {
+                "id": "place_0",
+                "pose": [
+                    -4.87622380470783e-05,
+                    -0.0008666687488235747
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 6
+            },
+            {
+                "id": "place_1",
+                "pose": [
+                    0.39237349669304233,
+                    0.056739545643971566
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 0
+            },
+            {
+                "id": "place_2",
+                "pose": [
+                    0.8080847868249624,
+                    0.35677038290575
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 2
+            },
+            {
+                "id": "place_3",
+                "pose": [
+                    1.1819796152239603,
+                    0.2543378602213906
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_4",
+                "pose": [
+                    2.0508703226385356,
+                    0.3495453800152969
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.06155149936676026,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "chair",
+                "visits": 2
+            },
+            {
+                "id": "place_5",
+                "pose": [
+                    3.815358410400182,
+                    1.0612357607054408
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.058495920896530156,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "chair",
+                "visits": 3
+            },
+            {
+                "id": "place_6",
+                "pose": [
+                    2.5347737110560007,
+                    0.8249279927674656
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 0
+            },
+            {
+                "id": "place_7",
+                "pose": [
+                    2.853537099179392,
+                    1.1104235059765721
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 0
+            },
+            {
+                "id": "place_8",
+                "pose": [
+                    5.192083964344983,
+                    0.38014775129876593
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_9",
+                "pose": [
+                    6.132027375975089,
+                    0.06410457241381912
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_10",
+                "pose": [
+                    6.811131118437506,
+                    0.1994246290131735
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_11",
+                "pose": [
+                    8.381801213794958,
+                    0.4874298487319475
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_12",
+                "pose": [
+                    8.885846984101288,
+                    0.5678328305612202
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0676488995552063,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "chair",
+                "visits": 1
+            },
+            {
+                "id": "place_13",
+                "pose": [
+                    8.782918823197845,
+                    1.4258311151937875
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.12905028879642488,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "vacuum cleaner",
+                "visits": 2
+            },
+            {
+                "id": "place_14",
+                "pose": [
+                    8.85556613613492,
+                    1.9310429202533717
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.04518204581737519,
+                    "cardboard box": 0.11835303604602813,
+                    "trash bin": 0.14410541196465493,
+                    "vacuum cleaner": 0.10028727015852928,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "trash bin",
+                "visits": 4
+            },
+            {
+                "id": "place_15",
+                "pose": [
+                    7.755218854434027,
+                    0.4010588141192442
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_16",
+                "pose": [
+                    8.071137848751304,
+                    2.252574869105682
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.06268412470817566,
+                    "trash bin": 0.09014677405357362,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "trash bin",
+                "visits": 1
+            },
+            {
+                "id": "place_17",
+                "pose": [
+                    7.5406930874463045,
+                    2.5093227216364036
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_18",
+                "pose": [
+                    6.865683279845298,
+                    5.06607465656946
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.08676171069145204,
+                    "cardboard box": 0.04042813702225686,
+                    "trash bin": 0.2841495987474919,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "trash bin",
+                "visits": 5
+            },
+            {
+                "id": "place_19",
+                "pose": [
+                    7.050118400372762,
+                    2.7932818322930366
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.05583375096321106,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.08463407754898072,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "trash bin",
+                "visits": 1
+            },
+            {
+                "id": "place_20",
+                "pose": [
+                    5.853245990230689,
+                    5.51309659617032
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.1612387712597847,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "chair",
+                "visits": 3
+            },
+            {
+                "id": "place_21",
+                "pose": [
+                    7.2964567872521275,
+                    3.398702035641039
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.06854042410850525,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "chair",
+                "visits": 1
+            },
+            {
+                "id": "place_22",
+                "pose": [
+                    5.290759398973742,
+                    5.497068272833743
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.05557611584663391,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "bench",
+                "visits": 1
+            },
+            {
+                "id": "place_23",
+                "pose": [
+                    6.897259990956946,
+                    4.584384674961724
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.055428290367126466,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "bench",
+                "visits": 1
+            },
+            {
+                "id": "place_24",
+                "pose": [
+                    2.923624257965091,
+                    5.008633168299285
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_25",
+                "pose": [
+                    2.352350387534292,
+                    3.902588972068207
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_26",
+                "pose": [
+                    -0.3499065947758443,
+                    1.2998865800477701
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.05919318795204163,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "trash bin",
+                "visits": 4
+            },
+            {
+                "id": "place_27",
+                "pose": [
+                    0.7173449363806104,
+                    2.299847503585043
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_28",
+                "pose": [
+                    -0.38852114163583423,
+                    1.982316425421009
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 1
+            },
+            {
+                "id": "place_29",
+                "pose": [
+                    3.8153584104001625,
+                    1.0612357607054506
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 0
+            },
+            {
+                "id": "place_30",
+                "pose": [
+                    0.7519328743455698,
+                    0.7516090283770187
+                ],
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                },
+                "label": "",
+                "visits": 6
+            }
+        ],
+        "links": [
+            {
+                "age": 0,
+                "traversals": 6,
+                "source": "place_0",
+                "target": "place_1"
+            },
+            {
+                "age": 1,
+                "traversals": 2,
+                "source": "place_0",
+                "target": "place_2"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_1",
+                "target": "place_2"
+            },
+            {
+                "age": 1,
+                "traversals": 2,
+                "source": "place_2",
+                "target": "place_3"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_2",
+                "target": "place_26"
+            },
+            {
+                "age": 0,
+                "traversals": 7,
+                "source": "place_2",
+                "target": "place_30"
+            },
+            {
+                "age": 0,
+                "traversals": 3,
+                "source": "place_3",
+                "target": "place_4"
+            },
+            {
+                "age": 1,
+                "traversals": 3,
+                "source": "place_4",
+                "target": "place_5"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_5",
+                "target": "place_7"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_5",
+                "target": "place_8"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_7",
+                "target": "place_8"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_8",
+                "target": "place_9"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_9",
+                "target": "place_10"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_10",
+                "target": "place_11"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_11",
+                "target": "place_12"
+            },
+            {
+                "age": 0,
+                "traversals": 3,
+                "source": "place_12",
+                "target": "place_13"
+            },
+            {
+                "age": 3,
+                "traversals": 2,
+                "source": "place_13",
+                "target": "place_14"
+            },
+            {
+                "age": 0,
+                "traversals": 6,
+                "source": "place_14",
+                "target": "place_15"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_14",
+                "target": "place_16"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_16",
+                "target": "place_17"
+            },
+            {
+                "age": 2,
+                "traversals": 4,
+                "source": "place_17",
+                "target": "place_18"
+            },
+            {
+                "age": 0,
+                "traversals": 5,
+                "source": "place_18",
+                "target": "place_19"
+            },
+            {
+                "age": 0,
+                "traversals": 4,
+                "source": "place_18",
+                "target": "place_20"
+            },
+            {
+                "age": 1,
+                "traversals": 3,
+                "source": "place_20",
+                "target": "place_21"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_20",
+                "target": "place_22"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_22",
+                "target": "place_23"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_23",
+                "target": "place_24"
+            },
+            {
+                "age": 0,
+                "traversals": 2,
+                "source": "place_24",
+                "target": "place_25"
+            },
+            {
+                "age": 3,
+                "traversals": 2,
+                "source": "place_25",
+                "target": "place_26"
+            },
+            {
+                "age": 1,
+                "traversals": 5,
+                "source": "place_26",
+                "target": "place_27"
+            },
+            {
+                "age": 0,
+                "traversals": 3,
+                "source": "place_26",
+                "target": "place_28"
+            },
+            {
+                "age": 0,
+                "traversals": 1,
+                "source": "place_26",
+                "target": "place_29"
+            }
+        ]
+    },
+    "llm": {
+        "summary": {
+            "object_count": 8,
+            "object_edge_count": 0,
+            "place_count": 31,
+            "place_edge_count": 32
+        },
+        "objects": [
+            {
+                "id": "bench_inst_0",
+                "label": "bench",
+                "pose": [
+                    -0.811521669038422,
+                    3.082583885019565,
+                    0.26980230029801666
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "cardboard box_inst_0",
+                "label": "cardboard box",
+                "pose": [
+                    8.106697536844335,
+                    3.323252410928884,
+                    0.016932080626483752
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "chair_inst_3",
+                "label": "chair",
+                "pose": [
+                    9.36558958785022,
+                    4.328510629152159,
+                    0.16696902806228353
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "chair_inst_4",
+                "label": "chair",
+                "pose": [
+                    8.015439542711048,
+                    6.068731289564716,
+                    0.22127243002245228
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "chair_inst_5",
+                "label": "chair",
+                "pose": [
+                    3.941168921279649,
+                    6.803770094197137,
+                    0.4396163685625918
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "trash bin_inst_1",
+                "label": "trash bin",
+                "pose": [
+                    7.734072924499587,
+                    4.446261385950401,
+                    -0.028136052793102228
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "trash bin_inst_2",
+                "label": "trash bin",
+                "pose": [
+                    8.082548246689846,
+                    4.9440216453319845,
+                    -0.10980076168429538
+                ],
+                "stability": 1.0
+            },
+            {
+                "id": "vacuum cleaner_inst_1",
+                "label": "vacuum cleaner",
+                "pose": [
+                    10.06552239681547,
+                    2.808857175939427,
+                    0.13718020296656921
+                ],
+                "stability": 1.0
+            }
+        ],
+        "object_edges": [],
+        "places": [
+            {
+                "id": "place_0",
+                "pose": [
+                    -4.87622380470783e-05,
+                    -0.0008666687488235747
+                ],
+                "label": "",
+                "visits": 6,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_1",
+                "pose": [
+                    0.39237349669304233,
+                    0.056739545643971566
+                ],
+                "label": "",
+                "visits": 0,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_10",
+                "pose": [
+                    6.811131118437506,
+                    0.1994246290131735
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_11",
+                "pose": [
+                    8.381801213794958,
+                    0.4874298487319475
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_12",
+                "pose": [
+                    8.885846984101288,
+                    0.5678328305612202
+                ],
+                "label": "chair",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0676488995552063,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_13",
+                "pose": [
+                    8.782918823197845,
+                    1.4258311151937875
+                ],
+                "label": "vacuum cleaner",
+                "visits": 2,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.12905028879642488,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_14",
+                "pose": [
+                    8.85556613613492,
+                    1.9310429202533717
+                ],
+                "label": "trash bin",
+                "visits": 4,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.04518204581737519,
+                    "cardboard box": 0.11835303604602813,
+                    "trash bin": 0.14410541196465493,
+                    "vacuum cleaner": 0.10028727015852928,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_15",
+                "pose": [
+                    7.755218854434027,
+                    0.4010588141192442
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_16",
+                "pose": [
+                    8.071137848751304,
+                    2.252574869105682
+                ],
+                "label": "trash bin",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.06268412470817566,
+                    "trash bin": 0.09014677405357362,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_17",
+                "pose": [
+                    7.5406930874463045,
+                    2.5093227216364036
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_18",
+                "pose": [
+                    6.865683279845298,
+                    5.06607465656946
+                ],
+                "label": "trash bin",
+                "visits": 5,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.08676171069145204,
+                    "cardboard box": 0.04042813702225686,
+                    "trash bin": 0.2841495987474919,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_19",
+                "pose": [
+                    7.050118400372762,
+                    2.7932818322930366
+                ],
+                "label": "trash bin",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.05583375096321106,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.08463407754898072,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_2",
+                "pose": [
+                    0.8080847868249624,
+                    0.35677038290575
+                ],
+                "label": "",
+                "visits": 2,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_20",
+                "pose": [
+                    5.853245990230689,
+                    5.51309659617032
+                ],
+                "label": "chair",
+                "visits": 3,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.1612387712597847,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_21",
+                "pose": [
+                    7.2964567872521275,
+                    3.398702035641039
+                ],
+                "label": "chair",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.06854042410850525,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_22",
+                "pose": [
+                    5.290759398973742,
+                    5.497068272833743
+                ],
+                "label": "bench",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.05557611584663391,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_23",
+                "pose": [
+                    6.897259990956946,
+                    4.584384674961724
+                ],
+                "label": "bench",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.055428290367126466,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_24",
+                "pose": [
+                    2.923624257965091,
+                    5.008633168299285
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_25",
+                "pose": [
+                    2.352350387534292,
+                    3.902588972068207
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_26",
+                "pose": [
+                    -0.3499065947758443,
+                    1.2998865800477701
+                ],
+                "label": "trash bin",
+                "visits": 4,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.05919318795204163,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_27",
+                "pose": [
+                    0.7173449363806104,
+                    2.299847503585043
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_28",
+                "pose": [
+                    -0.38852114163583423,
+                    1.982316425421009
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_29",
+                "pose": [
+                    3.8153584104001625,
+                    1.0612357607054506
+                ],
+                "label": "",
+                "visits": 0,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_3",
+                "pose": [
+                    1.1819796152239603,
+                    0.2543378602213906
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_30",
+                "pose": [
+                    0.7519328743455698,
+                    0.7516090283770187
+                ],
+                "label": "",
+                "visits": 6,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_4",
+                "pose": [
+                    2.0508703226385356,
+                    0.3495453800152969
+                ],
+                "label": "chair",
+                "visits": 2,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.06155149936676026,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_5",
+                "pose": [
+                    3.815358410400182,
+                    1.0612357607054408
+                ],
+                "label": "chair",
+                "visits": 3,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.058495920896530156,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_6",
+                "pose": [
+                    2.5347737110560007,
+                    0.8249279927674656
+                ],
+                "label": "",
+                "visits": 0,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_7",
+                "pose": [
+                    2.853537099179392,
+                    1.1104235059765721
+                ],
+                "label": "",
+                "visits": 0,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_8",
+                "pose": [
+                    5.192083964344983,
+                    0.38014775129876593
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            },
+            {
+                "id": "place_9",
+                "pose": [
+                    6.132027375975089,
+                    0.06410457241381912
+                ],
+                "label": "",
+                "visits": 1,
+                "scores": {
+                    "meeting table set": 0.0,
+                    "chair": 0.0,
+                    "cardboard box": 0.0,
+                    "trash bin": 0.0,
+                    "vacuum cleaner": 0.0,
+                    "plant pot": 0.0,
+                    "shoes": 0.0,
+                    "bench": 0.0,
+                    "electric vehicle": 0.0,
+                    "large power bank": 0.0,
+                    "door": 0.0
+                }
+            }
+        ],
+        "place_edges": [
+            {
+                "source": "place_0",
+                "target": "place_1",
+                "distance": 0.39662791787927343,
+                "age": 0,
+                "traversals": 6
+            },
+            {
+                "source": "place_0",
+                "target": "place_2",
+                "distance": 0.8837330444412225,
+                "age": 1,
+                "traversals": 2
+            },
+            {
+                "source": "place_1",
+                "target": "place_2",
+                "distance": 0.5126737559609905,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_10",
+                "target": "place_11",
+                "distance": 1.596856773488295,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_11",
+                "target": "place_12",
+                "distance": 0.51041823836021,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_12",
+                "target": "place_13",
+                "distance": 0.8641500232826433,
+                "age": 0,
+                "traversals": 3
+            },
+            {
+                "source": "place_13",
+                "target": "place_14",
+                "distance": 0.510408268005663,
+                "age": 3,
+                "traversals": 2
+            },
+            {
+                "source": "place_14",
+                "target": "place_15",
+                "distance": 1.8845730299910346,
+                "age": 0,
+                "traversals": 6
+            },
+            {
+                "source": "place_14",
+                "target": "place_16",
+                "distance": 0.8477679707209734,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_16",
+                "target": "place_17",
+                "distance": 0.5893140967048515,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_17",
+                "target": "place_18",
+                "distance": 2.64435600801811,
+                "age": 2,
+                "traversals": 4
+            },
+            {
+                "source": "place_18",
+                "target": "place_19",
+                "distance": 2.2802639180073827,
+                "age": 0,
+                "traversals": 5
+            },
+            {
+                "source": "place_18",
+                "target": "place_20",
+                "distance": 1.1067329758738966,
+                "age": 0,
+                "traversals": 4
+            },
+            {
+                "source": "place_2",
+                "target": "place_26",
+                "distance": 1.4934564610906373,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_2",
+                "target": "place_3",
+                "distance": 0.3876722383754064,
+                "age": 1,
+                "traversals": 2
+            },
+            {
+                "source": "place_2",
+                "target": "place_30",
+                "distance": 0.3988114758036428,
+                "age": 0,
+                "traversals": 7
+            },
+            {
+                "source": "place_20",
+                "target": "place_21",
+                "distance": 2.5599847191409304,
+                "age": 1,
+                "traversals": 3
+            },
+            {
+                "source": "place_20",
+                "target": "place_22",
+                "distance": 0.5627149122716065,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_22",
+                "target": "place_23",
+                "distance": 1.8476567597546354,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_23",
+                "target": "place_24",
+                "distance": 3.9962191784997114,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_24",
+                "target": "place_25",
+                "distance": 1.244864490237165,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_25",
+                "target": "place_26",
+                "distance": 3.7518332238883954,
+                "age": 3,
+                "traversals": 2
+            },
+            {
+                "source": "place_26",
+                "target": "place_27",
+                "distance": 1.4625141638142563,
+                "age": 1,
+                "traversals": 5
+            },
+            {
+                "source": "place_26",
+                "target": "place_28",
+                "distance": 0.6835214532736665,
+                "age": 0,
+                "traversals": 3
+            },
+            {
+                "source": "place_26",
+                "target": "place_29",
+                "distance": 4.172096208971773,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_3",
+                "target": "place_4",
+                "distance": 0.8740912614004948,
+                "age": 0,
+                "traversals": 3
+            },
+            {
+                "source": "place_4",
+                "target": "place_5",
+                "distance": 1.9026091058910743,
+                "age": 1,
+                "traversals": 3
+            },
+            {
+                "source": "place_5",
+                "target": "place_7",
+                "distance": 0.9630782257965017,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_5",
+                "target": "place_8",
+                "distance": 1.5359863695496017,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_7",
+                "target": "place_8",
+                "distance": 2.449919206513972,
+                "age": 0,
+                "traversals": 1
+            },
+            {
+                "source": "place_8",
+                "target": "place_9",
+                "distance": 0.9916536229886654,
+                "age": 0,
+                "traversals": 2
+            },
+            {
+                "source": "place_9",
+                "target": "place_10",
+                "distance": 0.6924546272099801,
+                "age": 0,
+                "traversals": 2
+            }
+        ],
+        "object_place_links": [
+            {
+                "object_id": "bench_inst_0",
+                "place_id": "place_28",
+                "distance": 1.1787781508130895
+            },
+            {
+                "object_id": "cardboard box_inst_0",
+                "place_id": "place_21",
+                "distance": 0.8137461017841787
+            },
+            {
+                "object_id": "chair_inst_3",
+                "place_id": "place_21",
+                "distance": 2.268447611711153
+            },
+            {
+                "object_id": "chair_inst_4",
+                "place_id": "place_18",
+                "distance": 1.525535901802511
+            },
+            {
+                "object_id": "chair_inst_5",
+                "place_id": "place_22",
+                "distance": 1.8785271111796555
+            },
+            {
+                "object_id": "trash bin_inst_1",
+                "place_id": "place_23",
+                "distance": 0.8481355603389983
+            },
+            {
+                "object_id": "trash bin_inst_2",
+                "place_id": "place_18",
+                "distance": 1.2229706803867866
+            },
+            {
+                "object_id": "vacuum cleaner_inst_1",
+                "place_id": "place_14",
+                "distance": 1.4948418044213658
+            }
+        ]
+    },
+    "metadata": {
+        "world_frame": "map",
+        "base_frame": "base_footprint",
+        "place_gng_enabled": true,
+        "runtime": {
+            "events": {
+                "frames_seen": 54,
+                "gng_not_committed": 14,
+                "gng_update_calls": 30,
+                "raw_detections": 107,
+                "target_detections": 30,
+                "target_label_empty_frames": 1,
+                "zero_detection_frames": 31
+            },
+            "timings": {
+                "detection_filter": {
+                    "n": 54,
+                    "mean_ms": 0.19528852189304652,
+                    "p50_ms": 0.21361419931054115,
+                    "p95_ms": 0.25365648325532675,
+                    "min_ms": 0.017830636352300644,
+                    "max_ms": 0.2567949704825878
+                },
+                "frame_total": {
+                    "n": 54,
+                    "mean_ms": 950.1656313875208,
+                    "p50_ms": 290.10665928944945,
+                    "p95_ms": 2032.6698899269102,
+                    "min_ms": 237.66279965639114,
+                    "max_ms": 2227.2351742722094
+                },
+                "graph_update": {
+                    "n": 22,
+                    "mean_ms": 5.5030858440494,
+                    "p50_ms": 4.0124827064573765,
+                    "p95_ms": 10.192378028295934,
+                    "min_ms": 3.6838878877460957,
+                    "max_ms": 14.31263005360961
+                },
+                "groundingdino_predict": {
+                    "n": 54,
+                    "mean_ms": 142.78709787564972,
+                    "p50_ms": 132.64929107390344,
+                    "p95_ms": 136.35008709970862,
+                    "min_ms": 130.68465096876025,
+                    "max_ms": 661.6127449087799
+                },
+                "instance_gng_update": {
+                    "n": 30,
+                    "mean_ms": 0.158948947985967,
+                    "p50_ms": 0.1397482119500637,
+                    "p95_ms": 0.240754266269505,
+                    "min_ms": 0.09841099381446838,
+                    "max_ms": 0.2672821283340454
+                },
+                "place_gng_update": {
+                    "n": 54,
+                    "mean_ms": 15.304224694975549,
+                    "p50_ms": 16.487176530063152,
+                    "p95_ms": 21.825587772764266,
+                    "min_ms": 0.49644196406006813,
+                    "max_ms": 21.889247931540012
+                },
+                "pose_association": {
+                    "n": 30,
+                    "mean_ms": 1.48922149091959,
+                    "p50_ms": 1.513930270448327,
+                    "p95_ms": 1.645763497799635,
+                    "min_ms": 1.2162229977548122,
+                    "max_ms": 1.693566795438528
+                },
+                "sam_predict": {
+                    "n": 23,
+                    "mean_ms": 64.07454028806609,
+                    "p50_ms": 61.14916689693928,
+                    "p95_ms": 70.20987630821764,
+                    "min_ms": 52.4684889242053,
+                    "max_ms": 112.6124863512814
+                }
+            }
+        }
+    }
+}
