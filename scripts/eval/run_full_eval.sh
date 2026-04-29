@@ -68,7 +68,7 @@ for scene in "${SCENES[@]}"; do
         || { echo "run_experiment failed for $run_id"; continue; }
 
       # locate latest stcm.json artifact for this scenario (timestamp-prefixed dirs)
-      latest_artifact="$(ls -td results/eval/artifacts/**${scene}_${VARIANT}*/ 2>/dev/null | head -n1)"
+      latest_artifact="$(ls -td results/eval/artifacts/*${scene}_${VARIANT}*/ 2>/dev/null | head -n1)"
       if [[ -z "${latest_artifact:-}" || ! -f "${latest_artifact}stcm.json" ]]; then
         echo "no stcm.json artifact found; skip scoring for $run_id" >&2
         continue

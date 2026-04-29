@@ -1,0 +1,57 @@
+{
+  "n_runs": 2,
+  "n_clusters": 18,
+  "mean_sigma_m": 0.03632334580048452,
+  "max_sigma_m": 0.3565642642283985,
+  "per_label": {
+    "bench": {
+      "n_clusters": 2,
+      "mean_sigma_m": 0.0,
+      "max_sigma_m": 0.0
+    },
+    "bottle": {
+      "n_clusters": 1,
+      "mean_sigma_m": 0.0,
+      "max_sigma_m": 0.0
+    },
+    "cardboard box": {
+      "n_clusters": 1,
+      "mean_sigma_m": 0.0,
+      "max_sigma_m": 0.0
+    },
+    "chair": {
+      "n_clusters": 5,
+      "mean_sigma_m": 0.040288890030283964,
+      "max_sigma_m": 0.16391100507384151
+    },
+    "cup": {
+      "n_clusters": 1,
+      "mean_sigma_m": 0.0,
+      "max_sigma_m": 0.0
+    },
+    "door": {
+      "n_clusters": 2,
+      "mean_sigma_m": 0.01510712672193829,
+      "max_sigma_m": 0.03021425344387658
+    },
+    "meeting table set": {
+      "n_clusters": 4,
+      "mean_sigma_m": 0.10445165763962079,
+      "max_sigma_m": 0.3565642642283985
+    },
+    "trash bin": {
+      "n_clusters": 1,
+      "mean_sigma_m": 0.0,
+      "max_sigma_m": 0.0
+    },
+    "water fountain": {
+      "n_clusters": 1,
+      "mean_sigma_m": 0.004354890254941722,
+      "max_sigma_m": 0.004354890254941722
+    }
+  },
+  "predictions": [
+    "results/eval/meeting_run1_bt0.35_67bb403/stcm.json",
+    "results/eval/meeting_run2_bt0.40_67bb403/stcm.json"
+  ]
+}
