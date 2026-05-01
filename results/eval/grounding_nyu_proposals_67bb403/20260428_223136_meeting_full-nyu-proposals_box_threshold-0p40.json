@@ -1,0 +1,233 @@
+{
+  "overall": {
+    "n": 15,
+    "top1": 7,
+    "top2": 7,
+    "top1_acc": 0.4666666666666667,
+    "top2_acc": 0.4666666666666667
+  },
+  "by_subset": {
+    "simple": {
+      "n": 5,
+      "top1": 3,
+      "top2": 3,
+      "top1_acc": 0.6,
+      "top2_acc": 0.6
+    },
+    "disambiguation": {
+      "n": 5,
+      "top1": 2,
+      "top2": 2,
+      "top1_acc": 0.4,
+      "top2_acc": 0.4
+    },
+    "compositional": {
+      "n": 5,
+      "top1": 2,
+      "top2": 2,
+      "top1_acc": 0.4,
+      "top2_acc": 0.4
+    }
+  },
+  "trials": [
+    {
+      "id": "m_simple_01",
+      "subset": "simple",
+      "text": "go to the water fountain",
+      "gt_object_id": "water fountain_1_0",
+      "ranked": [
+        "water fountain_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_simple_02",
+      "subset": "simple",
+      "text": "go to the bench",
+      "gt_object_id": "bench_2_0",
+      "ranked": [
+        "bench_inst_0",
+        "bench_inst_4"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 2
+    },
+    {
+      "id": "m_simple_03",
+      "subset": "simple",
+      "text": "go to the bottle",
+      "gt_object_id": "bottle_2_0",
+      "ranked": [
+        "bottle_inst_0"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_simple_04",
+      "subset": "simple",
+      "text": "go to the cup",
+      "gt_object_id": "cup_2_0",
+      "ranked": [
+        "cup_inst_0"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_simple_05",
+      "subset": "simple",
+      "text": "go to the emergency exit sign",
+      "gt_object_id": "emergency exit sign_168_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "m_disambig_01",
+      "subset": "disambiguation",
+      "text": "go to the chair near the meeting table set",
+      "gt_object_id": "chair_1_0",
+      "ranked": [
+        "chair_inst_2",
+        "chair_inst_4",
+        "chair_inst_0",
+        "chair_inst_8",
+        "chair_inst_7"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 7
+    },
+    {
+      "id": "m_disambig_02",
+      "subset": "disambiguation",
+      "text": "go to the door near the meeting table set",
+      "gt_object_id": "door_2_0",
+      "ranked": [
+        "door_inst_0",
+        "door_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "m_disambig_03",
+      "subset": "disambiguation",
+      "text": "go to the cardboard box near the trash bin",
+      "gt_object_id": "cardboard box_4_0",
+      "ranked": [
+        "cardboard box_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_disambig_04",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the bottle",
+      "gt_object_id": "trash bin_5_0",
+      "ranked": [
+        "trash bin_inst_0"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_disambig_05",
+      "subset": "disambiguation",
+      "text": "go to the chair near the bench",
+      "gt_object_id": "chair_3_0",
+      "ranked": [
+        "chair_inst_5",
+        "chair_inst_0",
+        "chair_inst_4",
+        "chair_inst_2",
+        "chair_inst_8"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 7
+    },
+    {
+      "id": "m_compose_01",
+      "subset": "compositional",
+      "text": "go to the trash bin between the bottle and the cardboard box",
+      "gt_object_id": "trash bin_3_0",
+      "ranked": [
+        "trash bin_inst_0"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 1
+    },
+    {
+      "id": "m_compose_02",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the bench",
+      "gt_object_id": "chair_2_0",
+      "ranked": [
+        "chair_inst_0",
+        "chair_inst_4",
+        "chair_inst_2",
+        "chair_inst_5",
+        "chair_inst_8"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 7
+    },
+    {
+      "id": "m_compose_03",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the cardboard box",
+      "gt_object_id": "door_2_0",
+      "ranked": [
+        "door_inst_0",
+        "door_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "m_compose_04",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the chair and the door",
+      "gt_object_id": "meeting table set_1_0",
+      "ranked": [
+        "meeting table set_inst_0",
+        "meeting table set_inst_1",
+        "meeting table set_inst_3",
+        "meeting table set_inst_2"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 4
+    },
+    {
+      "id": "m_compose_05",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cardboard box and the water fountain",
+      "gt_object_id": "trash bin_1_0",
+      "ranked": [
+        "trash bin_inst_0"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 1
+    }
+  ],
+  "scene": "meeting",
+  "commands_path": "configs/eval/commands_meeting.yaml",
+  "prediction_path": "results/eval/artifacts/20260428_223136_meeting_full-nyu-proposals_box_threshold-0p40/stcm.json"
+}

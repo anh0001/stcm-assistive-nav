@@ -1,0 +1,252 @@
+{
+  "overall": {
+    "n": 15,
+    "top1": 2,
+    "top2": 6,
+    "top1_acc": 0.13333333333333333,
+    "top2_acc": 0.4
+  },
+  "by_subset": {
+    "simple": {
+      "n": 5,
+      "top1": 0,
+      "top2": 1,
+      "top1_acc": 0.0,
+      "top2_acc": 0.2
+    },
+    "disambiguation": {
+      "n": 5,
+      "top1": 1,
+      "top2": 2,
+      "top1_acc": 0.2,
+      "top2_acc": 0.4
+    },
+    "compositional": {
+      "n": 5,
+      "top1": 1,
+      "top2": 3,
+      "top1_acc": 0.2,
+      "top2_acc": 0.6
+    }
+  },
+  "trials": [
+    {
+      "id": "l_simple_01",
+      "subset": "simple",
+      "text": "go to the vacuum cleaner",
+      "gt_object_id": "vacuum cleaner_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_simple_02",
+      "subset": "simple",
+      "text": "go to the plant pot",
+      "gt_object_id": "plant pot_1_0",
+      "ranked": [],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 0
+    },
+    {
+      "id": "l_simple_03",
+      "subset": "simple",
+      "text": "go to the bench",
+      "gt_object_id": "bench_1_0",
+      "ranked": [
+        "bench_inst_0",
+        "bench_inst_1",
+        "bench_inst_10",
+        "bench_inst_11",
+        "bench_inst_12"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 9
+    },
+    {
+      "id": "l_simple_04",
+      "subset": "simple",
+      "text": "go to the electric vehicle",
+      "gt_object_id": "electric vehicle_1_0",
+      "ranked": [
+        "electric vehicle_inst_0",
+        "electric vehicle_inst_1"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 2
+    },
+    {
+      "id": "l_simple_05",
+      "subset": "simple",
+      "text": "go to the large power bank",
+      "gt_object_id": "large power bank_1_0",
+      "ranked": [
+        "large power bank_inst_0",
+        "large power bank_inst_1",
+        "large power bank_inst_2",
+        "large power bank_inst_3",
+        "large power bank_inst_4"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 6
+    },
+    {
+      "id": "l_disambig_01",
+      "subset": "disambiguation",
+      "text": "go to the chair near the vacuum cleaner",
+      "gt_object_id": "chair_1_0",
+      "ranked": [
+        "chair_inst_0",
+        "chair_inst_1",
+        "chair_inst_10",
+        "chair_inst_11",
+        "chair_inst_2"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 11
+    },
+    {
+      "id": "l_disambig_02",
+      "subset": "disambiguation",
+      "text": "go to the chair near the shoes",
+      "gt_object_id": "chair_5_0",
+      "ranked": [
+        "chair_inst_9",
+        "chair_inst_7",
+        "chair_inst_2",
+        "chair_inst_0",
+        "chair_inst_10"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 11
+    },
+    {
+      "id": "l_disambig_03",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the cardboard box",
+      "gt_object_id": "trash bin_1_0",
+      "ranked": [
+        "trash bin_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "l_disambig_04",
+      "subset": "disambiguation",
+      "text": "go to the door near the meeting table set",
+      "gt_object_id": "door_1_0",
+      "ranked": [
+        "door_inst_8",
+        "door_inst_6",
+        "door_inst_4",
+        "door_inst_11"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 4
+    },
+    {
+      "id": "l_disambig_05",
+      "subset": "disambiguation",
+      "text": "go to the meeting table set near the bench",
+      "gt_object_id": "meeting table set_3_0",
+      "ranked": [
+        "meeting table set_inst_1",
+        "meeting table set_inst_5",
+        "meeting table set_inst_8",
+        "meeting table set_inst_3",
+        "meeting table set_inst_0"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 8
+    },
+    {
+      "id": "l_compose_01",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cardboard box and the vacuum cleaner",
+      "gt_object_id": "trash bin_3_0",
+      "ranked": [
+        "trash bin_inst_1"
+      ],
+      "top1": true,
+      "top2": true,
+      "n_candidates": 1
+    },
+    {
+      "id": "l_compose_02",
+      "subset": "compositional",
+      "text": "go to the chair between the vacuum cleaner and the shoes",
+      "gt_object_id": "chair_3_0",
+      "ranked": [
+        "chair_inst_0",
+        "chair_inst_1",
+        "chair_inst_10",
+        "chair_inst_11",
+        "chair_inst_2"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 11
+    },
+    {
+      "id": "l_compose_03",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the door and the chair",
+      "gt_object_id": "meeting table set_4_0",
+      "ranked": [
+        "meeting table set_inst_4",
+        "meeting table set_inst_6",
+        "meeting table set_inst_8",
+        "meeting table set_inst_2",
+        "meeting table set_inst_3"
+      ],
+      "top1": false,
+      "top2": false,
+      "n_candidates": 8
+    },
+    {
+      "id": "l_compose_04",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the trash bin",
+      "gt_object_id": "door_2_0",
+      "ranked": [
+        "door_inst_6",
+        "door_inst_4",
+        "door_inst_8",
+        "door_inst_11"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 4
+    },
+    {
+      "id": "l_compose_05",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the shoes",
+      "gt_object_id": "chair_4_0",
+      "ranked": [
+        "chair_inst_9",
+        "chair_inst_7",
+        "chair_inst_2",
+        "chair_inst_0",
+        "chair_inst_10"
+      ],
+      "top1": false,
+      "top2": true,
+      "n_candidates": 11
+    }
+  ],
+  "scene": "livinglab",
+  "commands_path": "configs/eval/commands_livinglab.yaml",
+  "prediction_path": "results/eval/artifacts/20260429_231855_livinglab_full-nyu-proposals_box_threshold-0p25/stcm.json"
+}

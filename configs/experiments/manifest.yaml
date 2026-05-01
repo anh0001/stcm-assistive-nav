@@ -89,9 +89,15 @@ scenarios:
           max_mask_area_frac: 0.04
           penalty_factor: 0.25
         large_power_bank:
-          max_z: 0.35
-          max_mask_area_frac: 0.05
+          max_z: 0.7
+          max_mask_area_frac: 0.08
           penalty_factor: 0.25
+        door:
+          min_z: 0.4
+          max_z: 2.4
+          min_mask_area_frac: 0.01
+          max_mask_area_frac: 0.6
+          penalty_factor: 0.3
     ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
     benchmark_match_threshold_m: 1.0
     benchmark_label_aliases:

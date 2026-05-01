@@ -55,14 +55,16 @@ chunks:
           - recycling bin
           - indoor waste bin
           - five trash bins aligned against a wall
-        box_threshold: 0.3
-        text_threshold: 0.3
+        box_threshold: 0.25
+        text_threshold: 0.25
       - label: vacuum cleaner
         aliases:
           - vacuum cleaner
           - upright vacuum cleaner
           - cordless vacuum
           - floor cleaner
+        box_threshold: 0.25
+        text_threshold: 0.25
       - label: plant pot
         aliases:
           - plant pot
@@ -81,8 +83,10 @@ chunks:
           - portable power station
           - battery pack
           - power bank
+        box_threshold: 0.28
+        text_threshold: 0.28
   fixtures:
-    thresholds: [0.36, 0.36]
+    thresholds: [0.28, 0.28]
     classes:
       - label: door
         aliases:
@@ -91,6 +95,8 @@ chunks:
           - dark door
           - elevator sliding door
           - sliding door
+        box_threshold: 0.26
+        text_threshold: 0.26
       - label: electric vehicle
         aliases:
           - electric vehicle
