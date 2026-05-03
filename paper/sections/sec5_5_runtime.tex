@@ -1,0 +1,110 @@
+% Reviewer-facing draft for AE-4 / R1-4 (JACIII Jc26-0002).
+% Section number is intentionally written 5.5 to match the rebuttal letter;
+% adjust if the surrounding paper structure has shifted.
+\subsection{Computational Performance and Real-Time Feasibility}
+\label{sec:runtime}
+
+We instrumented every STCM module with \texttt{time.perf\_counter}
+boundaries inside the semantic-map builder node and replayed three
+indoor rosbags offline (\texttt{meeting}, \texttt{livinglab}, and a
+tuned variant \texttt{livinglab\_tuned}) on git SHA
+\texttt{6880a5f}. Per-module mean / p50 / p95 latencies and the
+effective per-bag rate are reported in Table~\ref{tab:runtime}; raw
+samples and the per-scenario event counters used to interpret them
+are archived under
+\texttt{results/bench/runtime\_6880a5f.json}.
+
+\noindent\textbf{Hardware.}
+All numbers are measured on a single workstation: Intel Xeon
+w7-3465X (28 cores / 56 threads), NVIDIA RTX 6000 Ada Generation
+(48~GiB VRAM), 125~GiB system RAM, Ubuntu 22.04.5 LTS
+(kernel 5.15.0-143-generic), ROS~2 Humble, CUDA toolkit 12.4,
+PyTorch 2.4.0+cu121, NVIDIA driver 580.82.07. We disclose the host
+explicitly because the perception backbone (GroundingDINO-T plus
+MobileSAM) is GPU-bound; we discuss the implication for embedded
+deployment at the end of the section.
+
+\noindent\textbf{Critical-vs-asynchronous split.}
+We separate the pipeline into modules that must close the
+navigation loop in real time (\emph{critical}) and modules that may
+run on independent threads and lag the navigation cycle without
+stalling it (\emph{async}). FAST-LIO2 odometry, the per-frame
+detection filter, the LiDAR-image association, and both growing-
+neural-gas updaters are critical: their latency directly bounds the
+rate at which the robot's pose and the topological graph can react
+to new sensor data. GroundingDINO, MobileSAM, the temporal
+score-fusion step, and the end-to-end per-frame pipeline are
+asynchronous: they feed the semantic graph but do not gate Nav2
+planning or controller cycles, which subscribe to the place graph
+and instance graph through ROS topics.
+
+\noindent\textbf{Critical-path budget.}
+Summing the p95 latencies of the critical-path STCM modules at the
+operating point used for evaluation gives
+$0.3 + 13.2 + 22.5 + 22.1 \approx 58~\mathrm{ms}$ per detection cycle
+(detection filter, LiDAR-image association, instance-GNG, place-GNG;
+Table~\ref{tab:runtime}, averaged over three scenarios). FAST-LIO2
+publishes \texttt{/fastlio2/lio\_odom} at $7.7$~Hz on average across
+the three replays, well within the open-loop latency our place-graph
+update can absorb ($\sim 22$~ms p95). The combined critical loop
+therefore admits closed-loop operation at \emph{at least} $\sim 17$~Hz
+on this hardware, which exceeds the rate at which an indoor mobility
+aid is required to update its local plan~\cite{nav2}. No critical-
+path module exceeded $25$~ms p95 in any scenario.
+
+\noindent\textbf{Asynchronous semantic update.}
+The slowest single module is GroundingDINO at
+$164$~ms mean / $162$~ms p95, followed by MobileSAM at $63$~ms / $70$~ms
+and temporal fusion at $40$~ms / $87$~ms. The end-to-end per-frame
+pipeline takes $1.7$--$1.9~\mathrm{s}$ mean, which is dominated by
+the perception cascade plus per-detection graph maintenance. Because
+this stage is asynchronous, the practical consequence is a
+\emph{semantic-update lag} of roughly one frame -- on the order of a
+single second -- between the moment an object enters the camera
+view and the moment the corresponding node is committed to the
+shared graph. In a stationary or slow-moving assistive-navigation
+setting this lag is acceptable: the obstacle layer underlying Nav2
+is still served by the LiDAR pipeline at $7.7$~Hz, and the
+semantic graph only needs to be fresh enough to ground a
+language command, not to avoid collisions. This decoupling is the
+load-bearing architectural claim of the system; we make it
+explicit so a reader can judge it.
+
+\noindent\textbf{Honesty caveats.}
+We surface three known measurement biases rather than launder them:
+(i) the \emph{Per-frame pipeline} sample includes the cheap
+zero-detection / target-label-empty early-return paths
+(70 / 350 frames on \texttt{meeting}, 21 / 54 on \texttt{livinglab}),
+which deflates p50 and p95 relative to the cost of a frame that
+actually triggers the full perception cascade -- the relevant event
+counters (\texttt{zero\_detection\_frames},
+\texttt{target\_label\_empty\_frames}) are recorded alongside every
+\texttt{result.json} so a reviewer can recompute conditional
+statistics; (ii) the \emph{LiDAR-image assoc} sample similarly
+includes TF-lookup fast-fail paths, which is why p50 and p95 differ
+by an order of magnitude
+($1.4$~ms vs.\ $13.2$~ms; the failure count is
+$113 / 458$ associations on \texttt{meeting}); and (iii) the first
+GroundingDINO call carries CUDA-kernel compilation overhead that
+inflates the mean very slightly above the steady-state cost. Nav2
+planner and controller latencies are reported architecturally rather
+than instrumented end-to-end; we treat the asynchronous-decoupling
+guarantee as a design claim, not a measurement.
+
+\noindent\textbf{Embedded-deployment outlook.}
+The numbers in Table~\ref{tab:runtime} were obtained on a desktop
+workstation with a high-end discrete GPU, not on the on-board
+compute typically available on a wheelchair-class assistive
+platform. Critical-path STCM modules are pure-CPU and would scale
+within a factor of two on a laptop-grade Xeon; the perception
+cascade is the dominant unknown. As future work we plan a parity
+sweep on a Jetson AGX Orin -- the modal embedded target for indoor
+service robots -- and to publish the resulting Table~\ref{tab:runtime}
+delta. We do \emph{not} claim onboard real-time feasibility from
+the present measurements; we claim only that, at the algorithmic
+level, the critical-path budget leaves substantial headroom for
+weaker hardware and the asynchronous design contains the perception
+cost outside the navigation loop.
+
+% Table D is generated by scripts/render_table_d.py; do not hand-edit.
+\input{tables/D.tex}

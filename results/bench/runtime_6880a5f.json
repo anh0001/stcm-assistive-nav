@@ -1,0 +1,305 @@
+{
+  "sha": "6880a5f88d78dd51c2ba4fd243e0e696245acb1c",
+  "hw": {
+    "cpu_model": "Intel(R) Xeon(R) w7-3465X",
+    "cpu_sockets": "1",
+    "cpu_cores_per_socket": "28",
+    "cpu_threads_total": "56",
+    "ram_gb": "125",
+    "gpu": "NVIDIA RTX 6000 Ada Generation, 49140 MiB",
+    "nvidia_driver": "580.82.07",
+    "cuda_toolkit": "release 12.4",
+    "os": "Ubuntu 22.04.5 LTS",
+    "kernel": "5.15.0-143-generic",
+    "ros_distro": "humble",
+    "python": "3.10.12",
+    "pytorch": "2.4.0+cu121"
+  },
+  "runs": {
+    "meeting": {
+      "scenario": "meeting",
+      "variant": "full",
+      "duration_s": 174.793355588,
+      "bag_path": "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed",
+      "frames_seen": 350,
+      "fastlio2_hz": 3.0092677048881553,
+      "camera_publish_hz": 10.000380129552273,
+      "modules": {
+        "groundingdino_predict": {
+          "n": 350,
+          "mean_ms": 155.1501747114318,
+          "p50_ms": 156.07110713608563,
+          "p95_ms": 161.03865071199834,
+          "max_ms": 651.4274580404162,
+          "effective_hz": 2.002364442416073
+        },
+        "sam_predict": {
+          "n": 280,
+          "mean_ms": 56.817771354690194,
+          "p50_ms": 55.75504759326577,
+          "p95_ms": 65.63863398041576,
+          "max_ms": 138.9656220562756,
+          "effective_hz": 1.6018915539328584
+        },
+        "detection_filter": {
+          "n": 350,
+          "mean_ms": 0.22445323344852244,
+          "p50_ms": 0.2249651588499546,
+          "p95_ms": 0.27157103177160025,
+          "max_ms": 0.3318418748676777,
+          "effective_hz": 2.002364442416073
+        },
+        "pose_association": {
+          "n": 458,
+          "mean_ms": 9.169568492742215,
+          "p50_ms": 1.436199527233839,
+          "p95_ms": 36.35988750029355,
+          "max_ms": 52.91354423388839,
+          "effective_hz": 2.6202368989330327
+        },
+        "instance_gng_update": {
+          "n": 345,
+          "mean_ms": 13.254406196537657,
+          "p50_ms": 21.717616356909275,
+          "p95_ms": 22.668413538485765,
+          "max_ms": 23.09470297768712,
+          "effective_hz": 1.9737592360958434
+        },
+        "place_gng_update": {
+          "n": 350,
+          "mean_ms": 18.02970215279077,
+          "p50_ms": 21.613802993670106,
+          "p95_ms": 22.340106777846813,
+          "max_ms": 22.71302230656147,
+          "effective_hz": 2.002364442416073
+        },
+        "graph_update": {
+          "n": 266,
+          "mean_ms": 36.81341724127139,
+          "p50_ms": 27.06233086064458,
+          "p95_ms": 88.91078713349998,
+          "max_ms": 124.7862963937223,
+          "effective_hz": 1.5217969762362156
+        },
+        "frame_total": {
+          "n": 350,
+          "mean_ms": 1553.8227140584163,
+          "p50_ms": 1870.6662172917277,
+          "p95_ms": 2168.8590727746487,
+          "max_ms": 4086.082525085658,
+          "effective_hz": 2.002364442416073
+        }
+      },
+      "events": {
+        "frames_seen": 350,
+        "gng_not_committed": 44,
+        "gng_update_calls": 345,
+        "pose_failures": 113,
+        "raw_detections": 1149,
+        "target_detections": 458,
+        "target_label_empty_frames": 14,
+        "tf_lookup_latest_fallbacks": 2,
+        "zero_detection_frames": 70
+      },
+      "bias_notes": {
+        "frame_total_includes_skip_paths": 84,
+        "pose_failures": 113,
+        "tf_lookup_latest_fallbacks": 2,
+        "raw_detections": 1149,
+        "target_detections": 458
+      },
+      "failure_flags": [
+        "zero_detection_frames_gt_10pct"
+      ],
+      "result_path": "results/eval/artifacts/20260503_092849_meeting_full_processing_period-0p0/result.json"
+    },
+    "livinglab": {
+      "scenario": "livinglab",
+      "variant": "full",
+      "duration_s": 153.252430832,
+      "bag_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737",
+      "frames_seen": 54,
+      "fastlio2_hz": 10.003103974778199,
+      "camera_publish_hz": 1.7356984065825185,
+      "modules": {
+        "groundingdino_predict": {
+          "n": 54,
+          "mean_ms": 167.2634000941697,
+          "p50_ms": 156.40558418817818,
+          "p95_ms": 162.6568609615788,
+          "max_ms": 723.8957341760397,
+          "effective_hz": 0.3523598269002105
+        },
+        "sam_predict": {
+          "n": 33,
+          "mean_ms": 66.68701478647012,
+          "p50_ms": 65.76764117926359,
+          "p95_ms": 71.67960740625858,
+          "max_ms": 122.28635000064969,
+          "effective_hz": 0.21533100532790642
+        },
+        "detection_filter": {
+          "n": 54,
+          "mean_ms": 0.2192904465590362,
+          "p50_ms": 0.21317950449883938,
+          "p95_ms": 0.2816820284351705,
+          "max_ms": 0.31649600714445114,
+          "effective_hz": 0.3523598269002105
+        },
+        "pose_association": {
+          "n": 52,
+          "mean_ms": 1.3945251613712082,
+          "p50_ms": 1.451944001019001,
+          "p95_ms": 1.640946208499372,
+          "max_ms": 1.851427834481001,
+          "effective_hz": 0.33930946294094344
+        },
+        "instance_gng_update": {
+          "n": 52,
+          "mean_ms": 2.271782875490876,
+          "p50_ms": 0.13201870024204254,
+          "p95_ms": 22.209677239879966,
+          "max_ms": 22.763737943023443,
+          "effective_hz": 0.33930946294094344
+        },
+        "place_gng_update": {
+          "n": 54,
+          "mean_ms": 16.439943108707666,
+          "p50_ms": 21.44908532500267,
+          "p95_ms": 21.992143988609314,
+          "max_ms": 22.01339090242982,
+          "effective_hz": 0.3523598269002105
+        },
+        "graph_update": {
+          "n": 29,
+          "mean_ms": 10.52924059331417,
+          "p50_ms": 7.091929204761982,
+          "p95_ms": 29.853548388928175,
+          "max_ms": 56.44942540675402,
+          "effective_hz": 0.18923027740937232
+        },
+        "frame_total": {
+          "n": 54,
+          "mean_ms": 1238.744430511293,
+          "p50_ms": 1853.6787037737668,
+          "p95_ms": 2277.3824766976754,
+          "max_ms": 2549.6419607661664,
+          "effective_hz": 0.3523598269002105
+        }
+      },
+      "events": {
+        "frames_seen": 54,
+        "gng_not_committed": 22,
+        "gng_update_calls": 52,
+        "raw_detections": 194,
+        "target_detections": 52,
+        "target_label_empty_frames": 4,
+        "zero_detection_frames": 21
+      },
+      "bias_notes": {
+        "frame_total_includes_skip_paths": 25,
+        "pose_failures": 0,
+        "tf_lookup_latest_fallbacks": 0,
+        "raw_detections": 194,
+        "target_detections": 52
+      },
+      "failure_flags": [
+        "zero_detection_frames_gt_10pct"
+      ],
+      "result_path": "results/eval/artifacts/20260503_101506_livinglab_full_processing_period-0p0/result.json"
+    },
+    "livinglab_tuned": {
+      "scenario": "livinglab_tuned",
+      "variant": "full",
+      "duration_s": 153.252430832,
+      "bag_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737",
+      "frames_seen": 54,
+      "fastlio2_hz": 10.003103974778199,
+      "camera_publish_hz": 1.7356984065825185,
+      "modules": {
+        "groundingdino_predict": {
+          "n": 54,
+          "mean_ms": 168.7608980315013,
+          "p50_ms": 157.99762192182243,
+          "p95_ms": 161.9652164168656,
+          "max_ms": 727.1216716617346,
+          "effective_hz": 0.3523598269002105
+        },
+        "sam_predict": {
+          "n": 54,
+          "mean_ms": 65.28223942344387,
+          "p50_ms": 65.96747157163918,
+          "p95_ms": 73.64407642744482,
+          "max_ms": 113.85055910795927,
+          "effective_hz": 0.3523598269002105
+        },
+        "detection_filter": {
+          "n": 54,
+          "mean_ms": 0.2933290476600329,
+          "p50_ms": 0.2911635674536228,
+          "p95_ms": 0.3561797086149453,
+          "max_ms": 0.4290509968996048,
+          "effective_hz": 0.3523598269002105
+        },
+        "pose_association": {
+          "n": 239,
+          "mean_ms": 2.263243353017703,
+          "p50_ms": 1.2553930282592773,
+          "p95_ms": 1.6010615974664686,
+          "max_ms": 35.60301614925265,
+          "effective_hz": 1.559518493132413
+        },
+        "instance_gng_update": {
+          "n": 232,
+          "mean_ms": 11.484548756611886,
+          "p50_ms": 11.598607990890741,
+          "p95_ms": 22.63025059364736,
+          "max_ms": 23.124827072024345,
+          "effective_hz": 1.5138422192749785
+        },
+        "place_gng_update": {
+          "n": 54,
+          "mean_ms": 17.473843215999228,
+          "p50_ms": 21.55780722387135,
+          "p95_ms": 21.975854388438165,
+          "max_ms": 22.13541604578495,
+          "effective_hz": 0.3523598269002105
+        },
+        "graph_update": {
+          "n": 53,
+          "mean_ms": 70.70999194534039,
+          "p50_ms": 57.97810107469559,
+          "p95_ms": 143.29422349110246,
+          "max_ms": 188.2638451643288,
+          "effective_hz": 0.345834644920577
+        },
+        "frame_total": {
+          "n": 54,
+          "mean_ms": 2285.881325723258,
+          "p50_ms": 2181.557211326435,
+          "p95_ms": 2957.017394714057,
+          "max_ms": 3394.2108526825905,
+          "effective_hz": 0.3523598269002105
+        }
+      },
+      "events": {
+        "frames_seen": 54,
+        "gng_update_calls": 232,
+        "pose_failures": 7,
+        "raw_detections": 755,
+        "target_detections": 239,
+        "target_label_empty_frames": 1
+      },
+      "bias_notes": {
+        "frame_total_includes_skip_paths": 1,
+        "pose_failures": 7,
+        "tf_lookup_latest_fallbacks": 0,
+        "raw_detections": 755,
+        "target_detections": 239
+      },
+      "failure_flags": [],
+      "result_path": "results/eval/artifacts/20260503_095733_livinglab_tuned_full_processing_period-0p0/result.json"
+    }
+  },
+  "note": "AE-4 runtime evidence; aggregated by scripts/render_table_d.py"
+}
