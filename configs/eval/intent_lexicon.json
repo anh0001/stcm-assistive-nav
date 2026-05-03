@@ -1,0 +1,22 @@
+{
+  "_doc": "Deterministic intent->label mapping for the AE-3 intent-lexicon baseline. Ordered list; first regex match wins. Patterns are case-insensitive Python regex on the command text. The chosen target_label is then fed to the same template grounder that handles explicit spatial commands.",
+  "_arm_id": "template+intent-lexicon",
+  "_version": 1,
+  "rules": [
+    {"pattern": "thirsty|some water|find (me )?water|water fountain", "label": "water fountain"},
+    {"pattern": "throw (away|out)|dispose|recycle|waste|garbage|where (the )?trash goes|trash bin|trash can|put this trash", "label": "trash bin"},
+    {"pattern": "(safety|fire|emergency)\\s+exit|in case of fire", "label": "emergency exit sign"},
+    {"pattern": "leave (the )?room|room exit|way out|take me to the exit|the exit", "label": "door"},
+    {"pattern": "have a meeting|conference table|meeting table", "label": "meeting table set"},
+    {"pattern": "tired|let me rest|take a rest|have a rest", "label": "bench"},
+    {"pattern": "sit on|need a chair|place to sit|chair to sit", "label": "chair"},
+    {"pattern": "grab a drink|i want.+drink|bottle of", "label": "bottle"},
+    {"pattern": "cup|coffee", "label": "cup"},
+    {"pattern": "cardboard|in a box|package|recycle.*box|box to (put|hold)", "label": "cardboard box"},
+    {"pattern": "vacuum|clean the floor", "label": "vacuum cleaner"},
+    {"pattern": "plant|flower", "label": "plant pot"},
+    {"pattern": "power bank|portable battery|charge my devices", "label": "large power bank"},
+    {"pattern": "electric vehicle|small (electric )?vehicle|scooter", "label": "electric vehicle"},
+    {"pattern": "shoes|leave my shoes", "label": "shoes"}
+  ]
+}

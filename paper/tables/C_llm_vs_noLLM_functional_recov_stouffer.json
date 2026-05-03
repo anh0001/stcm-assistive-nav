@@ -1,0 +1,28 @@
+{
+  "label": "LLM vs no-LLM functional+recoverable (two-scene)",
+  "method": "stouffer_signed_z",
+  "weighting": "sqrt_n",
+  "per_scene": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_meeting.json",
+      "n": 13,
+      "p_exact": 0.00390625,
+      "delta": 0.6923076923076923,
+      "sign": 1.0,
+      "z": 2.885634913355785,
+      "weight": 3.605551275463989
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_livinglab.json",
+      "n": 8,
+      "p_exact": 0.0625,
+      "delta": 0.625,
+      "sign": 1.0,
+      "z": 1.8627318658102858,
+      "weight": 2.8284271247461903
+    }
+  ],
+  "Z": 3.420108476333918,
+  "p_value_two_sided": 0.0006259616945478719,
+  "n_total": 21
+}

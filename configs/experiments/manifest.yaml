@@ -21,7 +21,7 @@ scenarios:
     ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
     benchmark_match_threshold_m: 1.0
   livinglab:
-    description: "Living-lab MCAP run from 2026-04-17; draft ground truth under review."
+    description: "Living-lab MCAP run from 2026-04-17. Ground truth frozen v1.0 (see configs/experiments/ground_truth/livinglab_stcm_gt.json for protocol + provenance)."
     bag_path: /media/dl-box/STREAM1/robotics_living_lab_20260417_171737
     storage_id: mcap
     config_overrides:
@@ -98,6 +98,111 @@ scenarios:
           min_mask_area_frac: 0.01
           max_mask_area_frac: 0.6
           penalty_factor: 0.3
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+    benchmark_label_aliases:
+      meeting table set:
+        - meeting table set
+        - table
+        - chair
+      chair:
+        - chair
+        - meeting table set
+      trash bin:
+        - trash bin
+        - cardboard box
+      large power bank:
+        - large power bank
+        - electric vehicle
+    benchmark_composite_covers:
+      meeting table set:
+        radius_m: 2.0
+        covered_pred_labels:
+          - meeting table set
+          - table
+          - chair
+          - bench
+
+  livinglab_tuned:
+    description: "Living-lab MCAP run from 2026-04-17, perception retuned for higher recall on rare classes (plant pot, electric vehicle, large power bank, shoes, second door, meeting table set). Same bag, same GT, same command set, more aggressive thresholds. Used for AE-3 perception-tuning sensitivity analysis (Codex review P2)."
+    bag_path: /media/dl-box/STREAM1/robotics_living_lab_20260417_171737
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+      nyu_prompt_bank_path: stcm/config/livinglab_nyu_grounded_prompts.yaml
+      label_margin_min: 0.03
+      gng_min_observations_to_commit: 1
+      cross_label_merge_distance_m: 0.45
+      cross_label_merge_min_cosine: 0.2
+      box_threshold: 0.30
+      text_threshold: 0.30
+      target_labels:
+        - "meeting table set"
+        - "chair"
+        - "cardboard box"
+        - "trash bin"
+        - "vacuum cleaner"
+        - "plant pot"
+        - "shoes"
+        - "bench"
+        - "electric vehicle"
+        - "large power bank"
+        - "door"
+      target_label_thresholds:
+        - 1.6
+        - 0.6
+        - 1.0
+        - 0.25
+        - 0.8
+        - 0.5
+        - 0.3
+        - 0.8
+        - 1.0
+        - 0.5
+        - 1.5
+      per_label_geometry_priors:
+        meeting_table_set:
+          min_z: 0.30
+          max_z: 1.2
+          min_mask_area_frac: 0.005
+          hard_min_mask_area_frac: 0.008
+          penalty_factor: 0.5
+        chair:
+          min_z: 0.10
+          max_z: 1.3
+          max_mask_area_frac: 0.10
+          penalty_factor: 0.5
+        trash_bin:
+          min_z: 0.0
+          max_z: 1.0
+          hard_max_z: 1.15
+          min_mask_area_frac: 0.0015
+          max_mask_area_frac: 0.10
+          penalty_factor: 0.45
+        vacuum_cleaner:
+          min_z: 0.0
+          max_z: 0.85
+          max_mask_area_frac: 0.14
+          penalty_factor: 0.5
+        plant_pot:
+          min_z: 0.0
+          max_z: 1.0
+          max_mask_area_frac: 0.14
+          penalty_factor: 0.5
+        shoes:
+          max_z: 0.30
+          max_mask_area_frac: 0.05
+          penalty_factor: 0.4
+        large_power_bank:
+          max_z: 0.8
+          max_mask_area_frac: 0.10
+          penalty_factor: 0.4
+        door:
+          min_z: 0.35
+          max_z: 2.5
+          min_mask_area_frac: 0.008
+          max_mask_area_frac: 0.7
+          penalty_factor: 0.45
     ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
     benchmark_match_threshold_m: 1.0
     benchmark_label_aliases:

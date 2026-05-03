@@ -1,5 +1,5 @@
 scene: livinglab
-description: 15 grounding commands. 5 simple, 5 disambiguation, 5 compositional.
+description: 30 grounding commands. 5 simple, 5 disambiguation, 5 compositional, 15 functional/intent.
 commands:
   # --- simple ---
   - id: l_simple_01
@@ -111,3 +111,65 @@ commands:
       type: between
       anchor_labels: [meeting table set, shoes]
     gt_object_id: chair_4_0
+
+  # --- functional / intent (no target_label; intent->label inference required) ---
+  - id: l_func_01
+    subset: functional
+    text: "I need to throw away this paper"
+    gt_object_id: trash bin_1_0
+  - id: l_func_02
+    subset: functional
+    text: "I'm tired, let me rest somewhere"
+    gt_object_id: bench_1_0
+  - id: l_func_03
+    subset: functional
+    text: "Where can I have a meeting"
+    gt_object_id: meeting table set_1_0
+  - id: l_func_04
+    subset: functional
+    text: "I need a chair to sit on"
+    gt_object_id: chair_1_0
+  - id: l_func_05
+    subset: functional
+    text: "I want to leave the room"
+    gt_object_id: door_1_0
+  - id: l_func_06
+    subset: functional
+    text: "Take me to the room exit"
+    gt_object_id: door_2_0
+  - id: l_func_07
+    subset: functional
+    text: "Where can I dispose of waste"
+    gt_object_id: trash bin_2_0
+  - id: l_func_08
+    subset: functional
+    text: "I have something to recycle in a box"
+    gt_object_id: cardboard box_1_0
+  - id: l_func_09
+    subset: functional
+    text: "Show me where the trash goes"
+    gt_object_id: trash bin_3_0
+  - id: l_func_10
+    subset: functional
+    text: "I need to clean the floor"
+    gt_object_id: vacuum cleaner_1_0
+  - id: l_func_11
+    subset: functional
+    text: "Show me the plants"
+    gt_object_id: plant pot_1_0
+  - id: l_func_12
+    subset: functional
+    text: "I want to charge my devices on a portable battery"
+    gt_object_id: large power bank_1_0
+  - id: l_func_13
+    subset: functional
+    text: "Take me to the small electric vehicle"
+    gt_object_id: electric vehicle_1_0
+  - id: l_func_14
+    subset: functional
+    text: "Show me where to leave my shoes"
+    gt_object_id: shoes_1_0
+  - id: l_func_15
+    subset: functional
+    text: "Can you find me a place to sit by the table"
+    gt_object_id: chair_2_0

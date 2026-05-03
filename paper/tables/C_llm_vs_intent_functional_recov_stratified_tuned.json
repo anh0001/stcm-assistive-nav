@@ -1,0 +1,34 @@
+{
+  "label": "LLM vs intent functional+recov (stratified, tuned)",
+  "method": "stratified_mcnemar_pooled_discordants",
+  "strata": [
+    {
+      "path": "paper/tables/C_llm_vs_intent_functional_recov_meeting.json",
+      "scene": "functional_recoverable_meeting",
+      "n": 13,
+      "b": 4,
+      "c": 0,
+      "delta": 0.3076923076923077,
+      "p_per_scene_exact": 0.125,
+      "sign_delta": 1
+    },
+    {
+      "path": "paper/tables/C_llm_vs_intent_functional_recov_livinglab_tuned.json",
+      "scene": "functional_recov_livinglab_tuned",
+      "n": 15,
+      "b": 5,
+      "c": 1,
+      "delta": 0.26666666666666666,
+      "p_per_scene_exact": 0.21875,
+      "sign_delta": 1
+    }
+  ],
+  "sum_b_llm_only": 9,
+  "sum_c_baseline_only": 1,
+  "n_total": 28,
+  "n_discordant_total": 10,
+  "p_value_exact_pooled_binomial": 0.021484375,
+  "mantel_haenszel_chi2_cc": 5.625,
+  "p_value_chi2_cc": 0.017706065807366618,
+  "direction_agreement_across_strata": true
+}

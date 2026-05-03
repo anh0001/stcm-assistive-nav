@@ -1,5 +1,18 @@
 {
     "stcm_version": "1.0",
+    "_provenance": {
+        "scene": "livinglab",
+        "bag_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737",
+        "bag_recorded_utc": "2026-04-17T17:17:37",
+        "version": "1.0",
+        "frozen_utc": "2026-05-01",
+        "annotator": "anhrisn",
+        "review_status": "frozen",
+        "n_objects": 23,
+        "annotation_protocol": "Manual annotation against rosbag2 RGB + LiDAR replay in RViz. Object included if visible in >=3 RGB frames, intersects robot path neighborhood within 5 m, and has stable LiDAR support across >=2 viewpoints. Pose = centroid of LiDAR-projected mask in world (map) frame. Coordinate system: world / map; same as STCM output. Match radius for evaluation: 1.0 m.",
+        "label_vocabulary": "Same target_labels list as configs/experiments/manifest.yaml livinglab variant.",
+        "notes": "Composite class 'meeting table set' is annotated as the centerpiece of one table plus up to four chairs grouped together; predicted graphs may store the centerpiece as 'table' or 'desk', resolved by the alias map in scripts/eval/grounding.py."
+    },
     "semantic_graph": {
         "directed": false,
         "multigraph": false,

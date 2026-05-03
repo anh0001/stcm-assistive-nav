@@ -1,0 +1,7493 @@
+{
+  "schema_version": 1,
+  "backend_required": "claude-sonnet-4-6",
+  "temperature_required": 0,
+  "scene": "meeting",
+  "instructions": "You are a spatial-language grounder for an indoor robot. For each command, pick the candidate object id that best satisfies the command. Use only ids drawn from candidates[command_id]. Use relation semantics (near, between) and the place-graph topology to disambiguate. Output the schema in `response_schema`.",
+  "response_schema": "Response file schema (the LLM must produce this exact structure):\n\n{\n  \"backend\": \"claude-sonnet-4-6\",\n  \"temperature\": 0,\n  \"scene\": \"<same as request.scene>\",\n  \"rankings\": [\n    {\n      \"command_id\": \"m_simple_01\",\n      \"ranked_object_ids\": [\"chair_1_0\", \"chair_2_0\", ...]\n    },\n    ...\n  ]\n}\n\nRules:\n- One entry per command in the request.\n- ranked_object_ids contains predicted object ids drawn ONLY from\n  request.candidates[command_id]. No invented ids.\n- Order is most-likely first; the scorer reads top-1 and top-2.\n- An empty list is allowed when no candidate is plausible.\n- temperature must be 0 for the reviewer-mandated determinism check.\n",
+  "place_graph": [
+    {
+      "id": "place_0",
+      "xy": [
+        -0.33911971730026946,
+        0.30975148545143766
+      ],
+      "neighbors": [
+        "place_1",
+        "place_2",
+        "place_51",
+        "place_53",
+        "place_61"
+      ]
+    },
+    {
+      "id": "place_1",
+      "xy": [
+        0.594550155264165,
+        0.05565198206543429
+      ],
+      "neighbors": [
+        "place_0",
+        "place_2"
+      ]
+    },
+    {
+      "id": "place_2",
+      "xy": [
+        0.6657362777805507,
+        0.49311077154343236
+      ],
+      "neighbors": [
+        "place_0",
+        "place_1",
+        "place_3",
+        "place_50"
+      ]
+    },
+    {
+      "id": "place_3",
+      "xy": [
+        1.1439913354567235,
+        0.055951744301224716
+      ],
+      "neighbors": [
+        "place_2",
+        "place_4",
+        "place_48"
+      ]
+    },
+    {
+      "id": "place_4",
+      "xy": [
+        1.5602675533689645,
+        0.12866871781022304
+      ],
+      "neighbors": [
+        "place_3",
+        "place_48",
+        "place_5"
+      ]
+    },
+    {
+      "id": "place_5",
+      "xy": [
+        2.1368147705212976,
+        0.387923292153901
+      ],
+      "neighbors": [
+        "place_4",
+        "place_6"
+      ]
+    },
+    {
+      "id": "place_6",
+      "xy": [
+        2.472774835441749,
+        0.5656553005618701
+      ],
+      "neighbors": [
+        "place_5",
+        "place_7"
+      ]
+    },
+    {
+      "id": "place_7",
+      "xy": [
+        2.9871272469097283,
+        0.7623820379800426
+      ],
+      "neighbors": [
+        "place_6",
+        "place_8"
+      ]
+    },
+    {
+      "id": "place_8",
+      "xy": [
+        4.055850099812248,
+        0.7272236988054327
+      ],
+      "neighbors": [
+        "place_10",
+        "place_7",
+        "place_9"
+      ]
+    },
+    {
+      "id": "place_9",
+      "xy": [
+        3.3675622165116206,
+        0.8191532688042608
+      ],
+      "neighbors": [
+        "place_8"
+      ]
+    },
+    {
+      "id": "place_10",
+      "xy": [
+        4.471745544315781,
+        0.5307960562125562
+      ],
+      "neighbors": [
+        "place_11",
+        "place_8"
+      ]
+    },
+    {
+      "id": "place_11",
+      "xy": [
+        4.9196055329178074,
+        0.08040577428193539
+      ],
+      "neighbors": [
+        "place_10",
+        "place_12"
+      ]
+    },
+    {
+      "id": "place_12",
+      "xy": [
+        4.984182244976542,
+        -0.3300358137829672
+      ],
+      "neighbors": [
+        "place_11",
+        "place_13"
+      ]
+    },
+    {
+      "id": "place_13",
+      "xy": [
+        5.516195218396282,
+        -0.4889081480156332
+      ],
+      "neighbors": [
+        "place_12",
+        "place_14"
+      ]
+    },
+    {
+      "id": "place_14",
+      "xy": [
+        7.292170384934564,
+        -0.8993407415706438
+      ],
+      "neighbors": [
+        "place_13",
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_15",
+      "xy": [
+        7.884251616735924,
+        -0.8976520497203236
+      ],
+      "neighbors": [
+        "place_14",
+        "place_16",
+        "place_17",
+        "place_18",
+        "place_19",
+        "place_20",
+        "place_24"
+      ]
+    },
+    {
+      "id": "place_16",
+      "xy": [
+        5.928341089066439,
+        -0.49942871662738847
+      ],
+      "neighbors": [
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_17",
+      "xy": [
+        6.481879526220857,
+        -0.5368436082634087
+      ],
+      "neighbors": [
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_18",
+      "xy": [
+        6.684522176975067,
+        -0.8780202908471766
+      ],
+      "neighbors": [
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_19",
+      "xy": [
+        6.212195959586526,
+        -0.5036604116706344
+      ],
+      "neighbors": [
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_20",
+      "xy": [
+        8.377980277110831,
+        -0.8497071403720917
+      ],
+      "neighbors": [
+        "place_15",
+        "place_21",
+        "place_24"
+      ]
+    },
+    {
+      "id": "place_21",
+      "xy": [
+        8.819778215176155,
+        -0.7259472996228105
+      ],
+      "neighbors": [
+        "place_20",
+        "place_22"
+      ]
+    },
+    {
+      "id": "place_22",
+      "xy": [
+        8.974739081705659,
+        -0.16423556537674017
+      ],
+      "neighbors": [
+        "place_21",
+        "place_23"
+      ]
+    },
+    {
+      "id": "place_23",
+      "xy": [
+        8.721637624241263,
+        0.12308310960841931
+      ],
+      "neighbors": [
+        "place_22",
+        "place_24"
+      ]
+    },
+    {
+      "id": "place_24",
+      "xy": [
+        8.257589315070941,
+        0.048653625905940925
+      ],
+      "neighbors": [
+        "place_15",
+        "place_20",
+        "place_23",
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_25",
+      "xy": [
+        7.502587539365639,
+        3.1168665218926574
+      ],
+      "neighbors": [
+        "place_24",
+        "place_26",
+        "place_27",
+        "place_28",
+        "place_29",
+        "place_30",
+        "place_31",
+        "place_32"
+      ]
+    },
+    {
+      "id": "place_26",
+      "xy": [
+        8.047219262830728,
+        0.705801657892439
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_27",
+      "xy": [
+        7.765368946923947,
+        2.715302222640698
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_28",
+      "xy": [
+        8.043761665725413,
+        1.1122973056020047
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_29",
+      "xy": [
+        7.945714985376036,
+        2.1609010620880778
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_30",
+      "xy": [
+        7.985471553500352,
+        1.8934357652105591
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_31",
+      "xy": [
+        8.023737037326871,
+        1.6360018498931899
+      ],
+      "neighbors": [
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_32",
+      "xy": [
+        7.043146326831999,
+        3.5235088168423085
+      ],
+      "neighbors": [
+        "place_25",
+        "place_33"
+      ]
+    },
+    {
+      "id": "place_33",
+      "xy": [
+        6.683513778850567,
+        3.6923663685569967
+      ],
+      "neighbors": [
+        "place_32",
+        "place_34"
+      ]
+    },
+    {
+      "id": "place_34",
+      "xy": [
+        6.322076793444954,
+        3.7921293176282047
+      ],
+      "neighbors": [
+        "place_33",
+        "place_35"
+      ]
+    },
+    {
+      "id": "place_35",
+      "xy": [
+        5.959042565348257,
+        3.890169878390446
+      ],
+      "neighbors": [
+        "place_34",
+        "place_36"
+      ]
+    },
+    {
+      "id": "place_36",
+      "xy": [
+        5.63034206802807,
+        3.986381527189939
+      ],
+      "neighbors": [
+        "place_35",
+        "place_37"
+      ]
+    },
+    {
+      "id": "place_37",
+      "xy": [
+        4.48631064260672,
+        4.228258885000694
+      ],
+      "neighbors": [
+        "place_36",
+        "place_38"
+      ]
+    },
+    {
+      "id": "place_38",
+      "xy": [
+        3.4412125697809937,
+        4.186007405659293
+      ],
+      "neighbors": [
+        "place_37",
+        "place_39"
+      ]
+    },
+    {
+      "id": "place_39",
+      "xy": [
+        2.881684401670357,
+        3.93033231822222
+      ],
+      "neighbors": [
+        "place_38",
+        "place_40",
+        "place_41",
+        "place_43"
+      ]
+    },
+    {
+      "id": "place_40",
+      "xy": [
+        4.991633553552947,
+        4.145205778501353
+      ],
+      "neighbors": [
+        "place_39"
+      ]
+    },
+    {
+      "id": "place_41",
+      "xy": [
+        3.9755504734626506,
+        4.268096332729817
+      ],
+      "neighbors": [
+        "place_39"
+      ]
+    },
+    {
+      "id": "place_43",
+      "xy": [
+        2.435696024506873,
+        3.498465377010496
+      ],
+      "neighbors": [
+        "place_39",
+        "place_44"
+      ]
+    },
+    {
+      "id": "place_44",
+      "xy": [
+        2.1726878838835675,
+        2.9729111907078325
+      ],
+      "neighbors": [
+        "place_43",
+        "place_45"
+      ]
+    },
+    {
+      "id": "place_45",
+      "xy": [
+        2.019079997246291,
+        2.415798155092535
+      ],
+      "neighbors": [
+        "place_44",
+        "place_46"
+      ]
+    },
+    {
+      "id": "place_46",
+      "xy": [
+        1.8718714106096064,
+        1.7624932974246053
+      ],
+      "neighbors": [
+        "place_45",
+        "place_47"
+      ]
+    },
+    {
+      "id": "place_47",
+      "xy": [
+        1.6682757688095249,
+        1.2576829023546747
+      ],
+      "neighbors": [
+        "place_46",
+        "place_48"
+      ]
+    },
+    {
+      "id": "place_48",
+      "xy": [
+        1.2254315126514443,
+        0.7932369809405011
+      ],
+      "neighbors": [
+        "place_3",
+        "place_4",
+        "place_47",
+        "place_50"
+      ]
+    },
+    {
+      "id": "place_50",
+      "xy": [
+        1.4291434864293875,
+        0.9945249451657279
+      ],
+      "neighbors": [
+        "place_2",
+        "place_48"
+      ]
+    },
+    {
+      "id": "place_51",
+      "xy": [
+        -0.01685161924145148,
+        -0.00156937565336866
+      ],
+      "neighbors": [
+        "place_0"
+      ]
+    },
+    {
+      "id": "place_53",
+      "xy": [
+        -0.949989350423783,
+        0.41057483768955244
+      ],
+      "neighbors": [
+        "place_0",
+        "place_54",
+        "place_59",
+        "place_61"
+      ]
+    },
+    {
+      "id": "place_54",
+      "xy": [
+        -2.103118977290759,
+        0.6309988152353645
+      ],
+      "neighbors": [
+        "place_53",
+        "place_55",
+        "place_59"
+      ]
+    },
+    {
+      "id": "place_55",
+      "xy": [
+        -2.4679591905839047,
+        0.3366991894887668
+      ],
+      "neighbors": [
+        "place_54",
+        "place_57"
+      ]
+    },
+    {
+      "id": "place_57",
+      "xy": [
+        -2.8278577389671726,
+        0.09883483172950971
+      ],
+      "neighbors": [
+        "place_55",
+        "place_58"
+      ]
+    },
+    {
+      "id": "place_58",
+      "xy": [
+        -3.412723570825539,
+        -0.210558124368329
+      ],
+      "neighbors": [
+        "place_57",
+        "place_59",
+        "place_60"
+      ]
+    },
+    {
+      "id": "place_59",
+      "xy": [
+        -1.6573335171012424,
+        0.49721274522368525
+      ],
+      "neighbors": [
+        "place_53",
+        "place_54",
+        "place_58",
+        "place_61"
+      ]
+    },
+    {
+      "id": "place_60",
+      "xy": [
+        -3.699767817689148,
+        -0.2761541818287992
+      ],
+      "neighbors": [
+        "place_58"
+      ]
+    },
+    {
+      "id": "place_61",
+      "xy": [
+        -1.1746893934470002,
+        0.06148918187119726
+      ],
+      "neighbors": [
+        "place_0",
+        "place_53",
+        "place_59"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command_id": "m_simple_01",
+      "subset": "simple",
+      "text": "go to the water fountain",
+      "target_label": "water fountain",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_02",
+      "subset": "simple",
+      "text": "go to the bench",
+      "target_label": "bench",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_03",
+      "subset": "simple",
+      "text": "go to the bottle",
+      "target_label": "bottle",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_04",
+      "subset": "simple",
+      "text": "go to the cup",
+      "target_label": "cup",
+      "relation": null,
+      "candidates": [],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_05",
+      "subset": "simple",
+      "text": "go to the emergency exit sign",
+      "target_label": "emergency exit sign",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_disambig_01",
+      "subset": "disambiguation",
+      "text": "go to the chair near the meeting table set",
+      "target_label": "chair",
+      "relation": {
+        "type": "near",
+        "anchor_label": "meeting table set"
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_02",
+      "subset": "disambiguation",
+      "text": "go to the door near the meeting table set",
+      "target_label": "door",
+      "relation": {
+        "type": "near",
+        "anchor_label": "meeting table set"
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_03",
+      "subset": "disambiguation",
+      "text": "go to the cardboard box near the trash bin",
+      "target_label": "cardboard box",
+      "relation": {
+        "type": "near",
+        "anchor_label": "trash bin"
+      },
+      "candidates": [
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        }
+      ],
+      "anchors": {
+        "trash bin": [
+          {
+            "id": "trash bin_inst_0",
+            "xy": [
+              3.6010406665318366,
+              6.147391625004298
+            ],
+            "place": "place_41"
+          },
+          {
+            "id": "trash bin_inst_1",
+            "xy": [
+              2.968903676613241,
+              4.2573159091206145
+            ],
+            "place": "place_39"
+          },
+          {
+            "id": "trash bin_inst_2",
+            "xy": [
+              3.3212138355065517,
+              5.727770941219459
+            ],
+            "place": "place_38"
+          },
+          {
+            "id": "trash bin_inst_3",
+            "xy": [
+              2.834666925765355,
+              5.097434678488483
+            ],
+            "place": "place_38"
+          },
+          {
+            "id": "trash bin_inst_4",
+            "xy": [
+              4.808792773717087,
+              3.438495007799382
+            ],
+            "place": "place_40"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_04",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the bottle",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "near",
+        "anchor_label": "bottle"
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {
+        "bottle": [
+          {
+            "id": "bottle_inst_0",
+            "xy": [
+              10.16176366279996,
+              0.7669338017188012
+            ],
+            "place": "place_22"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_05",
+      "subset": "disambiguation",
+      "text": "go to the chair near the bench",
+      "target_label": "chair",
+      "relation": {
+        "type": "near",
+        "anchor_label": "bench"
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "bench": [
+          {
+            "id": "bench_inst_1",
+            "xy": [
+              0.3298107921338349,
+              3.754876373457124
+            ],
+            "place": "place_44"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_01",
+      "subset": "compositional",
+      "text": "go to the trash bin between the bottle and the cardboard box",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "bottle",
+          "cardboard box"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {
+        "bottle": [
+          {
+            "id": "bottle_inst_0",
+            "xy": [
+              10.16176366279996,
+              0.7669338017188012
+            ],
+            "place": "place_22"
+          }
+        ],
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              4.194634664837553,
+              -1.1788689376258392
+            ],
+            "place": "place_12"
+          },
+          {
+            "id": "cardboard box_inst_2",
+            "xy": [
+              10.050673568118846,
+              -1.7153353099420092
+            ],
+            "place": "place_21"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_02",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the bench",
+      "target_label": "chair",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "bench"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ],
+        "bench": [
+          {
+            "id": "bench_inst_1",
+            "xy": [
+              0.3298107921338349,
+              3.754876373457124
+            ],
+            "place": "place_44"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_03",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the cardboard box",
+      "target_label": "door",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "cardboard box"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ],
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              4.194634664837553,
+              -1.1788689376258392
+            ],
+            "place": "place_12"
+          },
+          {
+            "id": "cardboard box_inst_2",
+            "xy": [
+              10.050673568118846,
+              -1.7153353099420092
+            ],
+            "place": "place_21"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_04",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the chair and the door",
+      "target_label": "meeting table set",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "chair",
+          "door"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "chair": [
+          {
+            "id": "chair_inst_0",
+            "xy": [
+              4.468710527404926,
+              2.6887599896873233
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_1",
+            "xy": [
+              5.722451963561281,
+              2.674812984116235
+            ],
+            "place": "place_35"
+          },
+          {
+            "id": "chair_inst_2",
+            "xy": [
+              9.222972009539646,
+              3.2949982987236477
+            ],
+            "place": "place_27"
+          },
+          {
+            "id": "chair_inst_3",
+            "xy": [
+              9.231049652634214,
+              2.449096564714967
+            ],
+            "place": "place_29"
+          },
+          {
+            "id": "chair_inst_4",
+            "xy": [
+              4.1588390973294524,
+              2.546821973845777
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_6",
+            "xy": [
+              4.478443288815463,
+              5.836435229496848
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_5",
+            "xy": [
+              3.0894226935571845,
+              2.735550426314231
+            ],
+            "place": "place_44"
+          },
+          {
+            "id": "chair_inst_8",
+            "xy": [
+              5.091022930313797,
+              2.5778674039265255
+            ],
+            "place": "place_36"
+          }
+        ],
+        "door": [
+          {
+            "id": "door_inst_0",
+            "xy": [
+              8.212493123738543,
+              -2.122826763654983
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_1",
+            "xy": [
+              8.07503697641713,
+              -2.032517884731768
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_3",
+            "xy": [
+              8.221520885455725,
+              -2.291705234498617
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_5",
+            "xy": [
+              9.287438606726882,
+              -2.1704928335037024
+            ],
+            "place": "place_21"
+          },
+          {
+            "id": "door_inst_2",
+            "xy": [
+              7.790045328129743,
+              -2.1304350778025873
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_7",
+            "xy": [
+              7.09325161299741,
+              -2.2003848998804356
+            ],
+            "place": "place_14"
+          },
+          {
+            "id": "door_inst_8",
+            "xy": [
+              6.463635708683831,
+              -2.213217521768596
+            ],
+            "place": "place_18"
+          },
+          {
+            "id": "door_inst_9",
+            "xy": [
+              5.5183136377821285,
+              -2.2569318690353257
+            ],
+            "place": "place_13"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_05",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cardboard box and the water fountain",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "cardboard box",
+          "water fountain"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              4.194634664837553,
+              -1.1788689376258392
+            ],
+            "place": "place_12"
+          },
+          {
+            "id": "cardboard box_inst_2",
+            "xy": [
+              10.050673568118846,
+              -1.7153353099420092
+            ],
+            "place": "place_21"
+          }
+        ],
+        "water fountain": [
+          {
+            "id": "water fountain_inst_0",
+            "xy": [
+              -3.528030101386953,
+              1.1395084582677621
+            ],
+            "place": "place_57"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_simple_06",
+      "subset": "simple",
+      "text": "go to the meeting table",
+      "target_label": "meeting table set",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_07",
+      "subset": "simple",
+      "text": "go to a chair",
+      "target_label": "chair",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_08",
+      "subset": "simple",
+      "text": "go to a trash bin",
+      "target_label": "trash bin",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_09",
+      "subset": "simple",
+      "text": "go to a door",
+      "target_label": "door",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_simple_10",
+      "subset": "simple",
+      "text": "go to a cardboard box",
+      "target_label": "cardboard box",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_disambig_06",
+      "subset": "disambiguation",
+      "text": "go to the door near the cardboard box",
+      "target_label": "door",
+      "relation": {
+        "type": "near",
+        "anchor_label": "cardboard box"
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        }
+      ],
+      "anchors": {
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              4.194634664837553,
+              -1.1788689376258392
+            ],
+            "place": "place_12"
+          },
+          {
+            "id": "cardboard box_inst_2",
+            "xy": [
+              10.050673568118846,
+              -1.7153353099420092
+            ],
+            "place": "place_21"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_07",
+      "subset": "disambiguation",
+      "text": "go to the meeting table set near the bench",
+      "target_label": "meeting table set",
+      "relation": {
+        "type": "near",
+        "anchor_label": "bench"
+      },
+      "candidates": [
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "bench": [
+          {
+            "id": "bench_inst_1",
+            "xy": [
+              0.3298107921338349,
+              3.754876373457124
+            ],
+            "place": "place_44"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_08",
+      "subset": "disambiguation",
+      "text": "go to the cardboard box near the meeting table set",
+      "target_label": "cardboard box",
+      "relation": {
+        "type": "near",
+        "anchor_label": "meeting table set"
+      },
+      "candidates": [
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_disambig_09",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the cup",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "near",
+        "anchor_label": "cup"
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {
+        "cup": []
+      }
+    },
+    {
+      "command_id": "m_disambig_10",
+      "subset": "disambiguation",
+      "text": "go to the chair near the door",
+      "target_label": "chair",
+      "relation": {
+        "type": "near",
+        "anchor_label": "door"
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "door": [
+          {
+            "id": "door_inst_0",
+            "xy": [
+              8.212493123738543,
+              -2.122826763654983
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_1",
+            "xy": [
+              8.07503697641713,
+              -2.032517884731768
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_3",
+            "xy": [
+              8.221520885455725,
+              -2.291705234498617
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_5",
+            "xy": [
+              9.287438606726882,
+              -2.1704928335037024
+            ],
+            "place": "place_21"
+          },
+          {
+            "id": "door_inst_2",
+            "xy": [
+              7.790045328129743,
+              -2.1304350778025873
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_7",
+            "xy": [
+              7.09325161299741,
+              -2.2003848998804356
+            ],
+            "place": "place_14"
+          },
+          {
+            "id": "door_inst_8",
+            "xy": [
+              6.463635708683831,
+              -2.213217521768596
+            ],
+            "place": "place_18"
+          },
+          {
+            "id": "door_inst_9",
+            "xy": [
+              5.5183136377821285,
+              -2.2569318690353257
+            ],
+            "place": "place_13"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_06",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the door",
+      "target_label": "chair",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "door"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ],
+        "door": [
+          {
+            "id": "door_inst_0",
+            "xy": [
+              8.212493123738543,
+              -2.122826763654983
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_1",
+            "xy": [
+              8.07503697641713,
+              -2.032517884731768
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_3",
+            "xy": [
+              8.221520885455725,
+              -2.291705234498617
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_5",
+            "xy": [
+              9.287438606726882,
+              -2.1704928335037024
+            ],
+            "place": "place_21"
+          },
+          {
+            "id": "door_inst_2",
+            "xy": [
+              7.790045328129743,
+              -2.1304350778025873
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "door_inst_7",
+            "xy": [
+              7.09325161299741,
+              -2.2003848998804356
+            ],
+            "place": "place_14"
+          },
+          {
+            "id": "door_inst_8",
+            "xy": [
+              6.463635708683831,
+              -2.213217521768596
+            ],
+            "place": "place_18"
+          },
+          {
+            "id": "door_inst_9",
+            "xy": [
+              5.5183136377821285,
+              -2.2569318690353257
+            ],
+            "place": "place_13"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_07",
+      "subset": "compositional",
+      "text": "go to the cardboard box between the trash bin and the meeting table set",
+      "target_label": "cardboard box",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "trash bin",
+          "meeting table set"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        }
+      ],
+      "anchors": {
+        "trash bin": [
+          {
+            "id": "trash bin_inst_0",
+            "xy": [
+              3.6010406665318366,
+              6.147391625004298
+            ],
+            "place": "place_41"
+          },
+          {
+            "id": "trash bin_inst_1",
+            "xy": [
+              2.968903676613241,
+              4.2573159091206145
+            ],
+            "place": "place_39"
+          },
+          {
+            "id": "trash bin_inst_2",
+            "xy": [
+              3.3212138355065517,
+              5.727770941219459
+            ],
+            "place": "place_38"
+          },
+          {
+            "id": "trash bin_inst_3",
+            "xy": [
+              2.834666925765355,
+              5.097434678488483
+            ],
+            "place": "place_38"
+          },
+          {
+            "id": "trash bin_inst_4",
+            "xy": [
+              4.808792773717087,
+              3.438495007799382
+            ],
+            "place": "place_40"
+          }
+        ],
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_08",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cup and the cardboard box",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "cup",
+          "cardboard box"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        }
+      ],
+      "anchors": {
+        "cup": [],
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              4.194634664837553,
+              -1.1788689376258392
+            ],
+            "place": "place_12"
+          },
+          {
+            "id": "cardboard box_inst_2",
+            "xy": [
+              10.050673568118846,
+              -1.7153353099420092
+            ],
+            "place": "place_21"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_09",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the bench and the chair",
+      "target_label": "meeting table set",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "bench",
+          "chair"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        }
+      ],
+      "anchors": {
+        "bench": [
+          {
+            "id": "bench_inst_1",
+            "xy": [
+              0.3298107921338349,
+              3.754876373457124
+            ],
+            "place": "place_44"
+          }
+        ],
+        "chair": [
+          {
+            "id": "chair_inst_0",
+            "xy": [
+              4.468710527404926,
+              2.6887599896873233
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_1",
+            "xy": [
+              5.722451963561281,
+              2.674812984116235
+            ],
+            "place": "place_35"
+          },
+          {
+            "id": "chair_inst_2",
+            "xy": [
+              9.222972009539646,
+              3.2949982987236477
+            ],
+            "place": "place_27"
+          },
+          {
+            "id": "chair_inst_3",
+            "xy": [
+              9.231049652634214,
+              2.449096564714967
+            ],
+            "place": "place_29"
+          },
+          {
+            "id": "chair_inst_4",
+            "xy": [
+              4.1588390973294524,
+              2.546821973845777
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_6",
+            "xy": [
+              4.478443288815463,
+              5.836435229496848
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_5",
+            "xy": [
+              3.0894226935571845,
+              2.735550426314231
+            ],
+            "place": "place_44"
+          },
+          {
+            "id": "chair_inst_8",
+            "xy": [
+              5.091022930313797,
+              2.5778674039265255
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_compose_10",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the chair",
+      "target_label": "door",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "chair"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [
+          {
+            "id": "table_inst_0",
+            "xy": [
+              5.134322622713294,
+              2.7913700708131577
+            ],
+            "place": "place_36"
+          }
+        ],
+        "chair": [
+          {
+            "id": "chair_inst_0",
+            "xy": [
+              4.468710527404926,
+              2.6887599896873233
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_1",
+            "xy": [
+              5.722451963561281,
+              2.674812984116235
+            ],
+            "place": "place_35"
+          },
+          {
+            "id": "chair_inst_2",
+            "xy": [
+              9.222972009539646,
+              3.2949982987236477
+            ],
+            "place": "place_27"
+          },
+          {
+            "id": "chair_inst_3",
+            "xy": [
+              9.231049652634214,
+              2.449096564714967
+            ],
+            "place": "place_29"
+          },
+          {
+            "id": "chair_inst_4",
+            "xy": [
+              4.1588390973294524,
+              2.546821973845777
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_6",
+            "xy": [
+              4.478443288815463,
+              5.836435229496848
+            ],
+            "place": "place_37"
+          },
+          {
+            "id": "chair_inst_5",
+            "xy": [
+              3.0894226935571845,
+              2.735550426314231
+            ],
+            "place": "place_44"
+          },
+          {
+            "id": "chair_inst_8",
+            "xy": [
+              5.091022930313797,
+              2.5778674039265255
+            ],
+            "place": "place_36"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "m_func_01",
+      "subset": "functional",
+      "text": "I'm thirsty and want some water",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_02",
+      "subset": "functional",
+      "text": "I need to throw away this paper",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_03",
+      "subset": "functional",
+      "text": "I'm tired, let me rest somewhere",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_04",
+      "subset": "functional",
+      "text": "Where can I have a meeting",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_05",
+      "subset": "functional",
+      "text": "Show me the way out in case of fire",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_06",
+      "subset": "functional",
+      "text": "I want to leave the room",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_07",
+      "subset": "functional",
+      "text": "I need a chair to sit on",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_08",
+      "subset": "functional",
+      "text": "I want to grab a drink",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_09",
+      "subset": "functional",
+      "text": "Where can I dispose of waste",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_10",
+      "subset": "functional",
+      "text": "I need a cup for some coffee",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_11",
+      "subset": "functional",
+      "text": "Show me the safety exit",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_12",
+      "subset": "functional",
+      "text": "I have something to recycle in a box",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_13",
+      "subset": "functional",
+      "text": "Can you find me a place to sit by the table",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_14",
+      "subset": "functional",
+      "text": "Show me where the trash goes",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "m_func_15",
+      "subset": "functional",
+      "text": "Take me to the room exit",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "trash bin_inst_0",
+          "label": "trash bin",
+          "xy": [
+            3.6010406665318366,
+            6.147391625004298
+          ],
+          "place": "place_41"
+        },
+        {
+          "id": "trash bin_inst_1",
+          "label": "trash bin",
+          "xy": [
+            2.968903676613241,
+            4.2573159091206145
+          ],
+          "place": "place_39"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            3.3212138355065517,
+            5.727770941219459
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            2.834666925765355,
+            5.097434678488483
+          ],
+          "place": "place_38"
+        },
+        {
+          "id": "trash bin_inst_4",
+          "label": "trash bin",
+          "xy": [
+            4.808792773717087,
+            3.438495007799382
+          ],
+          "place": "place_40"
+        },
+        {
+          "id": "chair_inst_0",
+          "label": "chair",
+          "xy": [
+            4.468710527404926,
+            2.6887599896873233
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_1",
+          "label": "chair",
+          "xy": [
+            5.722451963561281,
+            2.674812984116235
+          ],
+          "place": "place_35"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            9.222972009539646,
+            3.2949982987236477
+          ],
+          "place": "place_27"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.231049652634214,
+            2.449096564714967
+          ],
+          "place": "place_29"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            4.1588390973294524,
+            2.546821973845777
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_6",
+          "label": "chair",
+          "xy": [
+            4.478443288815463,
+            5.836435229496848
+          ],
+          "place": "place_37"
+        },
+        {
+          "id": "chair_inst_5",
+          "label": "chair",
+          "xy": [
+            3.0894226935571845,
+            2.735550426314231
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            5.091022930313797,
+            2.5778674039265255
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "table_inst_0",
+          "label": "meeting table set",
+          "xy": [
+            5.134322622713294,
+            2.7913700708131577
+          ],
+          "place": "place_36"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            4.194634664837553,
+            -1.1788689376258392
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "xy": [
+            10.050673568118846,
+            -1.7153353099420092
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            8.212493123738543,
+            -2.122826763654983
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_1",
+          "label": "door",
+          "xy": [
+            8.07503697641713,
+            -2.032517884731768
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_3",
+          "label": "door",
+          "xy": [
+            8.221520885455725,
+            -2.291705234498617
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_5",
+          "label": "door",
+          "xy": [
+            9.287438606726882,
+            -2.1704928335037024
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "door_inst_2",
+          "label": "door",
+          "xy": [
+            7.790045328129743,
+            -2.1304350778025873
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "door_inst_7",
+          "label": "door",
+          "xy": [
+            7.09325161299741,
+            -2.2003848998804356
+          ],
+          "place": "place_14"
+        },
+        {
+          "id": "door_inst_8",
+          "label": "door",
+          "xy": [
+            6.463635708683831,
+            -2.213217521768596
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "door_inst_9",
+          "label": "door",
+          "xy": [
+            5.5183136377821285,
+            -2.2569318690353257
+          ],
+          "place": "place_13"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.25967182207102,
+            -1.373727503541839
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            9.92150490315358,
+            -1.7931499395470891
+          ],
+          "place": "place_21"
+        },
+        {
+          "id": "emergency exit sign_inst_0",
+          "label": "emergency exit sign",
+          "xy": [
+            10.295245391023641,
+            0.21087421211503493
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "emergency exit sign_inst_1",
+          "label": "emergency exit sign",
+          "xy": [
+            6.558251762985674,
+            -2.1041690053576723
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "emergency exit sign_inst_4",
+          "label": "emergency exit sign",
+          "xy": [
+            -0.09729576162565648,
+            -0.06444968712804698
+          ],
+          "place": "place_51"
+        },
+        {
+          "id": "bottle_inst_0",
+          "label": "bottle",
+          "xy": [
+            10.16176366279996,
+            0.7669338017188012
+          ],
+          "place": "place_22"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            0.3298107921338349,
+            3.754876373457124
+          ],
+          "place": "place_44"
+        },
+        {
+          "id": "water fountain_inst_0",
+          "label": "water fountain",
+          "xy": [
+            -3.528030101386953,
+            1.1395084582677621
+          ],
+          "place": "place_57"
+        }
+      ],
+      "anchors": {}
+    }
+  ]
+}

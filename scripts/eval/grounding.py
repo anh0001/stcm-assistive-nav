@@ -352,6 +352,64 @@ def _gt_id_match(predicted_id: str, gt_id: str,
     return math.hypot(pred_xy[0] - gt_xy[0], pred_xy[1] - gt_xy[1]) <= radius_m
 
 
+def _gold_referent_present(gt_xy: tuple[float, float] | None,
+                           pred_xy_by_id: dict[str, tuple[float, float]],
+                           radius_m: float) -> bool:
+    """True if any predicted node lies within radius_m of the GT pose. Used to
+    distinguish perception failures (no predicted referent at all) from
+    grounding failures (referent present but ranker picked wrong)."""
+    if gt_xy is None:
+        return False
+    for xy in pred_xy_by_id.values():
+        if math.hypot(xy[0] - gt_xy[0], xy[1] - gt_xy[1]) <= radius_m:
+            return True
+    return False
+
+
+def _anchors_present(relation: dict[str, Any] | None,
+                     by_label: dict[str, list[dict[str, Any]]]) -> bool:
+    """For relational commands: every required anchor label has at least one
+    predicted instance. Returns True for non-relational commands."""
+    if not relation:
+        return True
+    labels: list[str] = []
+    if "anchor_label" in relation:
+        labels.append(relation["anchor_label"])
+    if "anchor_labels" in relation:
+        labels.extend(relation["anchor_labels"])
+    for lab in labels:
+        if not by_label.get(lab):
+            return False
+    return True
+
+
+def _classify_failure(top1: bool, gold_present: bool, anchors_present: bool,
+                      candidates_pool_empty: bool,
+                      ranker_picked_invalid: bool) -> str:
+    """Failure taxonomy (Codex review P5/P6).
+
+    none: top1 correct.
+    perception_missing: GT object not predicted within radius.
+    relation_error: GT present, but a required anchor label is missing.
+    alias_label_error: GT present, anchors present, but candidate pool empty
+        (target_label filter excluded all predictions; a label-aliasing or
+        intent-mapping miss).
+    llm_invalid_id: ranker returned an id not in the candidate pool (LLM-only).
+    ranker_error: GT present, anchors present, candidates present, ranker
+        chose wrong instance."""
+    if top1:
+        return "none"
+    if not gold_present:
+        return "perception_missing"
+    if not anchors_present:
+        return "relation_error"
+    if ranker_picked_invalid:
+        return "llm_invalid_id"
+    if candidates_pool_empty:
+        return "alias_label_error"
+    return "ranker_error"
+
+
 def evaluate(pred: dict[str, Any], commands: list[dict[str, Any]],
              gt: dict[str, Any] | None = None,
              match_radius_m: float = 1.0,
@@ -378,6 +436,18 @@ def evaluate(pred: dict[str, Any], commands: list[dict[str, Any]],
         top2 = any(_gt_id_match(rid, gt_id, pred_xy_by_id.get(rid), gt_xy, match_radius_m) for rid in ranked[:2])
         subset = str(cmd.get("subset", "unknown"))
 
+        rel = _normalize_relation(cmd.get("relation"), aliases=aliases)
+        gold_present = _gold_referent_present(gt_xy, pred_xy_by_id, match_radius_m)
+        anchors_present = _anchors_present(rel, by_label)
+        eligible = gold_present and anchors_present
+        failure_source = _classify_failure(
+            top1=top1,
+            gold_present=gold_present,
+            anchors_present=anchors_present,
+            candidates_pool_empty=(len(ranked) == 0),
+            ranker_picked_invalid=False,
+        )
+
         rows.append({
             "id": cmd.get("id"),
             "subset": subset,
@@ -387,25 +457,92 @@ def evaluate(pred: dict[str, Any], commands: list[dict[str, Any]],
             "top1": top1,
             "top2": top2,
             "n_candidates": len(ranked),
+            "gold_referent_present": gold_present,
+            "anchor_nodes_present": anchors_present,
+            "eligible_grounding_given_perception": eligible,
+            "failure_source": failure_source,
         })
-        st = subset_totals.setdefault(subset, {"n": 0, "top1": 0, "top2": 0})
+        st = subset_totals.setdefault(
+            subset,
+            {"n": 0, "top1": 0, "top2": 0,
+             "n_eligible": 0, "top1_eligible": 0},
+        )
         st["n"] += 1
         st["top1"] += int(top1)
         st["top2"] += int(top2)
+        st["n_eligible"] += int(eligible)
+        st["top1_eligible"] += int(eligible and top1)
 
     overall = {
         "n": len(rows),
         "top1": sum(1 for r in rows if r["top1"]),
         "top2": sum(1 for r in rows if r["top2"]),
+        "n_eligible": sum(1 for r in rows if r["eligible_grounding_given_perception"]),
+        "top1_eligible": sum(1 for r in rows
+                             if r["eligible_grounding_given_perception"]
+                             and r["top1"]),
     }
     overall["top1_acc"] = overall["top1"] / overall["n"] if overall["n"] else 0.0
     overall["top2_acc"] = overall["top2"] / overall["n"] if overall["n"] else 0.0
+    overall["top1_acc_given_perception"] = (
+        overall["top1_eligible"] / overall["n_eligible"]
+        if overall["n_eligible"] else 0.0
+    )
+
+    failure_counts: dict[str, int] = {}
+    for r in rows:
+        failure_counts[r["failure_source"]] = failure_counts.get(r["failure_source"], 0) + 1
+    overall["failure_counts"] = failure_counts
 
     for st in subset_totals.values():
         st["top1_acc"] = st["top1"] / st["n"] if st["n"] else 0.0
         st["top2_acc"] = st["top2"] / st["n"] if st["n"] else 0.0
+        st["top1_acc_given_perception"] = (
+            st["top1_eligible"] / st["n_eligible"]
+            if st["n_eligible"] else 0.0
+        )
 
     return {"overall": overall, "by_subset": subset_totals, "trials": rows}
+
+
+def _load_intent_lexicon(path: Path | None):
+    """Return ordered list of (compiled_regex, label). Empty when path is None."""
+    if path is None:
+        return []
+    import re
+    raw = json.loads(Path(path).read_text())
+    out = []
+    for rule in raw.get("rules", []):
+        pat = rule.get("pattern")
+        lab = rule.get("label")
+        if pat and lab:
+            out.append((re.compile(pat, re.IGNORECASE), lab))
+    return out
+
+
+def _apply_intent_lexicon(commands: list[dict], lexicon: list) -> list[dict]:
+    """Fill empty target_label by first-match regex on command text. Pure
+    function: returns a new list, does not mutate input. Records the matched
+    pattern in `_intent_match` for audit."""
+    if not lexicon:
+        return commands
+    out = []
+    for cmd in commands:
+        if cmd.get("target_label"):
+            out.append(cmd)
+            continue
+        text = str(cmd.get("text", ""))
+        matched = None
+        for rx, lab in lexicon:
+            if rx.search(text):
+                matched = (rx.pattern, lab)
+                break
+        new = dict(cmd)
+        if matched is not None:
+            new["target_label"] = matched[1]
+            new["_intent_match"] = {"pattern": matched[0], "label": matched[1]}
+        out.append(new)
+    return out
 
 
 def main() -> None:
@@ -421,6 +558,11 @@ def main() -> None:
                     help="Optional canonical→[aliases] JSON merged with the "
                          "built-in alias table. Pass an empty path to "
                          "disable file aliases.")
+    ap.add_argument("--intent-lexicon", type=Path, default=None,
+                    help="AE-3 intent-lexicon arm: deterministic regex map "
+                         "from command text to target_label, applied only to "
+                         "commands lacking an explicit target_label. Yields "
+                         "the 'template+intent-lexicon' baseline.")
     args = ap.parse_args()
 
     pred = json.loads(args.prediction.read_text())
@@ -430,19 +572,32 @@ def main() -> None:
     alias_path = args.label_aliases if args.label_aliases and str(args.label_aliases) else None
     aliases = _load_alias_map(alias_path)
 
+    lexicon = _load_intent_lexicon(args.intent_lexicon)
+    commands = _apply_intent_lexicon(commands, lexicon)
+
     result = evaluate(pred, commands, gt=gt, match_radius_m=args.match_radius,
                       aliases=aliases)
     result["scene"] = spec.get("scene")
     result["commands_path"] = str(args.commands)
     result["prediction_path"] = str(args.prediction)
+    result["arm"] = "template+intent-lexicon" if lexicon else "template-spatial"
+    if lexicon:
+        result["intent_lexicon_path"] = str(args.intent_lexicon)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
-    print(f"wrote {args.output}")
-    print(f"  overall top1={result['overall']['top1_acc']:.3f}  "
-          f"top2={result['overall']['top2_acc']:.3f}")
+    print(f"wrote {args.output}  [arm={result['arm']}]")
+    ov = result["overall"]
+    print(f"  overall top1={ov['top1_acc']:.3f}  "
+          f"top2={ov['top2_acc']:.3f}  "
+          f"top1|perception={ov['top1_acc_given_perception']:.3f} "
+          f"(n_eligible={ov['n_eligible']}/{ov['n']})")
+    print(f"  failure_counts={ov['failure_counts']}")
     for subset, st in result["by_subset"].items():
-        print(f"  {subset}: top1={st['top1_acc']:.3f} top2={st['top2_acc']:.3f} n={st['n']}")
+        print(f"  {subset}: top1={st['top1_acc']:.3f} "
+              f"top2={st['top2_acc']:.3f} "
+              f"top1|perc={st['top1_acc_given_perception']:.3f} "
+              f"n={st['n']} n_elig={st['n_eligible']}")
 
 
 if __name__ == "__main__":

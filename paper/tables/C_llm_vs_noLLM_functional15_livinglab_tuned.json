@@ -1,0 +1,60 @@
+{
+  "llm_report": "results/grounding_llm/livinglab_tuned_grounding.json",
+  "baseline_report": "results/grounding/livinglab_tuned_grounding_spatial.json",
+  "label": "functional_livinglab_tuned",
+  "include_subsets": "functional",
+  "eligible_only": false,
+  "overall": {
+    "n": 15,
+    "llm_top1": 9,
+    "baseline_top1": 0,
+    "llm_top1_acc": 0.6,
+    "baseline_top1_acc": 0.0,
+    "llm_top1_acc_ci95": [
+      0.357464427565077,
+      0.8017577191740534
+    ],
+    "baseline_top1_acc_ci95": [
+      0.0,
+      0.20388926630434784
+    ],
+    "discordant_b_llm_only": 9,
+    "discordant_c_baseline_only": 0,
+    "delta_acc_llm_minus_baseline": 0.6,
+    "delta_acc_ci95": [
+      0.35207743144279907,
+      0.8479225685572009
+    ],
+    "p_value_exact": 0.00390625,
+    "mcnemar_chi2_cc": 7.111111111111111,
+    "p_value_chi2_cc": 0.007660761135179472
+  },
+  "by_subset": {
+    "functional": {
+      "n": 15,
+      "llm_top1": 9,
+      "baseline_top1": 0,
+      "llm_top1_acc": 0.6,
+      "baseline_top1_acc": 0.0,
+      "llm_top1_acc_ci95": [
+        0.357464427565077,
+        0.8017577191740534
+      ],
+      "baseline_top1_acc_ci95": [
+        0.0,
+        0.20388926630434784
+      ],
+      "discordant_b_llm_only": 9,
+      "discordant_c_baseline_only": 0,
+      "delta_acc_llm_minus_baseline": 0.6,
+      "delta_acc_ci95": [
+        0.35207743144279907,
+        0.8479225685572009
+      ],
+      "p_value_exact": 0.00390625,
+      "mcnemar_chi2_cc": 7.111111111111111,
+      "p_value_chi2_cc": 0.007660761135179472,
+      "p_value_exact_holm_adj": 0.00390625
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "label": "LLM vs no-LLM functional+recov (meeting + livinglab_tuned)",
+  "method": "stouffer_signed_z",
+  "weighting": "sqrt_n",
+  "per_scene": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_meeting.json",
+      "n": 13,
+      "p_exact": 0.00390625,
+      "delta": 0.6923076923076923,
+      "sign": 1.0,
+      "z": 2.885634913355785,
+      "weight": 3.605551275463989
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_livinglab_tuned.json",
+      "n": 15,
+      "p_exact": 0.00390625,
+      "delta": 0.6,
+      "sign": 1.0,
+      "z": 2.885634913355785,
+      "weight": 3.872983346207417
+    }
+  ],
+  "Z": 4.078297252426111,
+  "p_value_two_sided": 4.536674021071718e-05,
+  "n_total": 28
+}

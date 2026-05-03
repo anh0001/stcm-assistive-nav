@@ -1,0 +1,37 @@
+scene,arm,subset,n,top1,top1_acc,n_recoverable,top1_recoverable,top1_acc_recoverable,n_perception_missing,top1_perception_missing,top1_acc_perception_missing
+meeting,no-LLM (template-spatial),compositional,10,5,0.5,9,5,0.556,1,0,0.0
+meeting,no-LLM (template-spatial),disambiguation,10,3,0.3,8,3,0.375,2,0,0.0
+meeting,no-LLM (template-spatial),functional,15,0,0.0,13,0,0.0,2,0,0.0
+meeting,no-LLM (template-spatial),simple,10,5,0.5,9,5,0.556,1,0,0.0
+meeting,+intent-lexicon,compositional,10,5,0.5,9,5,0.556,1,0,0.0
+meeting,+intent-lexicon,disambiguation,10,3,0.3,8,3,0.375,2,0,0.0
+meeting,+intent-lexicon,functional,15,5,0.333,13,5,0.385,2,0,0.0
+meeting,+intent-lexicon,simple,10,5,0.5,9,5,0.556,1,0,0.0
+meeting,+LLM (claude-sonnet-4-6),compositional,10,4,0.4,9,4,0.444,1,0,0.0
+meeting,+LLM (claude-sonnet-4-6),disambiguation,10,3,0.3,8,3,0.375,2,0,0.0
+meeting,+LLM (claude-sonnet-4-6),functional,15,9,0.6,13,9,0.692,2,0,0.0
+meeting,+LLM (claude-sonnet-4-6),simple,10,6,0.6,9,6,0.667,1,0,0.0
+livinglab,no-LLM (template-spatial),compositional,5,1,0.2,0,0,0.0,5,1,0.2
+livinglab,no-LLM (template-spatial),disambiguation,5,1,0.2,1,1,1.0,4,0,0.0
+livinglab,no-LLM (template-spatial),functional,15,0,0.0,8,0,0.0,7,0,0.0
+livinglab,no-LLM (template-spatial),simple,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,+intent-lexicon,compositional,5,1,0.2,0,0,0.0,5,1,0.2
+livinglab,+intent-lexicon,disambiguation,5,1,0.2,1,1,1.0,4,0,0.0
+livinglab,+intent-lexicon,functional,15,3,0.2,8,3,0.375,7,0,0.0
+livinglab,+intent-lexicon,simple,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,+LLM (claude-sonnet-4-6),compositional,5,1,0.2,0,0,0.0,5,1,0.2
+livinglab,+LLM (claude-sonnet-4-6),disambiguation,5,2,0.4,1,1,1.0,4,1,0.25
+livinglab,+LLM (claude-sonnet-4-6),functional,15,5,0.333,8,5,0.625,7,0,0.0
+livinglab,+LLM (claude-sonnet-4-6),simple,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,no-LLM (template-spatial),compositional,5,1,0.2,3,1,0.333,2,0,0.0
+livinglab,no-LLM (template-spatial),disambiguation,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,no-LLM (template-spatial),functional,15,0,0.0,15,0,0.0,0,0,0.0
+livinglab,no-LLM (template-spatial),simple,5,1,0.2,5,1,0.2,0,0,0.0
+livinglab,+intent-lexicon,compositional,5,1,0.2,3,1,0.333,2,0,0.0
+livinglab,+intent-lexicon,disambiguation,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,+intent-lexicon,functional,15,5,0.333,15,5,0.333,0,0,0.0
+livinglab,+intent-lexicon,simple,5,1,0.2,5,1,0.2,0,0,0.0
+livinglab,+LLM (claude-sonnet-4-6),compositional,5,4,0.8,3,2,0.667,2,2,1.0
+livinglab,+LLM (claude-sonnet-4-6),disambiguation,5,2,0.4,4,2,0.5,1,0,0.0
+livinglab,+LLM (claude-sonnet-4-6),functional,15,9,0.6,15,9,0.6,0,0,0.0
+livinglab,+LLM (claude-sonnet-4-6),simple,5,2,0.4,5,2,0.4,0,0,0.0

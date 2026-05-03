@@ -1,0 +1,34 @@
+{
+  "label": "LLM vs no-LLM functional (stratified by scene)",
+  "method": "stratified_mcnemar_pooled_discordants",
+  "strata": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional15_meeting.json",
+      "scene": "functional_15_meeting",
+      "n": 15,
+      "b": 9,
+      "c": 0,
+      "delta": 0.6,
+      "p_per_scene_exact": 0.00390625,
+      "sign_delta": 1
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional15_livinglab.json",
+      "scene": "functional_15_livinglab",
+      "n": 15,
+      "b": 5,
+      "c": 0,
+      "delta": 0.3333333333333333,
+      "p_per_scene_exact": 0.0625,
+      "sign_delta": 1
+    }
+  ],
+  "sum_b_llm_only": 14,
+  "sum_c_baseline_only": 0,
+  "n_total": 30,
+  "n_discordant_total": 14,
+  "p_value_exact_pooled_binomial": 0.0001220703125,
+  "mantel_haenszel_chi2_cc": 13.017857142857142,
+  "p_value_chi2_cc": 0.00030853466646283296,
+  "direction_agreement_across_strata": true
+}

@@ -1,0 +1,34 @@
+{
+  "label": "LLM vs no-LLM functional+recov (stratified, tuned)",
+  "method": "stratified_mcnemar_pooled_discordants",
+  "strata": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_meeting.json",
+      "scene": "functional_recoverable_meeting",
+      "n": 13,
+      "b": 9,
+      "c": 0,
+      "delta": 0.6923076923076923,
+      "p_per_scene_exact": 0.00390625,
+      "sign_delta": 1
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional_recov_livinglab_tuned.json",
+      "scene": "functional_recov_livinglab_tuned",
+      "n": 15,
+      "b": 9,
+      "c": 0,
+      "delta": 0.6,
+      "p_per_scene_exact": 0.00390625,
+      "sign_delta": 1
+    }
+  ],
+  "sum_b_llm_only": 18,
+  "sum_c_baseline_only": 0,
+  "n_total": 28,
+  "n_discordant_total": 18,
+  "p_value_exact_pooled_binomial": 7.62939453125e-06,
+  "mantel_haenszel_chi2_cc": 17.01388888888889,
+  "p_value_chi2_cc": 3.7107388769488325e-05,
+  "direction_agreement_across_strata": true
+}

@@ -1,0 +1,59 @@
+{
+  "llm_report": "results/grounding_llm/meeting_grounding.json",
+  "baseline_report": "results/grounding/meeting_grounding_intent.json",
+  "label": "functional_15_meeting",
+  "include_subsets": "functional",
+  "overall": {
+    "n": 15,
+    "llm_top1": 9,
+    "baseline_top1": 5,
+    "llm_top1_acc": 0.6,
+    "baseline_top1_acc": 0.3333333333333333,
+    "llm_top1_acc_ci95": [
+      0.357464427565077,
+      0.8017577191740534
+    ],
+    "baseline_top1_acc_ci95": [
+      0.15176100694691236,
+      0.5828687484878701
+    ],
+    "discordant_b_llm_only": 4,
+    "discordant_c_baseline_only": 0,
+    "delta_acc_llm_minus_baseline": 0.26666666666666666,
+    "delta_acc_ci95": [
+      0.0428741701850342,
+      0.4904591631482991
+    ],
+    "p_value_exact": 0.125,
+    "mcnemar_chi2_cc": 2.25,
+    "p_value_chi2_cc": 0.13361440253771617
+  },
+  "by_subset": {
+    "functional": {
+      "n": 15,
+      "llm_top1": 9,
+      "baseline_top1": 5,
+      "llm_top1_acc": 0.6,
+      "baseline_top1_acc": 0.3333333333333333,
+      "llm_top1_acc_ci95": [
+        0.357464427565077,
+        0.8017577191740534
+      ],
+      "baseline_top1_acc_ci95": [
+        0.15176100694691236,
+        0.5828687484878701
+      ],
+      "discordant_b_llm_only": 4,
+      "discordant_c_baseline_only": 0,
+      "delta_acc_llm_minus_baseline": 0.26666666666666666,
+      "delta_acc_ci95": [
+        0.0428741701850342,
+        0.4904591631482991
+      ],
+      "p_value_exact": 0.125,
+      "mcnemar_chi2_cc": 2.25,
+      "p_value_chi2_cc": 0.13361440253771617,
+      "p_value_exact_holm_adj": 0.125
+    }
+  }
+}

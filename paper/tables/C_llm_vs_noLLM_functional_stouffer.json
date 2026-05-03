@@ -1,0 +1,28 @@
+{
+  "label": "LLM vs no-LLM functional (meeting+livinglab)",
+  "method": "stouffer_signed_z",
+  "weighting": "sqrt_n",
+  "per_scene": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional15_meeting.json",
+      "n": 15,
+      "p_exact": 0.00390625,
+      "delta": 0.6,
+      "sign": 1.0,
+      "z": 2.885634913355785,
+      "weight": 3.872983346207417
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_functional15_livinglab.json",
+      "n": 15,
+      "p_exact": 0.0625,
+      "delta": 0.3333333333333333,
+      "sign": 1.0,
+      "z": 1.8627318658102858,
+      "weight": 3.872983346207417
+    }
+  ],
+  "Z": 3.3576023491092544,
+  "p_value_two_sided": 0.0007862163022900326,
+  "n_total": 30
+}

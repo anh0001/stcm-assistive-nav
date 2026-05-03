@@ -42,6 +42,58 @@ Paired runs on identical bag+commands:
 
 Report McNemar p-value per command subset. Effect size = Δ accuracy w/ 95% CI.
 
+### AE-3 LLM ablation workflow
+
+Backend = Claude Sonnet 4.6 (deterministic, temperature=0). No Ollama in
+paper numbers. Offline file-based protocol; no API key required.
+
+Command sets total **45**: `commands_meeting.yaml` (30) + `commands_livinglab.yaml` (15),
+balanced 15/15/15 across simple / disambiguation / compositional.
+
+```
+# 1. Run STCM offline once per scene (full variant, same prediction graph reused)
+ros2 launch stcm semantic_mapping.launch.py \
+  config_file:=configs/experiments/variants/full.yaml \
+  rosbag_path:=<scene_bag>
+
+# 2. Baseline (no-LLM, template grounder)
+python3 scripts/eval/grounding.py \
+  --prediction output/<scene>_stcm.json \
+  --ground-truth configs/experiments/ground_truth/<scene>_stcm_gt.json \
+  --commands configs/eval/commands_<scene>.yaml \
+  --output output/grounding/<scene>_grounding.json
+
+# 3a. LLM request bundle
+python3 scripts/eval/grounding_llm.py --phase request \
+  --prediction output/<scene>_stcm.json \
+  --commands configs/eval/commands_<scene>.yaml \
+  --output output/grounding_llm/<scene>_request.json
+
+# 3b. Claude Sonnet 4.6 (this assistant) reads request, writes response file at
+# output/grounding_llm/<scene>_response.json with temperature=0. Schema embedded
+# in request bundle. Archive both files for reproducibility.
+
+# 3c. LLM scoring
+python3 scripts/eval/grounding_llm.py --phase score \
+  --prediction output/<scene>_stcm.json \
+  --ground-truth configs/experiments/ground_truth/<scene>_stcm_gt.json \
+  --commands configs/eval/commands_<scene>.yaml \
+  --responses output/grounding_llm/<scene>_response.json \
+  --output output/grounding_llm/<scene>_grounding.json
+
+# 4. Paired McNemar + 95% CI per scene and per subset
+python3 scripts/eval/mcnemar.py \
+  --llm output/grounding_llm/<scene>_grounding.json \
+  --baseline output/grounding/<scene>_grounding.json \
+  --output paper/tables/C_<scene>_mcnemar.json
+```
+
+Reproducibility contract for Table C:
+- temperature=0 (enforced by grounding_llm.py score-phase, errors otherwise)
+- archive request + response JSONs alongside the prediction graph
+- pair on identical command IDs (mcnemar.py errors on mismatch)
+- aggregate across scenes only on identical `commands_*.yaml` SHAs
+
 ## Sensitivity sweep (AE-9)
 
 | Param | Values |

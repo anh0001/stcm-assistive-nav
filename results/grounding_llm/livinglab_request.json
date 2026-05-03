@@ -1,0 +1,2728 @@
+{
+  "schema_version": 1,
+  "backend_required": "claude-sonnet-4-6",
+  "temperature_required": 0,
+  "scene": "livinglab",
+  "instructions": "You are a spatial-language grounder for an indoor robot. For each command, pick the candidate object id that best satisfies the command. Use only ids drawn from candidates[command_id]. Use relation semantics (near, between) and the place-graph topology to disambiguate. Output the schema in `response_schema`.",
+  "response_schema": "Response file schema (the LLM must produce this exact structure):\n\n{\n  \"backend\": \"claude-sonnet-4-6\",\n  \"temperature\": 0,\n  \"scene\": \"<same as request.scene>\",\n  \"rankings\": [\n    {\n      \"command_id\": \"m_simple_01\",\n      \"ranked_object_ids\": [\"chair_1_0\", \"chair_2_0\", ...]\n    },\n    ...\n  ]\n}\n\nRules:\n- One entry per command in the request.\n- ranked_object_ids contains predicted object ids drawn ONLY from\n  request.candidates[command_id]. No invented ids.\n- Order is most-likely first; the scorer reads top-1 and top-2.\n- An empty list is allowed when no candidate is plausible.\n- temperature must be 0 for the reviewer-mandated determinism check.\n",
+  "place_graph": [
+    {
+      "id": "place_0",
+      "xy": [
+        -0.3458609033898271,
+        1.3038226964272182
+      ],
+      "neighbors": [
+        "place_1",
+        "place_2",
+        "place_25",
+        "place_26",
+        "place_27"
+      ]
+    },
+    {
+      "id": "place_1",
+      "xy": [
+        -0.0005512439525130067,
+        -0.0009404313061536024
+      ],
+      "neighbors": [
+        "place_0"
+      ]
+    },
+    {
+      "id": "place_2",
+      "xy": [
+        0.4487043420226271,
+        0.1150139485262022
+      ],
+      "neighbors": [
+        "place_0",
+        "place_3"
+      ]
+    },
+    {
+      "id": "place_3",
+      "xy": [
+        1.1068506437792844,
+        0.2514909214082367
+      ],
+      "neighbors": [
+        "place_2",
+        "place_28",
+        "place_4"
+      ]
+    },
+    {
+      "id": "place_4",
+      "xy": [
+        2.0846915335748175,
+        0.3831750232110446
+      ],
+      "neighbors": [
+        "place_3",
+        "place_5"
+      ]
+    },
+    {
+      "id": "place_5",
+      "xy": [
+        2.5517859492584893,
+        0.8443710080676937
+      ],
+      "neighbors": [
+        "place_4",
+        "place_6"
+      ]
+    },
+    {
+      "id": "place_6",
+      "xy": [
+        2.9362914150761026,
+        1.0939112117316623
+      ],
+      "neighbors": [
+        "place_5",
+        "place_7"
+      ]
+    },
+    {
+      "id": "place_7",
+      "xy": [
+        3.745580815749704,
+        1.0656131003615483
+      ],
+      "neighbors": [
+        "place_6",
+        "place_8"
+      ]
+    },
+    {
+      "id": "place_8",
+      "xy": [
+        5.2348104723626365,
+        0.3634036528488444
+      ],
+      "neighbors": [
+        "place_7",
+        "place_9"
+      ]
+    },
+    {
+      "id": "place_9",
+      "xy": [
+        6.164754403840497,
+        0.03980366334900773
+      ],
+      "neighbors": [
+        "place_10",
+        "place_8"
+      ]
+    },
+    {
+      "id": "place_10",
+      "xy": [
+        6.795639633678609,
+        0.19429782270543083
+      ],
+      "neighbors": [
+        "place_11",
+        "place_9"
+      ]
+    },
+    {
+      "id": "place_11",
+      "xy": [
+        8.372196025751567,
+        0.4840261883097169
+      ],
+      "neighbors": [
+        "place_10",
+        "place_12"
+      ]
+    },
+    {
+      "id": "place_12",
+      "xy": [
+        8.819753374123444,
+        0.5569607473501735
+      ],
+      "neighbors": [
+        "place_11",
+        "place_13",
+        "place_14"
+      ]
+    },
+    {
+      "id": "place_13",
+      "xy": [
+        7.83006903017615,
+        0.41104728431554427
+      ],
+      "neighbors": [
+        "place_12"
+      ]
+    },
+    {
+      "id": "place_14",
+      "xy": [
+        8.786277853455882,
+        1.3963364014513155
+      ],
+      "neighbors": [
+        "place_12",
+        "place_15"
+      ]
+    },
+    {
+      "id": "place_15",
+      "xy": [
+        8.877512106318722,
+        1.9421051962796112
+      ],
+      "neighbors": [
+        "place_14",
+        "place_16"
+      ]
+    },
+    {
+      "id": "place_16",
+      "xy": [
+        8.409854131994678,
+        2.094442787569308
+      ],
+      "neighbors": [
+        "place_15",
+        "place_17"
+      ]
+    },
+    {
+      "id": "place_17",
+      "xy": [
+        7.469171743430018,
+        2.5427527333988627
+      ],
+      "neighbors": [
+        "place_16",
+        "place_18"
+      ]
+    },
+    {
+      "id": "place_18",
+      "xy": [
+        7.194152021068362,
+        3.689508197740977
+      ],
+      "neighbors": [
+        "place_17",
+        "place_19"
+      ]
+    },
+    {
+      "id": "place_19",
+      "xy": [
+        6.848719594056951,
+        4.911536661622293
+      ],
+      "neighbors": [
+        "place_18",
+        "place_20",
+        "place_21"
+      ]
+    },
+    {
+      "id": "place_20",
+      "xy": [
+        7.009253208279957,
+        2.788417237230764
+      ],
+      "neighbors": [
+        "place_19",
+        "place_21"
+      ]
+    },
+    {
+      "id": "place_21",
+      "xy": [
+        5.999624642491416,
+        5.415161273512881
+      ],
+      "neighbors": [
+        "place_19",
+        "place_20",
+        "place_22"
+      ]
+    },
+    {
+      "id": "place_22",
+      "xy": [
+        5.270656448820446,
+        5.49649542969386
+      ],
+      "neighbors": [
+        "place_21",
+        "place_23"
+      ]
+    },
+    {
+      "id": "place_23",
+      "xy": [
+        2.9687870299875954,
+        5.096072878859703
+      ],
+      "neighbors": [
+        "place_22",
+        "place_24"
+      ]
+    },
+    {
+      "id": "place_24",
+      "xy": [
+        2.671254849930434,
+        4.52002037938858
+      ],
+      "neighbors": [
+        "place_23",
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_25",
+      "xy": [
+        -0.23444469441996682,
+        2.0494937424915975
+      ],
+      "neighbors": [
+        "place_0",
+        "place_24",
+        "place_26"
+      ]
+    },
+    {
+      "id": "place_26",
+      "xy": [
+        0.9264787019560129,
+        2.3748734749526608
+      ],
+      "neighbors": [
+        "place_0",
+        "place_25"
+      ]
+    },
+    {
+      "id": "place_27",
+      "xy": [
+        2.2657085955385723,
+        3.73484166880775
+      ],
+      "neighbors": [
+        "place_0",
+        "place_28"
+      ]
+    },
+    {
+      "id": "place_28",
+      "xy": [
+        0.5063679363733244,
+        0.7349761595289978
+      ],
+      "neighbors": [
+        "place_27",
+        "place_3"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command_id": "l_simple_01",
+      "subset": "simple",
+      "text": "go to the vacuum cleaner",
+      "target_label": "vacuum cleaner",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_simple_02",
+      "subset": "simple",
+      "text": "go to the plant pot",
+      "target_label": "plant pot",
+      "relation": null,
+      "candidates": [],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_simple_03",
+      "subset": "simple",
+      "text": "go to the bench",
+      "target_label": "bench",
+      "relation": null,
+      "candidates": [
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_simple_04",
+      "subset": "simple",
+      "text": "go to the electric vehicle",
+      "target_label": "electric vehicle",
+      "relation": null,
+      "candidates": [],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_simple_05",
+      "subset": "simple",
+      "text": "go to the large power bank",
+      "target_label": "large power bank",
+      "relation": null,
+      "candidates": [],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_disambig_01",
+      "subset": "disambiguation",
+      "text": "go to the chair near the vacuum cleaner",
+      "target_label": "chair",
+      "relation": {
+        "type": "near",
+        "anchor_label": "vacuum cleaner"
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        }
+      ],
+      "anchors": {
+        "vacuum cleaner": [
+          {
+            "id": "vacuum cleaner_inst_0",
+            "xy": [
+              10.440841299595165,
+              2.627039064588693
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "vacuum cleaner_inst_1",
+            "xy": [
+              10.06552239681547,
+              2.808857175939427
+            ],
+            "place": "place_15"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_disambig_02",
+      "subset": "disambiguation",
+      "text": "go to the chair near the shoes",
+      "target_label": "chair",
+      "relation": {
+        "type": "near",
+        "anchor_label": "shoes"
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        }
+      ],
+      "anchors": {
+        "shoes": []
+      }
+    },
+    {
+      "command_id": "l_disambig_03",
+      "subset": "disambiguation",
+      "text": "go to the trash bin near the cardboard box",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "near",
+        "anchor_label": "cardboard box"
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        }
+      ],
+      "anchors": {
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              8.106128526198733,
+              3.3217770714353168
+            ],
+            "place": "place_18"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_disambig_04",
+      "subset": "disambiguation",
+      "text": "go to the door near the meeting table set",
+      "target_label": "door",
+      "relation": {
+        "type": "near",
+        "anchor_label": "meeting table set"
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        }
+      ],
+      "anchors": {
+        "meeting table set": []
+      }
+    },
+    {
+      "command_id": "l_disambig_05",
+      "subset": "disambiguation",
+      "text": "go to the meeting table set near the bench",
+      "target_label": "meeting table set",
+      "relation": {
+        "type": "near",
+        "anchor_label": "bench"
+      },
+      "candidates": [],
+      "anchors": {
+        "bench": [
+          {
+            "id": "bench_inst_1",
+            "xy": [
+              -0.811521669038422,
+              3.082583885019565
+            ],
+            "place": "place_25"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_compose_01",
+      "subset": "compositional",
+      "text": "go to the trash bin between the cardboard box and the vacuum cleaner",
+      "target_label": "trash bin",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "cardboard box",
+          "vacuum cleaner"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        }
+      ],
+      "anchors": {
+        "cardboard box": [
+          {
+            "id": "cardboard box_inst_0",
+            "xy": [
+              8.106128526198733,
+              3.3217770714353168
+            ],
+            "place": "place_18"
+          }
+        ],
+        "vacuum cleaner": [
+          {
+            "id": "vacuum cleaner_inst_0",
+            "xy": [
+              10.440841299595165,
+              2.627039064588693
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "vacuum cleaner_inst_1",
+            "xy": [
+              10.06552239681547,
+              2.808857175939427
+            ],
+            "place": "place_15"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_compose_02",
+      "subset": "compositional",
+      "text": "go to the chair between the vacuum cleaner and the shoes",
+      "target_label": "chair",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "vacuum cleaner",
+          "shoes"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        }
+      ],
+      "anchors": {
+        "vacuum cleaner": [
+          {
+            "id": "vacuum cleaner_inst_0",
+            "xy": [
+              10.440841299595165,
+              2.627039064588693
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "vacuum cleaner_inst_1",
+            "xy": [
+              10.06552239681547,
+              2.808857175939427
+            ],
+            "place": "place_15"
+          }
+        ],
+        "shoes": []
+      }
+    },
+    {
+      "command_id": "l_compose_03",
+      "subset": "compositional",
+      "text": "go to the meeting table set between the door and the chair",
+      "target_label": "meeting table set",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "door",
+          "chair"
+        ]
+      },
+      "candidates": [],
+      "anchors": {
+        "door": [
+          {
+            "id": "door_inst_0",
+            "xy": [
+              9.117750951767869,
+              -0.8768230070521329
+            ],
+            "place": "place_12"
+          }
+        ],
+        "chair": [
+          {
+            "id": "chair_inst_2",
+            "xy": [
+              3.575942275944755,
+              4.114044879783409
+            ],
+            "place": "place_24"
+          },
+          {
+            "id": "chair_inst_3",
+            "xy": [
+              9.859533187333762,
+              3.889215734178333
+            ],
+            "place": "place_15"
+          },
+          {
+            "id": "chair_inst_4",
+            "xy": [
+              9.339652617461319,
+              4.3530425377643525
+            ],
+            "place": "place_18"
+          },
+          {
+            "id": "chair_inst_7",
+            "xy": [
+              8.014555350110236,
+              6.0688700830930715
+            ],
+            "place": "place_19"
+          },
+          {
+            "id": "chair_inst_8",
+            "xy": [
+              3.716543673816204,
+              5.378059252549194
+            ],
+            "place": "place_23"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_compose_04",
+      "subset": "compositional",
+      "text": "go to the door between the meeting table set and the trash bin",
+      "target_label": "door",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "trash bin"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [],
+        "trash bin": [
+          {
+            "id": "trash bin_inst_2",
+            "xy": [
+              7.439129805501536,
+              4.19389021199525
+            ],
+            "place": "place_18"
+          },
+          {
+            "id": "trash bin_inst_3",
+            "xy": [
+              7.7346678684377235,
+              4.446761877707062
+            ],
+            "place": "place_18"
+          }
+        ]
+      }
+    },
+    {
+      "command_id": "l_compose_05",
+      "subset": "compositional",
+      "text": "go to the chair between the meeting table set and the shoes",
+      "target_label": "chair",
+      "relation": {
+        "type": "between",
+        "anchor_labels": [
+          "meeting table set",
+          "shoes"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        }
+      ],
+      "anchors": {
+        "meeting table set": [],
+        "shoes": []
+      }
+    },
+    {
+      "command_id": "l_func_01",
+      "subset": "functional",
+      "text": "I need to throw away this paper",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_02",
+      "subset": "functional",
+      "text": "I'm tired, let me rest somewhere",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_03",
+      "subset": "functional",
+      "text": "Where can I have a meeting",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_04",
+      "subset": "functional",
+      "text": "I need a chair to sit on",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_05",
+      "subset": "functional",
+      "text": "I want to leave the room",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_06",
+      "subset": "functional",
+      "text": "Take me to the room exit",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_07",
+      "subset": "functional",
+      "text": "Where can I dispose of waste",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_08",
+      "subset": "functional",
+      "text": "I have something to recycle in a box",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_09",
+      "subset": "functional",
+      "text": "Show me where the trash goes",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_10",
+      "subset": "functional",
+      "text": "I need to clean the floor",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_11",
+      "subset": "functional",
+      "text": "Show me the plants",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_12",
+      "subset": "functional",
+      "text": "I want to charge my devices on a portable battery",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_13",
+      "subset": "functional",
+      "text": "Take me to the small electric vehicle",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_14",
+      "subset": "functional",
+      "text": "Show me where to leave my shoes",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    },
+    {
+      "command_id": "l_func_15",
+      "subset": "functional",
+      "text": "Can you find me a place to sit by the table",
+      "target_label": null,
+      "relation": null,
+      "candidates": [
+        {
+          "id": "door_inst_0",
+          "label": "door",
+          "xy": [
+            9.117750951767869,
+            -0.8768230070521329
+          ],
+          "place": "place_12"
+        },
+        {
+          "id": "chair_inst_2",
+          "label": "chair",
+          "xy": [
+            3.575942275944755,
+            4.114044879783409
+          ],
+          "place": "place_24"
+        },
+        {
+          "id": "chair_inst_3",
+          "label": "chair",
+          "xy": [
+            9.859533187333762,
+            3.889215734178333
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "chair_inst_4",
+          "label": "chair",
+          "xy": [
+            9.339652617461319,
+            4.3530425377643525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "chair_inst_7",
+          "label": "chair",
+          "xy": [
+            8.014555350110236,
+            6.0688700830930715
+          ],
+          "place": "place_19"
+        },
+        {
+          "id": "chair_inst_8",
+          "label": "chair",
+          "xy": [
+            3.716543673816204,
+            5.378059252549194
+          ],
+          "place": "place_23"
+        },
+        {
+          "id": "vacuum cleaner_inst_0",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.440841299595165,
+            2.627039064588693
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "vacuum cleaner_inst_1",
+          "label": "vacuum cleaner",
+          "xy": [
+            10.06552239681547,
+            2.808857175939427
+          ],
+          "place": "place_15"
+        },
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "xy": [
+            8.106128526198733,
+            3.3217770714353168
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_2",
+          "label": "trash bin",
+          "xy": [
+            7.439129805501536,
+            4.19389021199525
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "trash bin_inst_3",
+          "label": "trash bin",
+          "xy": [
+            7.7346678684377235,
+            4.446761877707062
+          ],
+          "place": "place_18"
+        },
+        {
+          "id": "bench_inst_1",
+          "label": "bench",
+          "xy": [
+            -0.811521669038422,
+            3.082583885019565
+          ],
+          "place": "place_25"
+        }
+      ],
+      "anchors": {}
+    }
+  ]
+}

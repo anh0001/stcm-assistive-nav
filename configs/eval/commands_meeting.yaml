@@ -1,5 +1,5 @@
 scene: meeting
-description: 15 grounding commands. 5 simple, 5 disambiguation, 5 compositional.
+description: 45 grounding commands. 10 simple, 10 disambiguation, 10 compositional, 15 functional/intent.
 commands:
   # --- simple: label-only, single instance or arbitrary instance ---
   - id: m_simple_01
@@ -111,3 +111,176 @@ commands:
       type: between
       anchor_labels: [cardboard box, water fountain]
     gt_object_id: trash bin_1_0
+
+  # --- simple (extended) ---
+  - id: m_simple_06
+    subset: simple
+    text: "go to the meeting table"
+    target_label: meeting table set
+    gt_object_id: meeting table set_1_0
+  - id: m_simple_07
+    subset: simple
+    text: "go to a chair"
+    target_label: chair
+    gt_object_id: chair_1_0
+  - id: m_simple_08
+    subset: simple
+    text: "go to a trash bin"
+    target_label: trash bin
+    gt_object_id: trash bin_1_0
+  - id: m_simple_09
+    subset: simple
+    text: "go to a door"
+    target_label: door
+    gt_object_id: door_1_0
+  - id: m_simple_10
+    subset: simple
+    text: "go to a cardboard box"
+    target_label: cardboard box
+    gt_object_id: cardboard box_4_0
+
+  # --- disambiguation (extended) ---
+  - id: m_disambig_06
+    subset: disambiguation
+    text: "go to the door near the cardboard box"
+    target_label: door
+    relation:
+      type: near
+      anchor_label: cardboard box
+    gt_object_id: door_1_0
+  - id: m_disambig_07
+    subset: disambiguation
+    text: "go to the meeting table set near the bench"
+    target_label: meeting table set
+    relation:
+      type: near
+      anchor_label: bench
+    gt_object_id: meeting table set_3_0
+  - id: m_disambig_08
+    subset: disambiguation
+    text: "go to the cardboard box near the meeting table set"
+    target_label: cardboard box
+    relation:
+      type: near
+      anchor_label: meeting table set
+    gt_object_id: cardboard box_5_0
+  - id: m_disambig_09
+    subset: disambiguation
+    text: "go to the trash bin near the cup"
+    target_label: trash bin
+    relation:
+      type: near
+      anchor_label: cup
+    gt_object_id: trash bin_5_0
+  - id: m_disambig_10
+    subset: disambiguation
+    text: "go to the chair near the door"
+    target_label: chair
+    relation:
+      type: near
+      anchor_label: door
+    gt_object_id: chair_1_0
+
+  # --- compositional (extended) ---
+  - id: m_compose_06
+    subset: compositional
+    text: "go to the chair between the meeting table set and the door"
+    target_label: chair
+    relation:
+      type: between
+      anchor_labels: [meeting table set, door]
+    gt_object_id: chair_1_0
+  - id: m_compose_07
+    subset: compositional
+    text: "go to the cardboard box between the trash bin and the meeting table set"
+    target_label: cardboard box
+    relation:
+      type: between
+      anchor_labels: [trash bin, meeting table set]
+    gt_object_id: cardboard box_5_0
+  - id: m_compose_08
+    subset: compositional
+    text: "go to the trash bin between the cup and the cardboard box"
+    target_label: trash bin
+    relation:
+      type: between
+      anchor_labels: [cup, cardboard box]
+    gt_object_id: trash bin_3_0
+  - id: m_compose_09
+    subset: compositional
+    text: "go to the meeting table set between the bench and the chair"
+    target_label: meeting table set
+    relation:
+      type: between
+      anchor_labels: [bench, chair]
+    gt_object_id: meeting table set_3_0
+  - id: m_compose_10
+    subset: compositional
+    text: "go to the door between the meeting table set and the chair"
+    target_label: door
+    relation:
+      type: between
+      anchor_labels: [meeting table set, chair]
+    gt_object_id: door_2_0
+
+  # --- functional / intent (no target_label; LLM must map intent to label) ---
+  - id: m_func_01
+    subset: functional
+    text: "I'm thirsty and want some water"
+    gt_object_id: water fountain_1_0
+  - id: m_func_02
+    subset: functional
+    text: "I need to throw away this paper"
+    gt_object_id: trash bin_1_0
+  - id: m_func_03
+    subset: functional
+    text: "I'm tired, let me rest somewhere"
+    gt_object_id: bench_2_0
+  - id: m_func_04
+    subset: functional
+    text: "Where can I have a meeting"
+    gt_object_id: meeting table set_1_0
+  - id: m_func_05
+    subset: functional
+    text: "Show me the way out in case of fire"
+    gt_object_id: emergency exit sign_168_0
+  - id: m_func_06
+    subset: functional
+    text: "I want to leave the room"
+    gt_object_id: door_1_0
+  - id: m_func_07
+    subset: functional
+    text: "I need a chair to sit on"
+    gt_object_id: chair_1_0
+  - id: m_func_08
+    subset: functional
+    text: "I want to grab a drink"
+    gt_object_id: bottle_2_0
+  - id: m_func_09
+    subset: functional
+    text: "Where can I dispose of waste"
+    gt_object_id: trash bin_2_0
+  - id: m_func_10
+    subset: functional
+    text: "I need a cup for some coffee"
+    gt_object_id: cup_2_0
+  - id: m_func_11
+    subset: functional
+    text: "Show me the safety exit"
+    gt_object_id: emergency exit sign_168_0
+  - id: m_func_12
+    subset: functional
+    text: "I have something to recycle in a box"
+    gt_object_id: cardboard box_4_0
+  - id: m_func_13
+    subset: functional
+    text: "Can you find me a place to sit by the table"
+    gt_object_id: chair_2_0
+  - id: m_func_14
+    subset: functional
+    text: "Show me where the trash goes"
+    gt_object_id: trash bin_3_0
+  - id: m_func_15
+    subset: functional
+    text: "Take me to the room exit"
+    gt_object_id: door_2_0

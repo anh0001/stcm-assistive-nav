@@ -1,0 +1,28 @@
+{
+  "label": "LLM vs intent functional+recoverable (two-scene)",
+  "method": "stouffer_signed_z",
+  "weighting": "sqrt_n",
+  "per_scene": [
+    {
+      "path": "paper/tables/C_llm_vs_intent_functional_recov_meeting.json",
+      "n": 13,
+      "p_exact": 0.125,
+      "delta": 0.3076923076923077,
+      "sign": 1.0,
+      "z": 1.5341205449145758,
+      "weight": 3.605551275463989
+    },
+    {
+      "path": "paper/tables/C_llm_vs_intent_functional_recov_livinglab.json",
+      "n": 8,
+      "p_exact": 0.5,
+      "delta": 0.25,
+      "sign": 1.0,
+      "z": 0.6744897502234225,
+      "weight": 2.8284271247461903
+    }
+  ],
+  "Z": 1.6233437017779926,
+  "p_value_two_sided": 0.10451595232036537,
+  "n_total": 21
+}

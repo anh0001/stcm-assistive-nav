@@ -1,0 +1,28 @@
+{
+  "label": "LLM vs no-LLM eligible (meeting + livinglab_tuned)",
+  "method": "stouffer_signed_z",
+  "weighting": "sqrt_n",
+  "per_scene": [
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_eligible_meeting.json",
+      "n": 39,
+      "p_exact": 0.01171875,
+      "delta": 0.23076923076923078,
+      "sign": 1.0,
+      "z": 2.5205022198859286,
+      "weight": 6.244997998398398
+    },
+    {
+      "path": "paper/tables/C_llm_vs_noLLM_eligible_livinglab_tuned.json",
+      "n": 27,
+      "p_exact": 0.0009765625,
+      "delta": 0.4074074074074074,
+      "sign": 1.0,
+      "z": 3.2971933424171898,
+      "weight": 5.196152422706632
+    }
+  ],
+  "Z": 4.046417416456397,
+  "p_value_two_sided": 5.200746060207706e-05,
+  "n_total": 66
+}

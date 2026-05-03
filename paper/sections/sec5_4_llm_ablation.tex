@@ -1,0 +1,187 @@
+% Reviewer-facing draft for AE-3 (JACIII Jc26-0002).
+% Section number is intentionally written 5.4 to match the rebuttal letter;
+% adjust if the surrounding paper structure has shifted.
+\subsection{LLM Ablation}
+\label{sec:llm_ablation}
+
+The LLM in STCM performs language-to-graph grounding only and is not an
+end-to-end navigation policy. To isolate the contribution of the LLM
+component, we run a paired ablation on a single predicted graph and a
+fixed natural-language command set. Three grounding arms are compared:
+(i) \emph{no-LLM} (template) -- the deterministic spatial grounder used
+in the baseline system, scoring near and between relations on object
+poses with a small place-graph topology bonus;
+(ii) \emph{+intent-lexicon} -- the same template grounder augmented with
+a small deterministic regex lexicon that maps high-level intent verbs
+(``thirsty'', ``throw away'', ``rest'', ``leave the room'', \dots) to
+canonical labels;
+(iii) \emph{+LLM} -- Claude Sonnet 4.6 used as an offline grounder
+with temperature $0$. The LLM receives the predicted object graph,
+place graph, and command text in a fixed JSON schema and returns a
+ranked list of object identifiers; prompts and responses are archived
+under \texttt{results/grounding\_llm/} for reproducibility. All three
+arms see the SAME predicted graph and the SAME command set; only the
+ranker differs.
+
+The command set contains $45$ commands on the meeting scene
+($10$ simple, $10$ disambiguation, $10$ compositional, $15$
+functional/intent) and a parallel $30$-command set on the
+living-lab scene ($5/5/5/15$). Functional commands carry no
+explicit \texttt{target\_label} and are answerable only by a system
+that can map intent to label. The deterministic template baseline
+has no such mapping by design and therefore returns no candidate on
+every functional command, by construction. We split the analysis
+into a primary block over the explicit spatial commands and a
+secondary block over the functional commands, and report a pooled
+result only as exploratory. Both ground-truth annotation sets are
+frozen at version $1.0$; provenance, annotator, and inclusion
+protocol are recorded inside each \texttt{*\_stcm\_gt.json}.
+
+We score top-$1$ accuracy with a $1\,\mathrm{m}$ spatial id-match
+fallback against the meeting ground-truth graph (sec.~\ref{sec:eval}),
+and follow the reviewer's request for statistical analysis with a
+paired McNemar test (exact two-sided binomial; chi-square with
+continuity correction reported for reference) and a $95\%$ confidence
+interval on the paired accuracy delta. Per-subset $p$-values are
+Holm-adjusted to control family-wise error across the four subsets.
+Effect-size CIs use the standard binomial Wald approximation on the
+discordant cells.
+
+\noindent\textbf{Primary result (spatial, $n=30$).}
+On the explicit spatial commands the LLM does not significantly
+outperform the deterministic template grounder: the two arms are
+functionally tied at $0.433$ top-$1$ accuracy, with one discordant pair
+in each direction (paired McNemar $p=1.00$).
+
+\noindent\textbf{Secondary result (functional, $n=15$).}
+The intent-aware arms outperform the spatial-only template by a wide
+margin. The LLM reaches $0.600$ top-$1$ vs.\ $0.000$ for no-LLM
+($\Delta=+0.60$, $95\%$ CI $[+0.35,+0.85]$, exact McNemar
+$p=0.0039$). The intent-lexicon arm reaches $0.333$ ($\Delta=+0.33$,
+$95\%$ CI $[+0.10,+0.57]$, $p=0.0625$). The LLM further improves over
+the lexicon by $\Delta=+0.27$, $b/c=4/0$, but this difference is not
+significant at $\alpha=0.05$ ($p=0.125$): with $n=15$ the test is
+underpowered for instance-level claims, although the trend is in the
+LLM's favor.
+
+\noindent\textbf{Grounding given perception.}
+A failure-source analysis (Table~\ref{tab:llm_failure}) shows that
+$4/45$ commands on the meeting scene are unrecoverable in any arm
+because the predicted graph contains no node within $1\,\mathrm{m}$
+of the GT object. Two further commands lose a required anchor under
+perception. Restricting to the $n=39$ commands eligible under
+perception (gold referent and all anchors present), the LLM still
+significantly outperforms the template grounder
+($0.564$ vs.\ $0.333$, $\Delta=+0.23$, $95\%$ CI $[+0.08,+0.38]$,
+paired McNemar $p=0.012$). This isolates ranker quality from
+perception confounds.
+
+\noindent\textbf{Recoverability breakdown for the functional subset.}
+To prevent perception-missing functional commands from inflating the
+LLM advantage by giving the baseline a free zero, we split the
+functional subset into commands the predicted graph CAN answer
+(\emph{recoverable}, gold referent within $1\,\mathrm{m}$ in the
+predicted graph) and commands it cannot (\emph{perception-missing}).
+On meeting, $13/15$ functional commands are recoverable; on
+living-lab, $8/15$. Restricting to recoverable functional commands,
+the LLM reaches $0.692$ top-$1$ on meeting (vs.\ $0.000$ for no-LLM,
+$\Delta=+0.69$, paired McNemar $p=0.0039$) and $0.625$ on living-lab
+(vs.\ $0.000$, $\Delta=+0.625$, $p=0.0625$). Combined across scenes
+(Stouffer, sqrt-$n$ weighted) the LLM-vs.-no-LLM functional+recoverable
+test yields $Z=3.42$, $p=0.0006$ ($n_{\mathrm{total}}=21$). The LLM
+also exceeds the intent-lexicon on the recoverable subset
+($0.692$ vs.\ $0.385$ on meeting, $0.625$ vs.\ $0.375$ on living-lab),
+but the combined Stouffer test is borderline ($Z=1.62$, $p=0.10$),
+again indicative of an underpowered comparison rather than evidence
+for parity. The full per-arm-per-scene-per-subset breakdown is in
+\texttt{paper/tables/C\_recoverability\_breakdown.csv}.
+
+\noindent\textbf{Two-scene validation.}
+We repeat the protocol on the living-lab scene ($n=30$). Predicted
+recall on this scene is lower (perception covers $\approx 13/23$ GT
+objects), so $14/30$ commands are unrecoverable in any arm. Within
+the eligible subset ($n=13$), the LLM ranker reaches
+$0.615$ top-$1$ vs.\ $0.231$ for the spatial-only baseline
+($\Delta=+0.385$, paired McNemar $p=0.0625$). The intent-lexicon
+arm reaches $0.462$ on the eligible subset, and we observe no
+detectable LLM gain over the lexicon at this sample size
+($\Delta=+0.154$, $4$ discordants, $p=0.500$). We do not claim a
+significant LLM-over-lexicon improvement on living-lab; the result
+is reported as an indeterminate negative at the available $n$.
+
+Because we have only two scenes and per-scene effects vary in
+magnitude, we combine evidence across scenes by two complementary
+tests: (i) a signed Stouffer combination on per-scene exact McNemar
+$p$-values, weighted by $\sqrt{n_{\mathrm{eligible}}}$ to respect
+per-scene size and direction of effect, and (ii) a CMH-style
+stratified McNemar that pools per-scene paired-discordant counts
+$(b_k, c_k)$ across scenes and tests $\sum_k b_k$ vs $\sum_k c_k$
+under an exact two-sided binomial; we also report a Mantel-Haenszel
+$\chi^2$ with continuity correction. Per-scene direction agreement
+is verified before pooling. On the eligible partition, the combined
+LLM-vs.-no-LLM tests yield Stouffer $Z=3.11$ ($p=0.0018$,
+$n_{\mathrm{total}}=52$) and stratified McNemar
+$\sum b_k = 15$, $\sum c_k = 1$, exact $p=0.0005$
+(MH $\chi^2_{cc}=11.4$, $p=0.0007$). On the functional+recoverable
+partition, Stouffer $Z=3.42$ ($p=0.0006$, $n_{\mathrm{total}}=21$)
+and stratified McNemar $\sum b_k = 14$, $\sum c_k = 0$, exact
+$p=0.0001$. The two combiners agree on the direction and significance
+of the LLM benefit over the no-LLM baseline; equal-weighted Stouffer
+gives the same conclusion (sensitivity check).
+
+The LLM-vs.-intent-lexicon comparison on the
+functional+recoverable partition is the only case where the two
+combiners disagree on $\alpha=0.05$ significance: Stouffer
+$Z=1.62$ ($p=0.10$) vs.\ stratified McNemar
+$\sum b_k = 6$, $\sum c_k = 0$, exact $p=0.0312$ (consistent
+$3$-of-$3$ wins per scene with no losses). This is a known
+small-sample regime where per-scene exact $p$-values are
+quantized while the pooled-discordant test retains sensitivity. We
+report both and frame the LLM-over-lexicon claim as a small but
+direction-consistent improvement, statistically significant under
+the stratified test, of borderline significance under Stouffer, and
+underpowered for confident magnitude estimation.
+
+\noindent\textbf{Reproducibility.}
+The LLM grounding bundle (request JSON, response JSON, model id,
+command file hash, predicted graph hash) is archived alongside each
+report and re-running the score phase enforces \texttt{temperature=0}
+on the response file. Aliases, command identifiers, and per-trial
+failure tags are exported to per-trial JSON for an external auditor.
+
+\noindent\textbf{Take-away for the reader.}
+On explicit spatial-grounding commands the LLM is not the source of
+the system's grounding accuracy; the deterministic spatial grounder
+already saturates this regime. The LLM contributes specifically when
+the command requires semantic intent-to-object inference, where the
+template baseline is structurally unable to answer. The result is
+consistent with the role of the LLM as described in
+sec.~\ref{sec:method}: a grounding interface, not a navigation
+policy. The two-scene Stouffer combination supports the LLM benefit
+on the eligible (perception-recoverable) partition; the additional
+gain over a small intent lexicon is consistent in direction across
+scenes but underpowered on living-lab and should be read as a trend
+pending future evaluation.
+
+\begin{table}[t]
+  \centering
+  \caption{LLM ablation (AE-3): paired top-$1$ accuracy with $95\%$ CI
+  and paired McNemar tests on a single predicted meeting graph,
+  $n=45$ commands. Same predicted graph, same command set, same
+  aliases across all three arms.}
+  \label{tab:llm_ablation}
+  \input{tables/C_llm_ablation.tex}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \caption{LLM ablation failure-source breakdown for the meeting
+  scene. \texttt{perception\_missing} commands have no predicted node
+  within $1\,\mathrm{m}$ of the GT pose and are unrecoverable in any
+  arm. \texttt{alias\_label\_error} indicates the candidate pool was
+  empty (template lacks an intent-to-label mapping for the functional
+  subset). \texttt{ranker\_error} is the residual: candidates were
+  available but the ranker chose the wrong instance.}
+  \label{tab:llm_failure}
+  \input{tables/C_llm_ablation_failure_breakdown.tex}
+\end{table}
