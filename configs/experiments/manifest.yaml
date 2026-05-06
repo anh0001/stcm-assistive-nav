@@ -8,21 +8,21 @@ bench_dir: results/bench
 scenarios:
   corridor:
     description: "Candidate corridor-style run; rename once final annotation is fixed."
-    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_162017_uncompressed
+    bag_path: /mnt/STREAM/ranger_recording_20251215_162017_uncompressed
     storage_id: sqlite3
   office:
     description: "Candidate office/lab-style run; rename once final annotation is fixed."
-    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_163039_uncompressed
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163039_uncompressed
     storage_id: sqlite3
   meeting:
     description: "Candidate meeting-room-style run; rename once final annotation is fixed."
-    bag_path: /media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163827_uncompressed
     storage_id: sqlite3
     ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
     benchmark_match_threshold_m: 1.0
   livinglab:
     description: "Living-lab MCAP run from 2026-04-17. Ground truth frozen v1.0 (see configs/experiments/ground_truth/livinglab_stcm_gt.json for protocol + provenance)."
-    bag_path: /media/dl-box/STREAM1/robotics_living_lab_20260417_171737
+    bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
     storage_id: mcap
     config_overrides:
       camera_frame: camera_optical_frame
@@ -125,7 +125,7 @@ scenarios:
 
   livinglab_tuned:
     description: "Living-lab MCAP run from 2026-04-17, perception retuned for higher recall on rare classes (plant pot, electric vehicle, large power bank, shoes, second door, meeting table set). Same bag, same GT, same command set, more aggressive thresholds. Used for AE-3 perception-tuning sensitivity analysis (Codex review P2)."
-    bag_path: /media/dl-box/STREAM1/robotics_living_lab_20260417_171737
+    bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
     storage_id: mcap
     config_overrides:
       camera_frame: camera_optical_frame
@@ -229,7 +229,7 @@ scenarios:
           - bench
 
   outdoor_livinglab:
-    description: "Outdoor living-lab MCAP run from 2026-05-01. Used to bootstrap initial GT for annotation."
+    description: "Outdoor living-lab MCAP run from 2026-05-01. Used to bootstrap initial GT for annotation. Target labels match outdoor_livinglab_stcm_gt.json categories."
     bag_path: /mnt/STREAM/outdoor_livinglab_01_20260501_162329_0
     storage_id: mcap
     config_overrides:
@@ -242,29 +242,35 @@ scenarios:
       box_threshold: 0.30
       text_threshold: 0.30
       target_labels:
-        - "meeting table set"
-        - "chair"
+        - "trailer"
+        - "electric utility vehicle"
+        - "electric wheelchair"
+        - "pair of ramps"
+        - "portable power station"
+        - "rectangular table"
+        - "trolley"
+        - "electric scooter"
         - "cardboard box"
-        - "trash bin"
-        - "vacuum cleaner"
-        - "plant pot"
-        - "shoes"
-        - "bench"
-        - "electric vehicle"
-        - "large power bank"
-        - "door"
+        - "basketball"
+        - "chair"
+        - "umbrella"
+        - "traffic cone"
+        - "prohibition sign"
       target_label_thresholds:
-        - 1.6
-        - 0.6
-        - 1.0
-        - 0.25
-        - 0.8
-        - 0.5
-        - 0.3
-        - 0.8
-        - 1.0
-        - 0.5
-        - 1.5
+        - 1.5  # trailer
+        - 1.2  # electric utility vehicle
+        - 0.8  # electric wheelchair
+        - 1.0  # pair of ramps
+        - 0.5  # portable power station
+        - 1.6  # rectangular table
+        - 0.8  # trolley
+        - 0.8  # electric scooter
+        - 1.0  # cardboard box
+        - 0.3  # basketball
+        - 0.6  # chair
+        - 0.6  # umbrella
+        - 0.4  # traffic cone
+        - 0.5  # prohibition sign
 
 required_topics:
   - /camera/image_raw
