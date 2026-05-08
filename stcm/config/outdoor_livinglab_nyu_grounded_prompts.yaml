@@ -1,0 +1,208 @@
+# Outdoor S3 NYU prompt bank — TUNED via GDINO probe (2026-05-07).
+# Source: scripts/probe/results/probe_outdoor.csv (80 frames within 6m of GT).
+# Per class: kept top 3-4 aliases by avg score; dropped any with hit rate <50%
+# OR avg score <0.20. Keeping prompts short avoids GroundingDINO attention
+# slowdown observed when chunks had >8 aliases (long prompt strings inflate
+# self-attention compute quadratically).
+
+chunks:
+  vehicles:
+    thresholds: [0.22, 0.22]
+    classes:
+      - label: trailer
+        # Probe top 4 by avg: utility 0.476, open 0.476, vehicle 0.464, covered 0.462.
+        detect_aliases:
+          - utility trailer
+          - open trailer
+          - vehicle trailer
+          - covered trailer
+        rerank_aliases:
+          - trailer
+          - utility trailer
+          - vehicle trailer
+        box_threshold: 0.18
+        text_threshold: 0.18
+
+      - label: electric utility vehicle
+        detect_aliases:
+          - electric utility vehicle
+          - small electric cart
+          - golf cart
+          - white utility vehicle
+        rerank_aliases:
+          - electric utility vehicle
+          - utility vehicle
+          - golf cart
+        box_threshold: 0.20
+        text_threshold: 0.20
+
+      - label: electric wheelchair
+        # Probe top 3: powered mobility scooter 0.578, motorized wheelchair 0.499,
+        # mobility chair 0.443. Plain 'electric wheelchair' 0.285 — kept as fallback.
+        detect_aliases:
+          - powered mobility scooter
+          - motorized wheelchair
+          - mobility chair
+          - electric wheelchair
+        rerank_aliases:
+          - electric wheelchair
+          - motorized wheelchair
+          - power wheelchair
+        box_threshold: 0.20
+        text_threshold: 0.20
+
+      - label: electric scooter
+        # Probe top 4: two-wheeled 0.603, stand-up 0.573, electric kick 0.510, kick 0.469.
+        detect_aliases:
+          - two-wheeled scooter
+          - stand-up scooter
+          - electric kick scooter
+          - kick scooter
+        rerank_aliases:
+          - electric scooter
+          - mobility scooter
+          - stand-up scooter
+        box_threshold: 0.20
+        text_threshold: 0.20
+
+      - label: trolley
+        detect_aliases:
+          - trolley
+          - hand cart
+          - utility cart
+          - push cart
+        rerank_aliases:
+          - trolley
+          - hand cart
+          - utility cart
+        box_threshold: 0.22
+        text_threshold: 0.22
+
+  outdoor_objects:
+    thresholds: [0.22, 0.22]
+    classes:
+      - label: pair of ramps
+        # Probe top 3: metal ramps on ground 0.507, two metal ramps 0.409, pair of ramps 0.409.
+        # 'incline ramp' (0.065) DROPPED.
+        detect_aliases:
+          - metal ramps on ground
+          - two metal ramps
+          - pair of ramps
+          - vehicle loading ramp
+        rerank_aliases:
+          - pair of ramps
+          - loading ramp
+          - metal ramps
+        box_threshold: 0.18
+        text_threshold: 0.18
+
+      - label: portable power station
+        detect_aliases:
+          - portable power station
+          - large power bank
+          - battery box
+          - power generator box
+        rerank_aliases:
+          - portable power station
+          - battery box
+          - power generator box
+        box_threshold: 0.20
+        text_threshold: 0.20
+
+      - label: rectangular table
+        detect_aliases:
+          - rectangular table
+          - outdoor table
+          - picnic table
+          - folding table
+        rerank_aliases:
+          - rectangular table
+          - outdoor table
+          - picnic table
+        box_threshold: 0.24
+        text_threshold: 0.24
+
+      - label: cardboard box
+        detect_aliases:
+          - cardboard box
+          - brown cardboard box
+          - shipping box
+        rerank_aliases:
+          - cardboard box
+          - brown cardboard box
+          - shipping box
+        box_threshold: 0.26
+        text_threshold: 0.26
+
+      - label: basketball
+        # Probe winner: round orange ball 0.657. 'basketball' (0.112) demoted.
+        # 'orange basketball' (0.069) DROPPED.
+        detect_aliases:
+          - round orange ball
+          - rubber ball on ground
+          - sports ball
+          - basketball
+        rerank_aliases:
+          - basketball
+          - orange basketball
+          - sports ball
+        box_threshold: 0.18
+        text_threshold: 0.18
+
+      - label: chair
+        detect_aliases:
+          - chair
+          - folding chair
+          - outdoor chair
+          - plastic chair
+        rerank_aliases:
+          - chair
+          - folding chair
+          - outdoor chair
+        box_threshold: 0.30
+        text_threshold: 0.30
+
+      - label: umbrella
+        # Probe top 3: folded 0.378, open 0.376, shade 0.316. 'parasol' (0.009) DROPPED.
+        detect_aliases:
+          - folded umbrella
+          - open umbrella
+          - shade umbrella
+          - umbrella
+        rerank_aliases:
+          - umbrella
+          - outdoor umbrella
+          - patio umbrella
+        box_threshold: 0.20
+        text_threshold: 0.20
+
+  signage:
+    thresholds: [0.22, 0.22]
+    classes:
+      - label: traffic cone
+        detect_aliases:
+          - traffic cone
+          - road cone
+          - safety cone
+          - orange cone
+        rerank_aliases:
+          - traffic cone
+          - road cone
+          - orange safety cone
+        box_threshold: 0.22
+        text_threshold: 0.22
+
+      - label: prohibition sign
+        # Probe top 4: red sign on ground 0.523, red circular sign 0.502,
+        # prohibition sign 0.414, red prohibition sign 0.406. 'stop sign' (0.054) DROPPED.
+        detect_aliases:
+          - red sign on ground
+          - red circular sign
+          - prohibition sign
+          - red prohibition sign
+        rerank_aliases:
+          - prohibition sign
+          - no entry sign
+          - red prohibition sign
+        box_threshold: 0.20
+        text_threshold: 0.20

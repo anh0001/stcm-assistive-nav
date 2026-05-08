@@ -114,6 +114,9 @@ class SemanticMapUpdater(Node):
         self.gng_outlier_gate_meters = float(
             self.declare_parameter("gng_outlier_gate_meters", 0.0).value
         )
+        self.max_observation_range_m = float(
+            self.declare_parameter("max_observation_range_m", 0.0).value
+        )
         self.instance_label_voting_enabled = bool(
             self.declare_parameter("instance_label_voting_enabled", False).value
         )

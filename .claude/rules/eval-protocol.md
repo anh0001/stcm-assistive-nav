@@ -4,13 +4,23 @@ Reproducibility contract for Tables A/B/C/E numbers. Authoritative for `/eval`.
 
 ## Scenarios (AE-1 / R1-1)
 
-Three independent indoor sessions. Each ≥3 runs w/ fresh seed.
+Three independent sessions covering indoor structured, indoor cluttered, and
+outdoor settings. Each ≥3 runs w/ fresh seed.
 
-| ID | Name | Bag path |
-|----|------|----------|
-| S1 | corridor (TMU 7F Bldg 2) | `data/bags/corridor_*.db3` |
-| S2 | office/lab room | `data/bags/office_*.db3` |
-| S3 | meeting room | `data/bags/meeting_*.db3` |
+| ID | Name | Bag path | Storage | GT path | Commands |
+|----|------|----------|---------|---------|----------|
+| S1 | meeting room (indoor structured) | `/mnt/STREAM/ranger_recording_20251215_163827_uncompressed` | sqlite3 | `configs/experiments/ground_truth/meeting_stcm_gt.json` | `configs/eval/commands_meeting.yaml` (45) |
+| S2 | living lab (indoor cluttered) | `/mnt/STREAM/robotics_living_lab_20260417_171737` | mcap | `configs/experiments/ground_truth/livinglab_stcm_gt.json` | `configs/eval/commands_livinglab.yaml` (30) |
+| S3 | outdoor living lab | `/mnt/STREAM/outdoor_livinglab_01_20260501_162329_0` | mcap | `configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json` | `configs/eval/commands_outdoorlivinglab.yaml` (30) |
+
+Manifest entries: `meeting`, `livinglab`, `outdoor_livinglab` (defaults) plus
+`livinglab_tuned`, `outdoor_livinglab_tuned` (perception-tuned variants for
+AE-3 sensitivity analysis). Tuned variants share bag + GT + command set with
+their non-tuned base (same paired test conditions).
+
+Total grounding commands across S1–S3: **105** (45 meeting + 30 livinglab + 30
+outdoor). Subsets across all three: simple, disambiguation, compositional,
+functional/intent. McNemar pairing per scene only (different command IDs).
 
 Dataset card → Table A: duration, path length, label vocab, ground-truth instance count.
 
@@ -47,8 +57,10 @@ Report McNemar p-value per command subset. Effect size = Δ accuracy w/ 95% CI.
 Backend = Claude Sonnet 4.6 (deterministic, temperature=0). No Ollama in
 paper numbers. Offline file-based protocol; no API key required.
 
-Command sets total **45**: `commands_meeting.yaml` (30) + `commands_livinglab.yaml` (15),
-balanced 15/15/15 across simple / disambiguation / compositional.
+Command sets total **105**: `commands_meeting.yaml` (45) + `commands_livinglab.yaml` (30)
++ `commands_outdoorlivinglab.yaml` (30). Each scene file balances simple /
+disambiguation / compositional / functional subsets (5/5/5/15 per scene for
+livinglab + outdoor; 10/10/10/15 for meeting).
 
 ```
 # 1. Run STCM offline once per scene (full variant, same prediction graph reused)

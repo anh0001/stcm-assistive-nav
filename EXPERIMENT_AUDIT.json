@@ -1,0 +1,63 @@
+{
+  "date": "2026-05-07",
+  "auditor": "gpt-5.5-xhigh",
+  "audit_target": "DSE iter 18 on outdoor_livinglab x full-nyu-proposals (F1=0.300)",
+  "overall_verdict": "fail",
+  "integrity_status": "fail",
+  "checks": {
+    "gt_provenance": {
+      "status": "fail",
+      "details": "outdoor_livinglab_stcm_gt.json contains STCM runtime telemetry (frames_seen, gng_update_calls, raw_detections); no _provenance block, no annotator, no frozen-date, no inclusion protocol. Looks like a frozen STCM output, not hand-annotated GT.",
+      "evidence": ["configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json:2", "configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json:2805", "configs/experiments/manifest.yaml:232"]
+    },
+    "score_normalization": {
+      "status": "warn",
+      "details": "Hungarian matching with conventional precision/recall denominators. No fraud. Missing finite-check on NaN/inf poses in _node_pose. No current numeric effect (invalid_prediction_nodes=0).",
+      "evidence": ["scripts/experiments/benchmark_stcm_graph.py:67", "scripts/experiments/benchmark_stcm_graph.py:176", "scripts/experiments/benchmark_stcm_graph.py:208", "scripts/experiments/benchmark_stcm_graph.py:211", "scripts/experiments/benchmark_stcm_graph.py:477"]
+    },
+    "result_existence": {
+      "status": "pass",
+      "details": "F1=0.300 number is honest literal in result file. DSE log row matches. Graph has 21 nodes, max abs pose 12.67m. Harness fragility: run_dse_point.py picks newest matching file rather than capturing exact path.",
+      "evidence": ["results/eval/20260507_073408_outdoor_livinglab_full-nyu-proposals.json:1279", "dse_results/dse_log.csv:19", "dse_results/run_dse_point.py:157"]
+    },
+    "dead_code": {
+      "status": "fail",
+      "details": "DSE swept dead knobs as if live. box_threshold/text_threshold confirmed dead (NYU bank per-class override). target_label_thresholds[trailer] dead but reason mis-stated (GNG manager doesn't read per-label). label_margin_min NOT dead (used in choose_label) - DSE_REPORT was wrong; tied values were coincidence.",
+      "evidence": ["stcm/stcm/core/nyu_grounded_backend.py:237", "stcm/stcm/core/nyu_grounded_backend.py:380", "stcm/stcm/core/nyu_grounded_backend.py:421", "stcm/stcm/nodes/semantic_map_builder.py:81", "stcm/stcm/nodes/semantic_map_builder.py:315", "stcm/config/outdoor_livinglab_nyu_grounded_prompts.yaml:20"]
+    },
+    "scope": {
+      "status": "fail",
+      "details": "20 single-run DSE points on 1 scene with 1 seed. Eval protocol contract requires >=3 independent runs/scenario, recorded git SHA, bag SHA-256, seed, hostname. iter 18 violated all (--skip-bag-hash, dirty git, no seed). Phrase 'best achievable F1' is scope inflation.",
+      "evidence": ["dse_results/inferred_params.md:5", "dse_results/DSE_REPORT.md:13", "dse_results/DSE_REPORT.md:80", ".claude/rules/eval-protocol.md:7", ".claude/rules/eval-protocol.md:122"]
+    },
+    "label_aliasing": {
+      "status": "fail",
+      "details": "Strict same-label scoring gives F1=0.250; declared alias+1.5m gives F1=0.300. Inflation = 1.20x. Extra TP from trolley_GT matched to electric_utility_vehicle_pred at 1.117m via alias. rectangular_table -> trailer alias is most suspect (visually/semantically distinct).",
+      "evidence": ["scripts/experiments/benchmark_stcm_graph.py:243", "scripts/experiments/benchmark_stcm_graph.py:266", "scripts/experiments/benchmark_stcm_graph.py:289", "configs/experiments/manifest.yaml:292", "configs/experiments/manifest.yaml:308"]
+    },
+    "range_gate_bug": {
+      "status": "fail",
+      "details": "max_observation_range_m gate computes obs_range without np.isfinite guard. NaN > 5.0 evaluates False, so NaN-pose detections survive. Current iter 18 graph has no non-finite poses, but code path is unsafe before any paper claim. GNG also accepts arbitrary centroids without finite-check.",
+      "evidence": ["stcm/stcm/nodes/semantic_map_builder.py:1607", "stcm/stcm/core/gng_instance_manager.py:168"]
+    },
+    "eval_type": "synthetic_proxy"
+  },
+  "scoring_modes_disclosed": {
+    "strict_same_label_at_1m": {"tp": 5, "fp": 16, "fn": 14, "f1": 0.250},
+    "alias_at_1.5m_declared": {"tp": 6, "fp": 15, "fn": 13, "f1": 0.300},
+    "inflation_factor": 1.20
+  },
+  "claims": [
+    {"id": "C1", "text": "F1=0.300 on outdoor S3", "impact": "needs_qualifier"},
+    {"id": "C2", "text": "best achievable from 20-cycle DSE", "impact": "needs_qualifier"},
+    {"id": "C3", "text": "outdoor capability demonstrated", "impact": "unsupported"},
+    {"id": "C4", "text": "range gate filters horizon FP correctly", "impact": "needs_qualifier"}
+  ],
+  "action_items_priority": [
+    "Add _provenance block to outdoor_livinglab_stcm_gt.json",
+    "Fix range gate NaN hole at semantic_map_builder.py:1607 + regression test",
+    "Report both strict and alias scoring modes; remove suspect aliases",
+    "Re-run iter 18 with >=3 seeds on clean git + bag SHA-256",
+    "Harden run_dse_point.py result-file capture; reject dirty git in run_experiment"
+  ]
+}

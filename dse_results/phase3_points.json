@@ -1,0 +1,6 @@
+[
+  {"iter": 17, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "gng_cluster_merge_distance": 1.5}, "note": "phase3 GCMD=1.5 bigger merge"},
+  {"iter": 18, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "cross_label_merge_distance_m": 0.8}, "note": "phase3 cross_label=0.8 broader"},
+  {"iter": 19, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "label_margin_min": 0.10}, "note": "phase3 label_margin=0.10 stricter"},
+  {"iter": 20, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "gng_outlier_gate_meters": 2.0}, "note": "phase3 outlier_gate=2.0 enable"}
+]

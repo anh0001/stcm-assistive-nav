@@ -46,6 +46,7 @@ from ..map_utils import (
     is_nearby_in_map,
     pose_in_map_frame,
     pose_in_map_frame_from_projected,
+    pose_in_map_frame_from_projected_mode,
     save_graph_json,
     save_stcm_json,
     update_graph_edges,
@@ -68,6 +69,23 @@ class SemanticMapBuilder(Node):
         self.base_frame = self.declare_parameter("base_frame", "base_link").value
         self.world_frame = self.declare_parameter("world_frame", "map").value
         self.use_projected_lidar = bool(self.declare_parameter("use_projected_lidar", False).value)
+        # When true, RGB-D depth + Depth-Anything fallbacks are bypassed and a
+        # detection is rejected if projected-LiDAR pose computation fails.
+        # Useful outdoors where RGB-D depth is unreliable past 4-6m.
+        self.require_projected_lidar = bool(
+            self.declare_parameter("require_projected_lidar", False).value
+        )
+        # Pose estimator mode for projected LiDAR:
+        #   "mean"           — mean of all mask-internal points (legacy; fragile
+        #                      outdoors when masks include ground/background).
+        #   "densest_voxel"  — densest 0.15m voxel inside the mask (robust to
+        #                      mask noise; recommended for outdoor scenes).
+        self.pose_estimator_mode = str(
+            self.declare_parameter("pose_estimator_mode", "mean").value
+        ).strip().lower()
+        self.pose_voxel_size_m = float(
+            self.declare_parameter("pose_voxel_size_m", 0.15).value
+        )
         self.projected_lidar_topic = self.declare_parameter(
             "projected_lidar_topic", "/lidar_points_projected"
         ).value
@@ -165,6 +183,9 @@ class SemanticMapBuilder(Node):
         )
         self.gng_outlier_gate_meters = float(
             self.declare_parameter("gng_outlier_gate_meters", 0.0).value
+        )
+        self.max_observation_range_m = float(
+            self.declare_parameter("max_observation_range_m", 0.0).value
         )
         self.instance_label_voting_enabled = bool(
             self.declare_parameter("instance_label_voting_enabled", False).value
@@ -1012,14 +1033,34 @@ class SemanticMapBuilder(Node):
         depth_method = None
 
         if self.use_projected_lidar and projected_cloud is not None and rt_projected is not None:
-            pose = pose_in_map_frame_from_projected(
-                projected_cloud,
-                rt_projected,
-                rt_base,
-                segment=mask[0],
-                rt_camera=rt_camera,
-            )
-            depth_method = "LiDAR"
+            if self.pose_estimator_mode == "densest_voxel":
+                pose_result = pose_in_map_frame_from_projected_mode(
+                    projected_cloud,
+                    rt_projected,
+                    rt_base,
+                    segment=mask[0],
+                    rt_camera=rt_camera,
+                    voxel_size=self.pose_voxel_size_m,
+                )
+                pose = pose_result["pose"] if isinstance(pose_result, dict) else pose_result
+                depth_method = "LiDAR-voxel"
+            else:
+                pose = pose_in_map_frame_from_projected(
+                    projected_cloud,
+                    rt_projected,
+                    rt_base,
+                    segment=mask[0],
+                    rt_camera=rt_camera,
+                )
+                depth_method = "LiDAR"
+
+        # Strict-lidar mode: skip every fallback. If lidar pose computation
+        # failed (cloud doesn't cover the mask, no projected cloud, etc.),
+        # reject the detection.
+        if self.require_projected_lidar:
+            if pose is None:
+                self._count_event("strict_lidar_rejections")
+            return pose, depth_method
 
         if pose is None and depth_image is not None and rt_camera is not None:
             pose = pose_in_map_frame(
@@ -1600,6 +1641,33 @@ class SemanticMapBuilder(Node):
                 self._count_event("pose_failures")
                 self.get_logger().warning(f"Failed to calculate 3D position for '{label}'")
                 continue
+
+            pose_arr = np.asarray(pose, dtype=float)
+            if pose_arr.size < 2 or not np.isfinite(pose_arr[:2]).all():
+                # NaN/inf poses bypass `obs_range > max` (NaN comparisons are False) and
+                # poison the GNG centroid average. Reject before any downstream use.
+                self._count_event("nonfinite_pose_rejections")
+                self.get_logger().warning(
+                    f"    Non-finite pose for '{label}': {pose_arr.tolist()}; rejected"
+                )
+                continue
+
+            if self.max_observation_range_m > 0.0 and rt_base is not None:
+                robot_xy = np.asarray(rt_base[:3, 3], dtype=float)[:2]
+                if not np.isfinite(robot_xy).all():
+                    self._count_event("nonfinite_robot_pose_skipped_range_gate")
+                    self.get_logger().warning(
+                        f"    Range gate skipped: non-finite robot xy {robot_xy.tolist()}"
+                    )
+                else:
+                    obs_range = float(np.linalg.norm(pose_arr[:2] - robot_xy))
+                    if not np.isfinite(obs_range) or obs_range > self.max_observation_range_m:
+                        self._count_event("range_gate_rejections")
+                        self.get_logger().info(
+                            f"    Range gate rejected '{label}' at {obs_range:.2f}m "
+                            f"(> {self.max_observation_range_m:.2f}m)"
+                        )
+                        continue
 
             score = None
             if scores is not None:

@@ -1,0 +1,175 @@
+scene: outdoor_livinglab
+description: 30 grounding commands for outdoor living-lab S3. 5 simple, 5 disambiguation, 5 compositional, 15 functional/intent. Targets drawn from outdoor_livinglab_stcm_gt.json categories (14 labels, 19 instances).
+commands:
+  # --- simple: label-only, single instance or arbitrary instance ---
+  - id: o_simple_01
+    subset: simple
+    text: "go to the electric utility vehicle"
+    target_label: electric utility vehicle
+    gt_object_id: electric utility vehicle_1_0
+  - id: o_simple_02
+    subset: simple
+    text: "go to the electric wheelchair"
+    target_label: electric wheelchair
+    gt_object_id: electric wheelchair_1_0
+  - id: o_simple_03
+    subset: simple
+    text: "go to the rectangular table"
+    target_label: rectangular table
+    gt_object_id: rectangular table_4_0
+  - id: o_simple_04
+    subset: simple
+    text: "go to the basketball"
+    target_label: basketball
+    gt_object_id: basketball_1_0
+  - id: o_simple_05
+    subset: simple
+    text: "go to the umbrella"
+    target_label: umbrella
+    gt_object_id: umbrella_1_0
+
+  # --- disambiguation: multi-instance or near-anchor selection ---
+  - id: o_disambig_01
+    subset: disambiguation
+    text: "go to the trailer near the electric utility vehicle"
+    target_label: trailer
+    relation:
+      type: near
+      anchor_label: electric utility vehicle
+    gt_object_id: trailer_1_0
+  - id: o_disambig_02
+    subset: disambiguation
+    text: "go to the trailer near the rectangular table"
+    target_label: trailer
+    relation:
+      type: near
+      anchor_label: rectangular table
+    gt_object_id: trailer_2_0
+  - id: o_disambig_03
+    subset: disambiguation
+    text: "go to the trailer near the trolley"
+    target_label: trailer
+    relation:
+      type: near
+      anchor_label: trolley
+    gt_object_id: trailer_3_0
+  - id: o_disambig_04
+    subset: disambiguation
+    text: "go to the chair near the rectangular table"
+    target_label: chair
+    relation:
+      type: near
+      anchor_label: rectangular table
+    gt_object_id: chair_1_0
+  - id: o_disambig_05
+    subset: disambiguation
+    text: "go to the trailer near the pair of ramps"
+    target_label: trailer
+    relation:
+      type: near
+      anchor_label: pair of ramps
+    gt_object_id: trailer_6_0
+
+  # --- compositional: spatial-relational with two anchors ---
+  - id: o_compose_01
+    subset: compositional
+    text: "go to the trailer between the electric utility vehicle and the trolley"
+    target_label: trailer
+    relation:
+      type: between
+      anchor_labels: [electric utility vehicle, trolley]
+    gt_object_id: trailer_1_0
+  - id: o_compose_02
+    subset: compositional
+    text: "go to the trailer between the rectangular table and the electric utility vehicle"
+    target_label: trailer
+    relation:
+      type: between
+      anchor_labels: [rectangular table, electric utility vehicle]
+    gt_object_id: trailer_1_0
+  - id: o_compose_03
+    subset: compositional
+    text: "go to the cardboard box between the portable power station and the basketball"
+    target_label: cardboard box
+    relation:
+      type: between
+      anchor_labels: [portable power station, basketball]
+    gt_object_id: cardboard box_1_0
+  - id: o_compose_04
+    subset: compositional
+    text: "go to the traffic cone between the prohibition sign and the umbrella"
+    target_label: traffic cone
+    relation:
+      type: between
+      anchor_labels: [prohibition sign, umbrella]
+    gt_object_id: traffic cone_1_0
+  - id: o_compose_05
+    subset: compositional
+    text: "go to the trailer between the pair of ramps and the electric scooter"
+    target_label: trailer
+    relation:
+      type: between
+      anchor_labels: [pair of ramps, electric scooter]
+    gt_object_id: trailer_6_0
+
+  # --- functional / intent (no target_label; intent->label inference required) ---
+  - id: o_func_01
+    subset: functional
+    text: "I need a small vehicle to move some cargo across the lot"
+    gt_object_id: electric utility vehicle_1_0
+  - id: o_func_02
+    subset: functional
+    text: "I cannot walk well, find me something I can sit and ride"
+    gt_object_id: electric wheelchair_1_0
+  - id: o_func_03
+    subset: functional
+    text: "I want to play a quick game outside"
+    gt_object_id: basketball_1_0
+  - id: o_func_04
+    subset: functional
+    text: "It is starting to rain, take me to something that gives shade or cover"
+    gt_object_id: umbrella_1_0
+  - id: o_func_05
+    subset: functional
+    text: "I need to charge my equipment outside, find me a portable battery"
+    gt_object_id: portable power station_1_0
+  - id: o_func_06
+    subset: functional
+    text: "I have a heavy box, find me something on wheels to push it"
+    gt_object_id: trolley_1_0
+  - id: o_func_07
+    subset: functional
+    text: "I want to load something into a trailer, find me a ramp"
+    gt_object_id: pair of ramps_1_0
+  - id: o_func_08
+    subset: functional
+    text: "Take me to a small electric ride I can stand on"
+    gt_object_id: electric scooter_1_0
+  - id: o_func_09
+    subset: functional
+    text: "I need a flat surface outside to put my laptop on"
+    gt_object_id: rectangular table_4_0
+  - id: o_func_10
+    subset: functional
+    text: "Find me a place to sit outside"
+    gt_object_id: chair_1_0
+  - id: o_func_11
+    subset: functional
+    text: "I have an empty box to recycle"
+    gt_object_id: cardboard box_1_0
+  - id: o_func_12
+    subset: functional
+    text: "Stay away from the construction marker"
+    gt_object_id: traffic cone_1_0
+  - id: o_func_13
+    subset: functional
+    text: "Show me where entry is not allowed"
+    gt_object_id: prohibition sign_1_0
+  - id: o_func_14
+    subset: functional
+    text: "Show me a large transport unit attached to a vehicle"
+    gt_object_id: trailer_1_0
+  - id: o_func_15
+    subset: functional
+    text: "I need to move many small items at once outdoors"
+    gt_object_id: trolley_1_0

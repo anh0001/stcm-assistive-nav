@@ -126,6 +126,11 @@ def launch_setup(context, *args, **kwargs):
         "gng_outlier_gate_meters",
         config.get("gng_outlier_gate_meters", 0.0),
     )
+    max_observation_range_m = _resolve_float(
+        context,
+        "max_observation_range_m",
+        config.get("max_observation_range_m", 0.0),
+    )
     place_gng_enabled = _resolve_bool(
         context,
         "place_gng_enabled",
@@ -245,6 +250,7 @@ def launch_setup(context, *args, **kwargs):
             "gng_min_observations_to_commit": gng_min_obs,
             "gng_cluster_merge_distance": gng_cluster_merge_distance,
             "gng_outlier_gate_meters": gng_outlier_gate_meters,
+            "max_observation_range_m": max_observation_range_m,
             "place_gng_enabled": place_gng_enabled,
             "place_gng_distance_threshold": place_gng_distance_threshold,
             "place_gng_eps_w": place_gng_eps_w,
@@ -308,6 +314,7 @@ def launch_setup(context, *args, **kwargs):
                 "gng_min_observations_to_commit": gng_min_obs,
                 "gng_cluster_merge_distance": gng_cluster_merge_distance,
                 "gng_outlier_gate_meters": gng_outlier_gate_meters,
+            "max_observation_range_m": max_observation_range_m,
                 "place_gng_enabled": place_gng_enabled,
                 "place_gng_distance_threshold": place_gng_distance_threshold,
                 "place_gng_eps_w": place_gng_eps_w,
@@ -451,6 +458,11 @@ def generate_launch_description():
                 "gng_outlier_gate_meters",
                 default_value="",
                 description="Override the gng_outlier_gate_meters value from the config file.",
+            ),
+            DeclareLaunchArgument(
+                "max_observation_range_m",
+                default_value="",
+                description="Reject detections whose 3D pose is farther than this (meters) from the robot base xy. 0 disables.",
             ),
             DeclareLaunchArgument(
                 "place_gng_enabled",

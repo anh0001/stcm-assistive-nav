@@ -1,0 +1,5 @@
+{
+  "max_observation_range_m": 3,
+  "gng_min_observations_to_commit": 2,
+  "gng_outlier_gate_meters": 2.0
+}

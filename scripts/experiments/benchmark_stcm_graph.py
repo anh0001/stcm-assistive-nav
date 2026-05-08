@@ -266,17 +266,39 @@ def _is_acceptable_label_pair(
     return pred_key in label_aliases.get(gt_key, set())
 
 
+def _resolve_threshold(label: str, threshold: Any, default: float = 1.0) -> float:
+    """Resolve match threshold for a GT label.
+
+    `threshold` can be either a single float (uniform threshold) or a dict
+    mapping label → meters (per-class threshold). Dict supports `_default`
+    key as fallback for unlisted labels.
+    """
+    if isinstance(threshold, dict):
+        if label in threshold:
+            return float(threshold[label])
+        return float(threshold.get("_default", default))
+    return float(threshold)
+
+
+def _max_threshold(threshold: Any, default: float = 1.0) -> float:
+    if isinstance(threshold, dict):
+        if not threshold:
+            return float(default)
+        return float(max(threshold.values()))
+    return float(threshold)
+
+
 def _match_with_label_aliases(
     *,
     gt_nodes: list[dict[str, Any]],
     pred_nodes: list[dict[str, Any]],
-    threshold_m: float,
+    threshold_m: Any,
     label_aliases: dict[str, set[str]],
 ) -> dict[str, Any]:
     labels = sorted({node["label"] for node in gt_nodes} | {node["label"] for node in pred_nodes})
     matches = []
     if gt_nodes and pred_nodes:
-        reject_cost = float(threshold_m) + 1_000_000.0
+        reject_cost = float(_max_threshold(threshold_m)) + 1_000_000.0
         cost_matrix = np.full((len(gt_nodes), len(pred_nodes)), reject_cost, dtype=float)
         acceptable = np.zeros((len(gt_nodes), len(pred_nodes)), dtype=bool)
         for gt_index, gt_node in enumerate(gt_nodes):
@@ -290,7 +312,9 @@ def _match_with_label_aliases(
             if gt_index >= len(gt_nodes) or pred_index >= len(pred_nodes):
                 continue
             xy_error = cost_matrix[gt_index][pred_index]
-            if acceptable[gt_index, pred_index] and xy_error <= threshold_m:
+            gt_label_for_thresh = gt_nodes[gt_index]["label"]
+            per_pair_threshold = _resolve_threshold(gt_label_for_thresh, threshold_m)
+            if acceptable[gt_index, pred_index] and xy_error <= per_pair_threshold:
                 gt_node = gt_nodes[gt_index]
                 pred_node = pred_nodes[pred_index]
                 matches.append(
@@ -466,12 +490,16 @@ def evaluate_graphs(
     *,
     prediction_path: Path,
     ground_truth_path: Path,
-    match_threshold_m: float = 1.0,
+    match_threshold_m: Any = 1.0,
     duplicate_threshold_m: float = 0.5,
     wrong_label_threshold_m: float = 1.0,
     label_aliases: dict[str, Any] | None = None,
     composite_covers: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """`match_threshold_m` may be float (uniform) or dict[label,float] with
+    optional `_default` key (per-class). Dict accommodates large objects
+    where GT is annotated on outer surface but predictions land at mask
+    centroid (e.g. trailer wall vs. trailer center)."""
     prediction_path = Path(prediction_path).expanduser()
     ground_truth_path = Path(ground_truth_path).expanduser()
     pred_raw, pred_invalid = _normalized_nodes(_semantic_nodes(_load_json(prediction_path)))
@@ -497,7 +525,7 @@ def evaluate_graphs(
                 label,
                 gt_by_label.get(label, []),
                 pred_by_label.get(label, []),
-                match_threshold_m,
+                _resolve_threshold(label, match_threshold_m),
             )
             for label in labels
         }
@@ -548,8 +576,12 @@ def evaluate_graphs(
         for match in item["matched_pairs"]
     ]
     duplicate_pairs = _duplicate_pairs(pred_raw, duplicate_threshold_m)
+    if isinstance(match_threshold_m, dict):
+        metric_name_thresh_str = "per-class"
+    else:
+        metric_name_thresh_str = f"{float(match_threshold_m):g}m"
     return {
-        "metric_name": f"STCM Object Map F1@{match_threshold_m:g}m",
+        "metric_name": f"STCM Object Map F1@{metric_name_thresh_str}",
         "prediction_path": str(prediction_path),
         "ground_truth_path": str(ground_truth_path),
         "match_policy": {

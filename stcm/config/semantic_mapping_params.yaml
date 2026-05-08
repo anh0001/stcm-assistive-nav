@@ -39,6 +39,15 @@ world_frame: "map"
 # `projected_lidar_frame` overrides the PointCloud2 header frame (leave blank to use header).
 # ============================================================================
 use_projected_lidar: true
+# When true, skip RGB-D + Depth-Anything fallbacks entirely and reject any
+# detection whose projected-lidar pose computation fails (no cloud, mask
+# uncovered, etc.). Useful outdoors where RGB-D depth is noisy past 4-6m.
+require_projected_lidar: false
+# Pose estimator: "mean" (legacy mean of mask-internal points) or
+# "densest_voxel" (densest voxel; robust to mask noise on ground/background;
+# recommended outdoors).
+pose_estimator_mode: "mean"
+pose_voxel_size_m: 0.15
 projected_lidar_topic: "/lidar_points_projected"
 projected_lidar_frame: "lidar_link"
 # Seconds to wait for projected lidar frames before falling back to the depth topic.
@@ -195,6 +204,11 @@ gng_min_observations_to_commit: 3
 gng_cluster_merge_distance: 0.5
 # Ignore samples farther than this from existing instances (meters, 0 disables).
 gng_outlier_gate_meters: 0.0
+# Reject detections whose 3D pose is farther than this (meters) from the robot
+# base xy at observation time. 0 disables. Useful for outdoor scenes where
+# horizon/sky depth aliasing yields phantom detections beyond the meaningful
+# sensor range.
+max_observation_range_m: 0.0
 instance_label_voting_enabled: false
 cross_label_merge_distance_m: 0.5
 cross_label_merge_min_cosine: 0.25

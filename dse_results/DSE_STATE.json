@@ -1,0 +1,33 @@
+{
+  "iteration": 20,
+  "status": "phase_complete",
+  "best_metric": 0.3,
+  "best_params": {
+    "iteration": "18",
+    "timestamp": "2026-05-06T22:43:51.236910",
+    "max_observation_range_m": "3.0",
+    "gng_min_observations_to_commit": "2",
+    "box_threshold": "0.35",
+    "text_threshold": "0.35",
+    "target_label_thresholds_trailer": "1.5",
+    "label_margin_min": "0.05",
+    "cross_label_merge_distance_m": "0.8",
+    "tp": "6",
+    "fp": "15",
+    "fn": "13",
+    "precision": "0.2857142857142857",
+    "recall": "0.3157894736842105",
+    "f1": "0.3",
+    "object_nodes": "21",
+    "range_gate_rejections": "945",
+    "constraint_met": "True",
+    "result_json": "/home/anhar/codes/stcm-assistive-nav/results/eval/20260507_073408_outdoor_livinglab_full-nyu-proposals.json",
+    "notes": "phase3 cross_label=0.8 broader"
+  },
+  "best_iter": 18,
+  "total_iterations": 20,
+  "start_time": "2026-05-06T11:44:12.029432",
+  "patience_counter": 0,
+  "phase": "phase3",
+  "end_time": "2026-05-06T23:03:28.200921"
+}

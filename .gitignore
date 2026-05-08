@@ -64,3 +64,8 @@ CATKIN_IGNORE
 # Environment variables (contains API keys)
 .env
 .env.local
+
+# Probe scratch frames (large image dumps; reproducible from rosbag)
+scripts/probe/frames/
+
+# DSE per-iter outputs/configs are kept; frames not.

@@ -1,0 +1,83 @@
+# Extra aliases to probe for outdoor classes that the production NYU bank misses.
+# Each alias is run as its OWN solo prompt (not chunk-grouped) so we can attribute
+# detection success to a specific phrasing.
+# Tune thresholds per class to match production for fair comparison.
+
+classes:
+  basketball:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "basketball"
+      - "orange basketball"
+      - "round orange ball"
+      - "rubber ball on ground"
+      - "sports ball"
+      - "ball"
+
+  umbrella:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "umbrella"
+      - "outdoor umbrella"
+      - "patio umbrella"
+      - "open umbrella"
+      - "parasol"
+      - "shade umbrella"
+      - "folded umbrella"
+
+  electric_wheelchair:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "electric wheelchair"
+      - "motorized wheelchair"
+      - "power wheelchair"
+      - "wheelchair"
+      - "mobility chair"
+      - "powered mobility scooter"
+
+  electric_scooter:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "electric scooter"
+      - "stand-up scooter"
+      - "kick scooter"
+      - "two-wheeled scooter"
+      - "scooter"
+      - "electric kick scooter"
+
+  prohibition_sign:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "prohibition sign"
+      - "no entry sign"
+      - "red prohibition sign"
+      - "do not enter sign"
+      - "stop sign"
+      - "red circular sign"
+      - "warning sign"
+      - "red sign on ground"
+
+  pair_of_ramps:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "pair of ramps"
+      - "loading ramps"
+      - "metal ramps on ground"
+      - "vehicle loading ramp"
+      - "two metal ramps"
+      - "ramp"
+      - "aluminum ramp"
+      - "incline ramp"
+
+  trailer:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "trailer"
+      - "cargo trailer"
+      - "vehicle trailer"
+      - "wheeled trailer"
+      - "small trailer"
+      - "utility trailer"
+      - "open trailer"
+      - "covered trailer"
+      - "container trailer"

@@ -1,0 +1,7 @@
+{
+  "max_observation_range_m": 3,
+  "gng_min_observations_to_commit": 2,
+  "box_threshold": 0.25,
+  "text_threshold": 0.25,
+  "target_label_thresholds_trailer": 1.5
+}

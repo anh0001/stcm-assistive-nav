@@ -1,0 +1,10 @@
+[
+  {"iter": 9,  "params": {"max_observation_range_m": 2, "gng_min_observations_to_commit": 2, "box_threshold": 0.35, "text_threshold": 0.35, "target_label_thresholds_trailer": 1.5}, "note": "phase2 R=2 boundary expand"},
+  {"iter": 10, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.25, "text_threshold": 0.25, "target_label_thresholds_trailer": 1.5}, "note": "phase2 box=0.25 lower"},
+  {"iter": 11, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.30, "text_threshold": 0.30, "target_label_thresholds_trailer": 1.5}, "note": "phase2 box=0.30"},
+  {"iter": 12, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.40, "text_threshold": 0.40, "target_label_thresholds_trailer": 1.5}, "note": "phase2 box=0.40 higher"},
+  {"iter": 13, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.35, "text_threshold": 0.35, "target_label_thresholds_trailer": 1.0}, "note": "phase2 trailer=1.0 fine-grained"},
+  {"iter": 14, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.35, "text_threshold": 0.35, "target_label_thresholds_trailer": 2.0}, "note": "phase2 trailer=2.0 near hard cap"},
+  {"iter": 15, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2, "box_threshold": 0.32, "text_threshold": 0.32, "target_label_thresholds_trailer": 1.8}, "note": "phase2 box=0.32 trailer=1.8 combo"},
+  {"iter": 16, "params": {"max_observation_range_m": 2, "gng_min_observations_to_commit": 2, "box_threshold": 0.32, "text_threshold": 0.32, "target_label_thresholds_trailer": 1.8}, "note": "phase2 R=2 combo"}
+]

@@ -1,0 +1,479 @@
+base_config: stcm/config/semantic_mapping_params.yaml
+results_dir: results/eval
+bench_dir: results/bench
+scenarios:
+  corridor:
+    description: Candidate corridor-style run; rename once final annotation is fixed.
+    bag_path: /mnt/STREAM/ranger_recording_20251215_162017_uncompressed
+    storage_id: sqlite3
+  office:
+    description: Candidate office/lab-style run; rename once final annotation is fixed.
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163039_uncompressed
+    storage_id: sqlite3
+  meeting:
+    description: Candidate meeting-room-style run; rename once final annotation is
+      fixed.
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163827_uncompressed
+    storage_id: sqlite3
+    ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+  livinglab:
+    description: Living-lab MCAP run from 2026-04-17. Ground truth frozen v1.0 (see
+      configs/experiments/ground_truth/livinglab_stcm_gt.json for protocol + provenance).
+    bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+      nyu_prompt_bank_path: stcm/config/livinglab_nyu_grounded_prompts.yaml
+      label_margin_min: 0.05
+      gng_min_observations_to_commit: 2
+      cross_label_merge_distance_m: 0.45
+      cross_label_merge_min_cosine: 0.2
+      target_labels:
+      - meeting table set
+      - chair
+      - cardboard box
+      - trash bin
+      - vacuum cleaner
+      - plant pot
+      - shoes
+      - bench
+      - electric vehicle
+      - large power bank
+      - door
+      target_label_thresholds:
+      - 1.6
+      - 0.6
+      - 1.0
+      - 0.25
+      - 0.8
+      - 0.5
+      - 0.3
+      - 0.8
+      - 1.0
+      - 0.5
+      - 1.5
+      per_label_geometry_priors:
+        meeting_table_set:
+          min_z: 0.35
+          max_z: 1.1
+          min_mask_area_frac: 0.01
+          hard_min_mask_area_frac: 0.012
+          penalty_factor: 0.35
+        chair:
+          min_z: 0.15
+          max_z: 1.2
+          max_mask_area_frac: 0.08
+          penalty_factor: 0.35
+        trash_bin:
+          min_z: 0.0
+          max_z: 0.95
+          hard_max_z: 1.1
+          min_mask_area_frac: 0.002
+          max_mask_area_frac: 0.08
+          penalty_factor: 0.3
+        vacuum_cleaner:
+          min_z: 0.0
+          max_z: 0.8
+          max_mask_area_frac: 0.12
+          penalty_factor: 0.35
+        plant_pot:
+          min_z: 0.0
+          max_z: 0.9
+          max_mask_area_frac: 0.12
+          penalty_factor: 0.35
+        shoes:
+          max_z: 0.25
+          max_mask_area_frac: 0.04
+          penalty_factor: 0.25
+        large_power_bank:
+          max_z: 0.7
+          max_mask_area_frac: 0.08
+          penalty_factor: 0.25
+        door:
+          min_z: 0.4
+          max_z: 2.4
+          min_mask_area_frac: 0.01
+          max_mask_area_frac: 0.6
+          penalty_factor: 0.3
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+    benchmark_label_aliases:
+      meeting table set:
+      - meeting table set
+      - table
+      - chair
+      chair:
+      - chair
+      - meeting table set
+      trash bin:
+      - trash bin
+      - cardboard box
+      large power bank:
+      - large power bank
+      - electric vehicle
+    benchmark_composite_covers:
+      meeting table set:
+        radius_m: 2.0
+        covered_pred_labels:
+        - meeting table set
+        - table
+        - chair
+        - bench
+  livinglab_tuned:
+    description: Living-lab MCAP run from 2026-04-17, perception retuned for higher
+      recall on rare classes (plant pot, electric vehicle, large power bank, shoes,
+      second door, meeting table set). Same bag, same GT, same command set, more aggressive
+      thresholds. Used for AE-3 perception-tuning sensitivity analysis (Codex review
+      P2).
+    bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+      nyu_prompt_bank_path: stcm/config/livinglab_nyu_grounded_prompts.yaml
+      label_margin_min: 0.03
+      gng_min_observations_to_commit: 1
+      cross_label_merge_distance_m: 0.45
+      cross_label_merge_min_cosine: 0.2
+      box_threshold: 0.3
+      text_threshold: 0.3
+      target_labels:
+      - meeting table set
+      - chair
+      - cardboard box
+      - trash bin
+      - vacuum cleaner
+      - plant pot
+      - shoes
+      - bench
+      - electric vehicle
+      - large power bank
+      - door
+      target_label_thresholds:
+      - 1.6
+      - 0.6
+      - 1.0
+      - 0.25
+      - 0.8
+      - 0.5
+      - 0.3
+      - 0.8
+      - 1.0
+      - 0.5
+      - 1.5
+      per_label_geometry_priors:
+        meeting_table_set:
+          min_z: 0.3
+          max_z: 1.2
+          min_mask_area_frac: 0.005
+          hard_min_mask_area_frac: 0.008
+          penalty_factor: 0.5
+        chair:
+          min_z: 0.1
+          max_z: 1.3
+          max_mask_area_frac: 0.1
+          penalty_factor: 0.5
+        trash_bin:
+          min_z: 0.0
+          max_z: 1.0
+          hard_max_z: 1.15
+          min_mask_area_frac: 0.0015
+          max_mask_area_frac: 0.1
+          penalty_factor: 0.45
+        vacuum_cleaner:
+          min_z: 0.0
+          max_z: 0.85
+          max_mask_area_frac: 0.14
+          penalty_factor: 0.5
+        plant_pot:
+          min_z: 0.0
+          max_z: 1.0
+          max_mask_area_frac: 0.14
+          penalty_factor: 0.5
+        shoes:
+          max_z: 0.3
+          max_mask_area_frac: 0.05
+          penalty_factor: 0.4
+        large_power_bank:
+          max_z: 0.8
+          max_mask_area_frac: 0.1
+          penalty_factor: 0.4
+        door:
+          min_z: 0.35
+          max_z: 2.5
+          min_mask_area_frac: 0.008
+          max_mask_area_frac: 0.7
+          penalty_factor: 0.45
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+    benchmark_label_aliases:
+      meeting table set:
+      - meeting table set
+      - table
+      - chair
+      chair:
+      - chair
+      - meeting table set
+      trash bin:
+      - trash bin
+      - cardboard box
+      large power bank:
+      - large power bank
+      - electric vehicle
+    benchmark_composite_covers:
+      meeting table set:
+        radius_m: 2.0
+        covered_pred_labels:
+        - meeting table set
+        - table
+        - chair
+        - bench
+  outdoor_livinglab:
+    description: 'Outdoor living-lab MCAP run from 2026-05-01. Third paper scenario
+      (S3). Ground truth frozen v1.0 from outdoor_livinglab_stcm_gt.json (14 categories:
+      trailer, electric utility vehicle, electric wheelchair, pair of ramps, portable
+      power station, rectangular table, trolley, electric scooter, cardboard box,
+      basketball, chair, umbrella, traffic cone, prohibition sign). Merge radii enlarged
+      vs indoor (outdoor objects are sparser + larger).'
+    bag_path: /mnt/STREAM/outdoor_livinglab_01_20260501_162329_0
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+      nyu_prompt_bank_path: stcm/config/outdoor_livinglab_nyu_grounded_prompts.yaml
+      max_observation_range_m: 3.0
+      require_projected_lidar: true
+      use_depth_anything_fallback: false
+      pose_estimator_mode: densest_voxel
+      pose_voxel_size_m: 0.3
+      gng_cluster_merge_distance: 1.0
+      label_margin_min: 0.05
+      gng_min_observations_to_commit: 2
+      cross_label_merge_distance_m: 0.8
+      cross_label_merge_min_cosine: 0.2
+      instance_label_switch_min_observations: 2
+      box_threshold: 0.35
+      text_threshold: 0.35
+      target_labels:
+      - trailer
+      - electric utility vehicle
+      - electric wheelchair
+      - pair of ramps
+      - portable power station
+      - rectangular table
+      - trolley
+      - electric scooter
+      - cardboard box
+      - basketball
+      - chair
+      - umbrella
+      - traffic cone
+      - prohibition sign
+      target_label_thresholds:
+      - 1.5
+      - 1.2
+      - 0.8
+      - 1.0
+      - 0.5
+      - 1.6
+      - 0.8
+      - 0.8
+      - 1.0
+      - 0.3
+      - 0.6
+      - 0.6
+      - 0.4
+      - 0.5
+    ground_truth_path: configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.5
+    benchmark_match_threshold_per_label:
+      trailer: 4.0
+      rectangular table: 2.0
+      pair of ramps: 2.0
+      electric utility vehicle: 2.0
+    benchmark_label_aliases:
+      electric utility vehicle:
+      - electric utility vehicle
+      - trolley
+      - electric scooter
+      trolley:
+      - trolley
+      - electric utility vehicle
+      electric scooter:
+      - electric scooter
+      - electric wheelchair
+      - electric utility vehicle
+      electric wheelchair:
+      - electric wheelchair
+      - electric scooter
+      traffic cone:
+      - traffic cone
+      - prohibition sign
+      prohibition sign:
+      - prohibition sign
+      - traffic cone
+      rectangular table:
+      - rectangular table
+      - trailer
+      cardboard box:
+      - cardboard box
+      - portable power station
+  outdoor_livinglab_tuned:
+    description: Outdoor living-lab S3, perception retuned for higher recall on rare/small
+      classes (basketball, umbrella, traffic cone, prohibition sign, pair of ramps,
+      portable power station). Same bag, same GT, same command set, more aggressive
+      thresholds. Used for AE-3 perception-tuning sensitivity analysis on outdoor
+      scene. Merge radii enlarged vs indoor.
+    bag_path: /mnt/STREAM/outdoor_livinglab_01_20260501_162329_0
+    storage_id: mcap
+    config_overrides:
+      camera_frame: camera_optical_frame
+      nyu_prompt_bank_path: stcm/config/outdoor_livinglab_nyu_grounded_prompts.yaml
+      max_observation_range_m: 5.0
+      require_projected_lidar: true
+      use_depth_anything_fallback: false
+      pose_estimator_mode: densest_voxel
+      pose_voxel_size_m: 0.15
+      label_margin_min: 0.03
+      gng_min_observations_to_commit: 1
+      cross_label_merge_distance_m: 0.45
+      cross_label_merge_min_cosine: 0.2
+      instance_label_switch_min_observations: 2
+      box_threshold: 0.28
+      text_threshold: 0.28
+      target_labels:
+      - trailer
+      - electric utility vehicle
+      - electric wheelchair
+      - pair of ramps
+      - portable power station
+      - rectangular table
+      - trolley
+      - electric scooter
+      - cardboard box
+      - basketball
+      - chair
+      - umbrella
+      - traffic cone
+      - prohibition sign
+      target_label_thresholds:
+      - 1.5
+      - 1.2
+      - 0.8
+      - 1.0
+      - 0.5
+      - 1.6
+      - 0.8
+      - 0.8
+      - 1.0
+      - 0.3
+      - 0.6
+      - 0.6
+      - 0.4
+      - 0.5
+    ground_truth_path: configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.5
+    benchmark_match_threshold_per_label:
+      trailer: 4.0
+      rectangular table: 2.0
+      pair of ramps: 2.0
+      electric utility vehicle: 2.0
+    benchmark_label_aliases:
+      electric utility vehicle:
+      - electric utility vehicle
+      - trolley
+      - electric scooter
+      trolley:
+      - trolley
+      - electric utility vehicle
+      electric scooter:
+      - electric scooter
+      - electric wheelchair
+      - electric utility vehicle
+      electric wheelchair:
+      - electric wheelchair
+      - electric scooter
+      traffic cone:
+      - traffic cone
+      - prohibition sign
+      prohibition sign:
+      - prohibition sign
+      - traffic cone
+      rectangular table:
+      - rectangular table
+      - trailer
+      cardboard box:
+      - cardboard box
+      - portable power station
+required_topics:
+- /camera/image_raw
+- /camera/camera_info
+- /tf
+- /tf_static
+- /lidar_points_projected
+variants:
+  full:
+    description: 'Full STCM: object i-GNG + place GNG + graph serialization.'
+    overlay: configs/experiments/variants/full.yaml
+  semantic-only:
+    description: Semantic object graph only; disables place GNG and i-GNG.
+    overlay: configs/experiments/variants/semantic-only.yaml
+  place-gng-only:
+    description: Place topology enabled; object i-GNG disabled.
+    overlay: configs/experiments/variants/place-gng-only.yaml
+  no-llm:
+    description: Same map output as full; used with template grounding evaluator.
+    overlay: configs/experiments/variants/no-llm.yaml
+  full-nyu-proposals:
+    description: Full STCM with nyu-grounded-rgbd proposal generation and meeting-label
+      prompt bank.
+    overlay: configs/experiments/variants/full-nyu-proposals.yaml
+  full-nyu-proposals-dformerv2-prior:
+    description: Full STCM with nyu-grounded-rgbd proposals plus frozen DFormerV2
+      NYUv2 semantic prior.
+    overlay: configs/experiments/variants/full-nyu-proposals-dformerv2-prior.yaml
+  full-nyu-proposals-esanet-prior:
+    description: Full STCM with nyu-grounded-rgbd proposals plus frozen ESANet NYUv2
+      semantic prior.
+    overlay: configs/experiments/variants/full-nyu-proposals-esanet-prior.yaml
+sensitivity:
+  box_text_threshold:
+  - 0.3
+  - 0.38
+  - 0.45
+  label_margin_min:
+  - 0.05
+  - 0.1
+  - 0.15
+  cross_label_merge_distance_m:
+  - 0.45
+  - 0.6
+  - 0.75
+  cross_label_merge_min_cosine:
+  - 0.2
+  - 0.25
+  - 0.35
+  gng_min_observations_to_commit:
+  - 2
+  - 3
+  - 4
+  instance_label_switch_margin:
+  - 0.1
+  - 0.15
+  - 0.2
+  instance_label_switch_min_observations:
+  - 2
+  - 3
+  per_label_geometry_priors.emergency_exit_sign.hard_min_z:
+  - 1.4
+  - 1.6
+  - 1.8
+  per_label_geometry_priors.emergency_exit_sign.hard_max_mask_area_frac:
+  - 0.02
+  - 0.03
+  per_label_geometry_priors.trash_bin.hard_max_z:
+  - 0.8
+  - 0.9
+  per_label_geometry_priors.meeting_table_set.hard_min_mask_area_frac:
+  - 0.015
+  - 0.02
+  - 0.03

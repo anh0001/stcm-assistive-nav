@@ -1,0 +1,10 @@
+[
+  {"iter": 1, "params": {"max_observation_range_m": 5, "gng_min_observations_to_commit": 2}, "note": "phase1 baseline R=5 G=2 (current best)"},
+  {"iter": 2, "params": {"max_observation_range_m": 3, "gng_min_observations_to_commit": 2}, "note": "phase1 R=3 tighter range"},
+  {"iter": 3, "params": {"max_observation_range_m": 4, "gng_min_observations_to_commit": 2}, "note": "phase1 R=4"},
+  {"iter": 4, "params": {"max_observation_range_m": 7, "gng_min_observations_to_commit": 2}, "note": "phase1 R=7"},
+  {"iter": 5, "params": {"max_observation_range_m": 10, "gng_min_observations_to_commit": 2}, "note": "phase1 R=10 wide range"},
+  {"iter": 6, "params": {"max_observation_range_m": 5, "gng_min_observations_to_commit": 1}, "note": "phase1 G=1 high recall"},
+  {"iter": 7, "params": {"max_observation_range_m": 5, "gng_min_observations_to_commit": 3}, "note": "phase1 G=3 high precision"},
+  {"iter": 8, "params": {"max_observation_range_m": 4, "gng_min_observations_to_commit": 3}, "note": "phase1 R=4 G=3 corner"}
+]

@@ -1,0 +1,5 @@
+{
+  "max_observation_range_m": 3,
+  "gng_min_observations_to_commit": 2,
+  "cross_label_merge_distance_m": 0.8
+}

@@ -480,12 +480,20 @@ def _benchmark_metrics(
 
     benchmark_json_path = artifact_dir / "benchmark.json"
     benchmark_csv_path = artifact_dir / "benchmark.csv"
-    threshold_m = float(scenario.get("benchmark_match_threshold_m", 1.0))
+    threshold_default = float(scenario.get("benchmark_match_threshold_m", 1.0))
+    per_label_thresh = scenario.get("benchmark_match_threshold_per_label") or {}
+    if per_label_thresh:
+        threshold_arg: Any = {"_default": threshold_default}
+        for k, v in per_label_thresh.items():
+            threshold_arg[str(k)] = float(v)
+    else:
+        threshold_arg = threshold_default
     record: dict[str, Any] = {
         "required": True,
         "available": False,
         "ground_truth_path": str(ground_truth_path),
-        "match_threshold_m": threshold_m,
+        "match_threshold_m": threshold_default,
+        "match_threshold_per_label": dict(per_label_thresh) if per_label_thresh else None,
         "output_json": str(benchmark_json_path),
         "output_csv": str(benchmark_csv_path),
     }
@@ -500,7 +508,7 @@ def _benchmark_metrics(
         benchmark = evaluate_graphs(
             prediction_path=graph_path,
             ground_truth_path=ground_truth_path,
-            match_threshold_m=threshold_m,
+            match_threshold_m=threshold_arg,
             label_aliases=scenario.get("benchmark_label_aliases"),
             composite_covers=scenario.get("benchmark_composite_covers"),
         )

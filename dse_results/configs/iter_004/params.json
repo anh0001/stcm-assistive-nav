@@ -1,0 +1,4 @@
+{
+  "max_observation_range_m": 7,
+  "gng_min_observations_to_commit": 2
+}
