@@ -1,0 +1,5 @@
+iter,ts,box_threshold,text_threshold,max_observation_range_m,gng_min_observations_to_commit,cross_label_merge_distance_m,label_margin_min,F1_mean,F1_std,P_mean,R_mean,n_runs,notes
+0,2026-04-24,0.3,0.3,0.0,2,0.45,0.05,0.301,0.223,0.295,0.323,3,baseline historical 67bb403
+-1,2026-04-29,0.4,0.3,0.0,2,0.45,0.05,0.524,0.0,0.579,0.478,1,existing single-run sweep at bt=0.40
+-1,2026-04-30,0.3,0.3,0.0,2,0.45,0.05,0.485,0.092,0.468,0.507,3,existing 3-run sweep at bt=0.30
+-1,2026-04-30,0.35,0.3,0.0,2,0.45,0.05,0.463,0.075,0.443,0.493,3,existing 3-run sweep at bt=0.35

@@ -1,0 +1,71 @@
+% Reviewer-facing draft for AE-1 / R1-1 (JACIII Jc26-0002).
+\subsection{Datasets and Scenarios}
+\label{sec:datasets}
+
+We evaluate STCM on three independent rosbag2 sessions covering an indoor
+structured scene, an indoor cluttered scene, and an outdoor scene, in
+direct response to the reviewer request for multi-scenario evidence
+(AE-1 / R1-1). Per-scenario duration, storage backend, label-vocabulary
+size, and ground-truth instance count are summarised in
+Table~\ref{tab:dataset_card}.
+
+\noindent\textbf{S1 -- Meeting room (indoor structured).}
+The meeting bag captures a $174.8$~s ranger traversal through a
+furnished meeting room with $20$ ground-truth object instances drawn
+from a $10$-class vocabulary (\emph{meeting table set}, \emph{chair},
+\emph{door}, \emph{trash bin}, \emph{cardboard box}, \emph{water
+fountain}, \emph{bottle}, \emph{cup}, \emph{bench}, \emph{emergency
+exit sign}). Storage is rosbag2 sqlite3.
+
+\noindent\textbf{S2 -- Living lab (indoor cluttered).}
+The living-lab MCAP bag is a $153.3$~s traversal through a workshop
+space populated with $23$ instances over an $11$-class vocabulary that
+adds outdoor-adjacent objects (\emph{electric vehicle}, \emph{large
+power bank}, \emph{plant pot}, \emph{vacuum cleaner}, \emph{shoes},
+\emph{bench}) to the indoor furniture set. Class-merge radii are
+relaxed for elongated objects (\emph{meeting table set} $1.6$~m,
+\emph{electric vehicle} $1.0$~m) and tightened for small objects
+(\emph{shoes} $0.3$~m, \emph{trash bin} $0.25$~m); the per-class
+geometry priors and aliases are recorded in the experiment manifest.
+
+\noindent\textbf{S3 -- Outdoor living lab.}
+The outdoor MCAP bag captures a $170.1$~s robot traversal through an
+outdoor testbed with $19$ ground-truth instances over a $14$-class
+vocabulary that is largely disjoint from the indoor scenes
+(\emph{trailer}, \emph{electric utility vehicle},
+\emph{electric wheelchair}, \emph{pair of ramps},
+\emph{portable power station}, \emph{rectangular table},
+\emph{trolley}, \emph{electric scooter}, \emph{basketball},
+\emph{traffic cone}, \emph{prohibition sign}, \emph{umbrella},
+\emph{cardboard box}, \emph{chair}). S3 is run under the same
+$\geq 3$-replay protocol as S1/S2 and contributes a third primary
+evaluation cell to all reported tables; we discuss the additional
+provenance and trajectory caveats specific to S3 in
+Sec.~\ref{sec:outdoor_caveat}.
+
+\noindent\textbf{Ground-truth protocol.}
+For S1 and S2 the ground truth is hand-annotated and frozen at
+version $1.0$, with per-instance pose, label, annotator, and frozen
+date archived inside the corresponding
+\texttt{<scene>\_stcm\_gt.json}. Annotation conventions and inclusion
+rules are recorded inside the GT file's \texttt{\_provenance} block.
+S3's ground truth was frozen at v$1.0$ from a one-shot STCM-shaped
+target rather than from an independent hand annotation, so S3
+\emph{agreement-with-GT} numbers should be read with the provenance
+caveat detailed in Sec.~\ref{sec:outdoor_caveat}; we keep S3 in the
+primary tables (rather than relegating it to an appendix) so that
+cross-scene comparisons remain visible to the reader, but we never
+aggregate S3 with S1/S2 in a cross-scene mean.
+
+\noindent\textbf{Reproducibility.}
+Every reported number was produced by
+\texttt{scripts/experiments/run\_experiment.py} in offline-sequential
+rosbag mode and scored by
+\texttt{scripts/experiments/benchmark\_stcm\_graph.py}. Each result
+JSON records the git SHA, dirty-state flag, bag path, checkpoint
+hashes (GroundingDINO, MobileSAM), random seed, hostname, and
+wall-clock UTC stamp. Results files are gathered under
+\texttt{results/eval/} and aggregated by
+\texttt{scripts/experiments/aggregate\_results.py}.
+
+\input{tables/A.tex}

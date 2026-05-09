@@ -1,0 +1,32 @@
+% Sensitivity sweep for AE-9 / R2-4. Aggregated from results/eval/*.json.
+% Numbers are mean F_1 over n runs; cells with n=1 flagged with ^{1}.
+% Default operating points in bold are taken from the variant YAML files
+% (configs/experiments/variants/*.yaml), not from a peak-picked cell.
+\begin{table}[t]
+\centering
+\caption{Sensitivity of $F_1$ to the two most operationally relevant knobs (AE-9 / R2-4). \emph{box\_threshold} is the GroundingDINO box confidence cutoff; \emph{processing\_period} is the inverse detection rate (s/frame). All other parameters held at the per-scenario defaults of Sec.~\ref{sec:datasets}. Mean $F_1$ over $n$ runs; $^{1}$ denotes single-run point estimate. \textbf{Bold} marks the variant-default operating point as declared in the variant YAML (\texttt{full.yaml} sets \texttt{box\_threshold}~$=0.45$; \texttt{full-nyu-proposals.yaml} sets \texttt{box\_threshold}~$=0.30$; \texttt{processing\_period}~$=1.0$~s/frame is the node-level default in \texttt{semantic\_map\_builder.py}). The bold cell is therefore not necessarily the peak of its column; the peak among $n{=}1$ cells is uninterpretable as a recommendation in the absence of replication.}
+\label{tab:sensitivity}
+\begin{tabular}{l l r r}
+\toprule
+Knob & Value & Meeting (S1) & Living lab (S2) \\
+\midrule
+\multicolumn{4}{l}{\emph{box\_threshold} (legacy GDINO-T, \texttt{full})} \\
+& $\mathbf{0.45}$  & $\mathbf{0.351}$ & $\mathbf{0.412^{1}}$ \\
+& $0.50$           & $0.339$ & $0.367$     \\
+& $0.55$           & $0.388$ & $0.304$     \\
+& $0.60$           & $0.474^{1}$ & $0.143^{1}$ \\
+\midrule
+\multicolumn{4}{l}{\emph{box\_threshold} (NYU-grounded, \texttt{full-nyu-proposals})} \\
+& $0.25$           & $0.350^{1}$ & $0.423^{1}$ \\
+& $\mathbf{0.30}$  & $\mathbf{0.400^{1}}$ & $\mathbf{0.485}$ \\
+& $0.35$           & $0.385$ & $0.463$     \\
+& $0.40$           & $0.500^{1}$ & $0.524^{1}$ \\
+\midrule
+\multicolumn{4}{l}{\emph{processing\_period} s/frame (legacy GDINO-T, \texttt{full})} \\
+& $0.0$ (every frame) & $0.280^{1}$ & $0.412^{1}$ \\
+& $0.7$               & $0.298$     & $0.424^{1}$ \\
+& $\mathbf{1.0}$      & $\mathbf{0.327^{1}}$ & $\mathbf{0.424^{1}}$ \\
+& $1.3$               & $0.286^{1}$ & $0.424^{1}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

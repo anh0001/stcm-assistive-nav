@@ -1,0 +1,152 @@
+{
+  "per_label": [
+    {
+      "label": "basketball",
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "iou": 0.5,
+      "f1": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "label": "cardboard box",
+      "tp": 1,
+      "fp": 3,
+      "fn": 0,
+      "iou": 0.25,
+      "f1": 0.4,
+      "precision": 0.25,
+      "recall": 1.0
+    },
+    {
+      "label": "chair",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "electric scooter",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    },
+    {
+      "label": "electric utility vehicle",
+      "tp": 1,
+      "fp": 2,
+      "fn": 0,
+      "iou": 0.3333333333333333,
+      "f1": 0.5,
+      "precision": 0.3333333333333333,
+      "recall": 1.0
+    },
+    {
+      "label": "electric wheelchair",
+      "tp": 0,
+      "fp": 3,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "pair of ramps",
+      "tp": 1,
+      "fp": 6,
+      "fn": 0,
+      "iou": 0.14285714285714285,
+      "f1": 0.25,
+      "precision": 0.14285714285714285,
+      "recall": 1.0
+    },
+    {
+      "label": "portable power station",
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "iou": 0.5,
+      "f1": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "label": "prohibition sign",
+      "tp": 0,
+      "fp": 5,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "rectangular table",
+      "tp": 0,
+      "fp": 3,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "traffic cone",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "trailer",
+      "tp": 1,
+      "fp": 5,
+      "fn": 5,
+      "iou": 0.09090909090909091,
+      "f1": 0.16666666666666666,
+      "precision": 0.16666666666666666,
+      "recall": 0.16666666666666666
+    },
+    {
+      "label": "trolley",
+      "tp": 1,
+      "fp": 3,
+      "fn": 0,
+      "iou": 0.25,
+      "f1": 0.4,
+      "precision": 0.25,
+      "recall": 1.0
+    },
+    {
+      "label": "umbrella",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": null,
+      "recall": 0.0
+    }
+  ],
+  "macro_iou": 0.21907854050711192,
+  "macro_f1": 0.28928571428571426,
+  "micro_iou": 0.1568627450980392,
+  "micro_f1": 0.2711864406779661,
+  "total_tp": 8,
+  "total_fp": 32,
+  "total_fn": 11,
+  "n_labels": 14
+}

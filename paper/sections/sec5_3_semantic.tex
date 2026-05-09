@@ -1,0 +1,91 @@
+% Reviewer-facing draft for semantic-labeling evidence (Tables C + F).
+\subsection{Semantic Labeling Quality}
+\label{sec:semantic}
+
+We report two complementary scoring families. (1)~\emph{Object-graph
+$F_1$}: Hungarian-matched $1{:}1$ same-label scoring at the per-
+scenario match radius implemented in
+\texttt{scripts/experiments/benchmark\_stcm\_graph.py} -- the
+system-level number that the downstream grounding and navigation
+modules see, and the natural headline for whether the constructed
+map is usable. The per-scenario radius is $1.0$~m for S1/S2 (indoor
+contract) and the outdoor per-class radius set declared in
+\texttt{configs/experiments/manifest.yaml} for S3.
+(2)~\emph{Per-class diagnostic $F_1$ / mIoU}: macro / micro
+$F_1$ and mean-IoU over committed-and-stable instance-graph nodes
+against the GT label set (Table~\ref{tab:semantic}) -- a per-class
+breakdown that surfaces which classes drag the system mean down,
+useful for debugging the prompt bank but not the right number for
+cross-scene comparison because the per-class average treats a small
+rare class (e.g.\ \emph{shoes}, \emph{umbrella}) the same as a
+dominant one. A node is \emph{committed} once the instance-GNG count
+exceeds the configured \texttt{gng\_min\_observations\_to\_commit}
+threshold (default $3$ on S1, $2$ on S2 due to the cluttered single-
+pass observability) and is \emph{stable} if its position drift over
+the last $1$~Hz processing window stays under $0.15$~m.
+
+\noindent\textbf{System-level result (object-graph $F_1$).}
+Reporting the best-replicated perception-backend cell per scene
+from Table~\ref{tab:variants}, STCM achieves
+$F_1{=}0.458 \pm 0.127$ on S1 (\texttt{full-nyu-proposals},
+$n{=}8$), $F_1{=}0.474 \pm 0.052$ on S2 (\texttt{full-nyu-proposals
++ ESANet semantic prior}, $n{=}3$), and $F_1{=}0.414 \pm 0.014$ on
+S3 under the outdoor per-class radius contract
+(\texttt{full-nyu-proposals} with the manifest-default
+\texttt{cross\_label\_merge\_distance\_m}~$=0.8$, $n{=}3$). Under
+the strict global $1.0$~m / no-alias indoor contract used for
+S1/S2, S3 scores $F_1{=}0.264 \pm 0.021$ on the same three runs
+(reported alongside in Sec.~\ref{sec:outdoor_caveat} Caveat 2).
+The cross-scene scoring contract is therefore consistent within
+each scene's perception regime; we do not aggregate across scenes
+into a single pooled mean because the three scenes use different
+prompt banks and (on S3) different match radii.
+
+\noindent\textbf{Per-class diagnostic (macro / micro $F_1$, mIoU).}
+Per-class breakdowns appear in Table~\ref{tab:semantic} for cross-
+scene comparability under the strict indoor contract. On S1 the
+system reaches macro-$F_1$ $0.507 \pm 0.030$ and micro-$F_1$
+$0.398 \pm 0.066$ over $5$ runs, with macro-mIoU $0.476 \pm 0.021$
+and micro-mIoU $0.250 \pm 0.053$. On S2 the corresponding numbers
+fall to macro-$F_1$ $0.298 \pm 0.013$, micro-$F_1$
+$0.241 \pm 0.033$, macro-mIoU $0.235 \pm 0.008$, micro-mIoU
+$0.138 \pm 0.021$. On S3 they are macro-$F_1$ $0.288 \pm 0.009$,
+micro-$F_1$ $0.264 \pm 0.021$, macro-mIoU $0.219 \pm 0.005$,
+micro-mIoU $0.152 \pm 0.014$. The macro-$F_1$ vs object-graph $F_1$
+gap on S2 / S3 (i.e.\ system $0.474$ / $0.414$ vs macro
+$0.298$ / $0.288$) reflects three structural phenomena: (i)~the
+cluttered or outdoor single-pass trajectory does not give multi-
+view confirmation for several peripheral instances (S2's GT count
+is $23$ but the average committed count under
+\texttt{full-nyu-proposals} is materially lower; S3's trajectory
+mechanically excludes four GT instances regardless of detector
+choice, see Sec.~\ref{sec:outdoor_caveat}), (ii)~outdoor or
+outdoor-adjacent classes (\emph{electric vehicle}, \emph{large
+power bank}, \emph{shoes} on S2; the entire $14$-class vocabulary
+on S3) sit out-of-distribution for the indoor-tuned text heads
+and contribute disproportionately to the per-class average even
+when their GT instance count is one or two, and (iii)~on S3,
+$13$/$30$ of the failure-counts in the grounding analysis
+(Sec.~\ref{sec:grounding}) are \texttt{alias\_label\_error},
+indicating that the perception-side class-label margin and the
+GT-side label vocabulary do not align even where geometry is
+correct. Phenomena (i) and (ii) are addressed by switching the
+perception backend in Sec.~\ref{sec:methods_variant} (the
+$+0.18$ system-$F_1$ lift from \texttt{full-nyu} to ESANet-prior
+on S2 is direct evidence); (iii) is a label-vocabulary
+calibration issue we discuss alongside the S3 caveat in
+Sec.~\ref{sec:outdoor_caveat}.
+
+\noindent\textbf{Standard-deviation note.}
+The $0.0\%$ standard-deviation entries in Table~\ref{tab:navigation}
+and parts of Tables~\ref{tab:semantic}/\ref{tab:grounding} reflect
+that, in those cells, the runs share a deterministic offline-
+sequential bag replay (\emph{replay repeatability under threshold
+perturbation}; see Sec.~\ref{sec:outdoor_caveat} Caveat 4 for the
+full reframing) and the run-to-run variation is dominated by
+threshold-induced graph variation that the GNG's voting-and-merge
+logic absorbs. Where the runs do not collapse (e.g.\ the
+macro-$F_1$ row on the meeting bag) we report the empirical s.d.;
+where they do, we report $0.0\%$ rather than fabricating spread.
+
+\input{tables/C.tex}

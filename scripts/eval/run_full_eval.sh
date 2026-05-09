@@ -12,7 +12,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-SCENES=("meeting" "livinglab")
+SCENES=("meeting" "livinglab" "outdoor_livinglab")
 # Sweep over box_threshold rather than processing_period: STCM is deterministic
 # in graph building once frames are fixed, so processing_period gives sigma=0.
 # box_threshold genuinely perturbs detection counts -> real run-to-run variation.
@@ -20,6 +20,7 @@ BOX_THRESHOLDS=("0.30" "0.35" "0.40")
 VARIANT="${VARIANT:-full-nyu-proposals}"
 GOAL_LABELS_meeting=(chair "meeting table set" door "trash bin" "water fountain")
 GOAL_LABELS_livinglab=(chair "cardboard box" "trash bin" "vacuum cleaner" door)
+GOAL_LABELS_outdoor_livinglab=("electric utility vehicle" "electric wheelchair" "rectangular table" "trailer" chair)
 
 NO_RUN=0
 while [[ $# -gt 0 ]]; do

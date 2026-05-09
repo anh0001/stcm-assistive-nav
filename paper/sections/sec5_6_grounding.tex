@@ -1,0 +1,76 @@
+% Reviewer-facing draft for grounding accuracy (Table E).
+\subsection{Spatial-Relational Grounding Accuracy}
+\label{sec:grounding}
+
+In the deployment loop, STCM is driven by natural-language commands
+that must be resolved against the produced graph before Nav2 receives
+a goal pose. Sec.~\ref{sec:llm_ablation} isolates the LLM grounder;
+this section reports baseline grounding accuracy of the deterministic
+template grounder used in the system itself, which is the headline
+number a reader should compare against subsequent ablations
+(Table~\ref{tab:grounding}). The command sets (\texttt{commands\_meeting.yaml},
+$45$ commands; \texttt{commands\_livinglab.yaml}, $30$ commands) are
+balanced across four subsets: \emph{simple} (label only),
+\emph{disambiguation} (multi-instance, requires choosing among
+candidates of the same class), \emph{compositional}
+(spatial-relational, e.g.\ ``the trash bin between the doors''), and
+\emph{functional} (intent-driven, addressed only via the LLM
+ablation in Sec.~\ref{sec:llm_ablation}; not in this table). Each
+command is paired across runs (same command IDs, same bag, same
+graph-build code, different \texttt{box\_threshold} sweep points
+$\in \{0.30, 0.35, 0.40\}$ on the NYU-grounded variant), so the
+reported standard deviation reflects threshold-induced graph
+variation under deterministic replay rather than seed-level
+stochastic replication; we treat $\sigma{=}0\%$ cells as ``replay
+repeatability,'' not as ``no run-to-run variance,'' consistent
+with the Sec.~\ref{sec:outdoor_caveat} reframing.
+
+\noindent\textbf{Result.}
+On the meeting bag, top-$1$ accuracy is $54.0 \pm 5.5\%$ on simple
+commands, $34.0 \pm 5.5\%$ on disambiguation, and $34.0 \pm 5.5\%$
+on compositional commands, for an overall of $40.7 \pm 5.5\%$
+top-$1$ and $42.7 \pm 3.7\%$ top-$2$ over $5$ runs.
+On the living lab, top-$1$ falls to $20.0\%$ on simple commands but
+recovers on disambiguation ($46.7 \pm 11.5\%$) and compositional
+($26.7 \pm 11.5\%$), for an overall of $31.1 \pm 7.7\%$ at top-$1$
+and $48.9 \pm 7.7\%$ at top-$2$ -- a substantial top-$2$ recovery
+that indicates the template grounder routinely surfaces the correct
+candidate in the second slot when an out-of-distribution simple
+label trips the first slot. On the outdoor living lab, top-$1$
+on simple commands is $20.0\%$, on disambiguation
+$26.7 \pm 11.5\%$, and on compositional $20.0\%$, for an overall
+top-$1$ of $22.2 \pm 3.8\%$ and top-$2$ of $53.3\%$ on the same
+$15$-command spatial subset used for S1 and S2. The S3 perception
+ceiling drives the residual gap: a per-command failure-mode
+breakdown produced by \texttt{scripts/eval/grounding.py}
+attributes $13$/$30$ failures to \texttt{alias\_label\_error} (the
+predicted class label does not match the GT canonical label even
+when geometry is right, an artefact of the outdoor prompt-bank
+vocabulary) and $9$/$30$ to \texttt{perception\_missing} (no
+predicted node within the $1.5$~m grounding match radius of the GT
+target). Functional / intent commands ($n{=}15$ on S3) are
+excluded from the Overall column of Table~\ref{tab:grounding} for
+all scenes so that the column denominator is consistent: by
+construction the template grounder cannot answer functional
+commands (Sec.~\ref{sec:llm_ablation}), so including them on S3
+would make S3 incomparable to S1 and S2 (which were scored only on
+the same spatial subset). The functional gap on S3 is the same gap
+the LLM grounder closes in Sec.~\ref{sec:llm_ablation}.
+
+\noindent\textbf{Interpretation.}
+Two failure patterns dominate. First, on living-lab simple commands
+the template grounder is bound by the underlying detection ceiling
+(Sec.~\ref{sec:semantic}); when the cluttered single-pass trajectory
+fails to commit a node for the queried label, no template heuristic
+recovers it. This is improved by the NYU-grounded perception
+backend (Sec.~\ref{sec:methods_variant}). Second, on disambiguation
+the template grounder uses near / between heuristics over object
+poses with a small place-graph topology bonus and breaks ties
+deterministically; this explains why top-$2 = $ top-$1$ on the
+meeting bag (the heuristic does not produce a meaningfully ranked
+list for symmetric cases). Sec.~\ref{sec:llm_ablation} shows that
+adding an LLM ranker over the same predicted graph closes part of
+the disambiguation gap, particularly on functional commands which
+the template grounder cannot answer by construction.
+
+\input{tables/E.tex}

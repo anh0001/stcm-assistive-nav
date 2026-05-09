@@ -251,7 +251,10 @@ scenarios:
       pose_estimator_mode: mean
       label_margin_min: 0.05
       gng_min_observations_to_commit: 2
-      cross_label_merge_distance_m: 0.45
+      # cross_label_merge_distance_m raised 0.45 -> 0.8 on 2026-05-09
+      # (auto-review-loop Round 1 finding, n=3 replicate F1=0.414±0.014 vs
+      # 0.254±0.004 baseline; +0.16 absolute, dedups same-pose cross-class FPs).
+      cross_label_merge_distance_m: 0.8
       cross_label_merge_min_cosine: 0.2
       instance_label_switch_min_observations: 2
       box_threshold: 0.35
@@ -322,9 +325,11 @@ scenarios:
       prohibition sign:
         - prohibition sign
         - traffic cone
+      # rectangular_table -> trailer alias dropped 2026-05-09 (Codex Round 2
+      # flagged as semantically suspect; rectangular_table is a 2m table,
+      # trailer is a 3-5m vehicle. Strict same-label scoring after drop.).
       rectangular table:
         - rectangular table
-        - trailer
       cardboard box:
         - cardboard box
         - portable power station

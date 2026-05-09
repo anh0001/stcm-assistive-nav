@@ -1,0 +1,1659 @@
+{
+  "covered_false_positive_nodes": [],
+  "duplicate_pairs": [
+    {
+      "label": "pair of ramps",
+      "node_a": "pair of ramps_inst_0",
+      "node_b": "pair of ramps_inst_15",
+      "xy_distance_m": 0.4828660762080556
+    }
+  ],
+  "false_negative_gt_nodes": [
+    {
+      "id": "chair_1_0",
+      "label": "chair",
+      "pose": [
+        7.192877560771729,
+        8.567663641816514,
+        0.21978831840626872
+      ]
+    },
+    {
+      "id": "electric scooter_1_0",
+      "label": "electric scooter",
+      "pose": [
+        5.14743356196676,
+        11.257586252870846,
+        -0.060255415729294055
+      ]
+    },
+    {
+      "id": "electric wheelchair_1_0",
+      "label": "electric wheelchair",
+      "pose": [
+        6.123759784385039,
+        12.515380018649665,
+        0.688181246800806
+      ]
+    },
+    {
+      "id": "prohibition sign_1_0",
+      "label": "prohibition sign",
+      "pose": [
+        -1.095565042643216,
+        -3.38356944169975,
+        0.9930410114345801
+      ]
+    },
+    {
+      "id": "rectangular table_4_0",
+      "label": "rectangular table",
+      "pose": [
+        8.034906261468764,
+        13.679342710936847,
+        0.5361809988764671
+      ]
+    },
+    {
+      "id": "trailer_1_0",
+      "label": "trailer",
+      "pose": [
+        10.70411883146338,
+        15.510156233554351,
+        0.8440850211383111
+      ]
+    },
+    {
+      "id": "trailer_2_0",
+      "label": "trailer",
+      "pose": [
+        8.470862406625969,
+        16.003822288469422,
+        2.467796565164549
+      ]
+    },
+    {
+      "id": "trailer_3_0",
+      "label": "trailer",
+      "pose": [
+        3.250245940715074,
+        8.166279692539797,
+        1.5759875456626815
+      ]
+    },
+    {
+      "id": "trailer_4_0",
+      "label": "trailer",
+      "pose": [
+        1.2957306517686078,
+        4.8853987938672105,
+        3.0607885083425583
+      ]
+    },
+    {
+      "id": "trailer_5_0",
+      "label": "trailer",
+      "pose": [
+        -0.24920670516252574,
+        0.5041295370854303,
+        1.7307041508623704
+      ]
+    },
+    {
+      "id": "umbrella_1_0",
+      "label": "umbrella",
+      "pose": [
+        7.325516746361698,
+        8.519337088700489,
+        0.055082921371511454
+      ]
+    }
+  ],
+  "false_positive_nodes": [
+    {
+      "id": "basketball_inst_0",
+      "label": "basketball",
+      "pose": [
+        8.961488148400969,
+        9.875231353555966,
+        -0.0924387673426187
+      ]
+    },
+    {
+      "id": "cardboard box_inst_0",
+      "label": "cardboard box",
+      "pose": [
+        1.274620639817954,
+        -2.1502014784393273,
+        0.0339675407239143
+      ]
+    },
+    {
+      "id": "cardboard box_inst_2",
+      "label": "cardboard box",
+      "pose": [
+        10.420401472275316,
+        9.837513211525698,
+        -0.07853593625280589
+      ]
+    },
+    {
+      "id": "cardboard box_inst_4",
+      "label": "cardboard box",
+      "pose": [
+        7.037041912490723,
+        7.850101181933642,
+        -0.04856200996392353
+      ]
+    },
+    {
+      "id": "cardboard box_inst_5",
+      "label": "cardboard box",
+      "pose": [
+        1.6833583604181896,
+        -2.519648736204073,
+        0.03383306389034561
+      ]
+    },
+    {
+      "id": "electric utility vehicle_inst_0",
+      "label": "electric utility vehicle",
+      "pose": [
+        11.546702108676039,
+        10.586159770306967,
+        0.05964582569370309
+      ]
+    },
+    {
+      "id": "electric utility vehicle_inst_1",
+      "label": "electric utility vehicle",
+      "pose": [
+        10.409615626209593,
+        9.854380316159636,
+        -0.08090588512558115
+      ]
+    },
+    {
+      "id": "electric utility vehicle_inst_2",
+      "label": "electric utility vehicle",
+      "pose": [
+        11.431236241666973,
+        11.221109500133737,
+        0.1112280494520012
+      ]
+    },
+    {
+      "id": "electric wheelchair_inst_0",
+      "label": "electric wheelchair",
+      "pose": [
+        10.210447406953556,
+        11.995489224443387,
+        0.17034622738686384
+      ]
+    },
+    {
+      "id": "electric wheelchair_inst_1",
+      "label": "electric wheelchair",
+      "pose": [
+        6.861804617553917,
+        10.148967587304616,
+        0.13802652682727573
+      ]
+    },
+    {
+      "id": "electric wheelchair_inst_3",
+      "label": "electric wheelchair",
+      "pose": [
+        9.347844267590574,
+        4.559607140847737,
+        0.12192076452638619
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_0",
+      "label": "pair of ramps",
+      "pose": [
+        1.2855256710211302,
+        -2.1428844678002767,
+        0.03518268081568612
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_2",
+      "label": "pair of ramps",
+      "pose": [
+        12.86265018425415,
+        5.477387628377571,
+        -0.19460880575246567
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_6",
+      "label": "pair of ramps",
+      "pose": [
+        11.777774660095616,
+        8.036948320698912,
+        -0.01177536190842923
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_7",
+      "label": "pair of ramps",
+      "pose": [
+        10.674627530222153,
+        9.930115483722084,
+        0.11180828905593497
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_10",
+      "label": "pair of ramps",
+      "pose": [
+        9.847262998688505,
+        10.315078502822399,
+        0.12773511566310886
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_12",
+      "label": "pair of ramps",
+      "pose": [
+        10.109379683355863,
+        9.592396651453583,
+        0.1096788167773809
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_1",
+      "label": "pair of ramps",
+      "pose": [
+        3.0669747016047184,
+        -1.4295443189486787,
+        -0.018616721886098628
+      ]
+    },
+    {
+      "id": "pair of ramps_inst_15",
+      "label": "pair of ramps",
+      "pose": [
+        1.6159610402170173,
+        -2.494981207826284,
+        0.029314715654955477
+      ]
+    },
+    {
+      "id": "portable power station_inst_2",
+      "label": "portable power station",
+      "pose": [
+        8.946286003695436,
+        11.670008877739077,
+        0.4146817448176006
+      ]
+    },
+    {
+      "id": "prohibition sign_inst_1",
+      "label": "prohibition sign",
+      "pose": [
+        11.478706652651722,
+        9.773945028909019,
+        0.29752955189639374
+      ]
+    },
+    {
+      "id": "prohibition sign_inst_4",
+      "label": "prohibition sign",
+      "pose": [
+        8.903706744827673,
+        9.85398881686315,
+        -0.0899105783745413
+      ]
+    },
+    {
+      "id": "prohibition sign_inst_7",
+      "label": "prohibition sign",
+      "pose": [
+        8.766427326787973,
+        11.752609413847619,
+        0.38128749876663054
+      ]
+    },
+    {
+      "id": "rectangular table_inst_0",
+      "label": "rectangular table",
+      "pose": [
+        11.496331919256415,
+        9.003737970329784,
+        -0.014842589410602975
+      ]
+    },
+    {
+      "id": "rectangular table_inst_2",
+      "label": "rectangular table",
+      "pose": [
+        8.242557893780857,
+        14.694715326116757,
+        0.6182840317799829
+      ]
+    },
+    {
+      "id": "rectangular table_inst_4",
+      "label": "rectangular table",
+      "pose": [
+        7.879299956029453,
+        6.3711255582945885,
+        0.08983753452570144
+      ]
+    },
+    {
+      "id": "trailer_inst_0",
+      "label": "trailer",
+      "pose": [
+        11.632471985706921,
+        9.010006713171151,
+        0.009508322627490287
+      ]
+    },
+    {
+      "id": "trailer_inst_1",
+      "label": "trailer",
+      "pose": [
+        10.467393154588658,
+        9.77348426439933,
+        -0.08733465241088834
+      ]
+    },
+    {
+      "id": "trailer_inst_3",
+      "label": "trailer",
+      "pose": [
+        10.228948408360779,
+        12.026577968888681,
+        0.18021269120049574
+      ]
+    },
+    {
+      "id": "trailer_inst_5",
+      "label": "trailer",
+      "pose": [
+        11.262444505891963,
+        11.482942410778918,
+        0.14159044555968855
+      ]
+    },
+    {
+      "id": "trailer_inst_8",
+      "label": "trailer",
+      "pose": [
+        8.23972691459934,
+        14.686042224913846,
+        0.6199120064039653
+      ]
+    },
+    {
+      "id": "trailer_inst_11",
+      "label": "trailer",
+      "pose": [
+        9.414445253329244,
+        4.751676771372971,
+        0.07028538948816068
+      ]
+    },
+    {
+      "id": "trolley_inst_0",
+      "label": "trolley",
+      "pose": [
+        10.214919185926533,
+        12.008132127615575,
+        0.17443027153191384
+      ]
+    },
+    {
+      "id": "trolley_inst_3",
+      "label": "trolley",
+      "pose": [
+        6.914536863540764,
+        10.24890315184986,
+        0.2643373029955385
+      ]
+    },
+    {
+      "id": "trolley_inst_4",
+      "label": "trolley",
+      "pose": [
+        5.5896518967515885,
+        9.331683698261847,
+        0.2970601215546167
+      ]
+    }
+  ],
+  "ground_truth_path": "/home/anhar/codes/stcm-assistive-nav/configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json",
+  "invalid_ground_truth_nodes": [],
+  "invalid_prediction_nodes": [],
+  "match_policy": {
+    "assignment": "one_to_one_hungarian_per_label",
+    "composite_covers": {},
+    "duplicate_threshold_m": 0.5,
+    "label": "category_or_label_exact_match",
+    "label_aliases": {},
+    "match_threshold_m": 1.0,
+    "position": "xy_distance_m",
+    "wrong_label_threshold_m": 1.0
+  },
+  "matched_pairs": [
+    {
+      "gt_id": "basketball_1_0",
+      "gt_pose": [
+        7.2808762388630495,
+        8.563899059556265,
+        -0.03657944626464229
+      ],
+      "label": "basketball",
+      "pred_id": "basketball_inst_1",
+      "pred_pose": [
+        7.3098955123181675,
+        8.691921196262108,
+        -0.023824277981485772
+      ],
+      "xy_error_m": 0.1312698964675161,
+      "xyz_error_m": 0.13188813455547865
+    },
+    {
+      "gt_id": "cardboard box_1_0",
+      "gt_pose": [
+        7.402978770341245,
+        8.50108946160784,
+        -0.09470709482604714
+      ],
+      "label": "cardboard box",
+      "pred_id": "cardboard box_inst_3",
+      "pred_pose": [
+        7.250726798877228,
+        8.401986231389678,
+        -0.011552048587584626
+      ],
+      "xy_error_m": 0.18166483714344397,
+      "xyz_error_m": 0.19979207884517058
+    },
+    {
+      "gt_id": "electric utility vehicle_1_0",
+      "gt_pose": [
+        10.27431873499226,
+        11.808277544331792,
+        0.2308692307217199
+      ],
+      "label": "electric utility vehicle",
+      "pred_id": "electric utility vehicle_inst_3",
+      "pred_pose": [
+        10.807305212665458,
+        11.766244118108302,
+        0.18896379600705784
+      ],
+      "xy_error_m": 0.5346413698008863,
+      "xyz_error_m": 0.5362811387334006
+    },
+    {
+      "gt_id": "pair of ramps_1_0",
+      "gt_pose": [
+        11.476632793288529,
+        8.609326257623563,
+        -0.07426788563660934
+      ],
+      "label": "pair of ramps",
+      "pred_id": "pair of ramps_inst_3",
+      "pred_pose": [
+        11.67541650167536,
+        8.935329455793,
+        -0.04621382238935108
+      ],
+      "xy_error_m": 0.38182855830427537,
+      "xyz_error_m": 0.38285777829554746
+    },
+    {
+      "gt_id": "portable power station_1_0",
+      "gt_pose": [
+        10.419468864532176,
+        9.836831314975376,
+        -0.13619065659024027
+      ],
+      "label": "portable power station",
+      "pred_id": "portable power station_inst_0",
+      "pred_pose": [
+        10.401754993518761,
+        9.8557765550289,
+        -0.07400774381050942
+      ],
+      "xy_error_m": 0.025936525344879058,
+      "xyz_error_m": 0.06737520307009967
+    },
+    {
+      "gt_id": "traffic cone_1_0",
+      "gt_pose": [
+        -0.2008659910322556,
+        0.36129331044529206,
+        0.23991812266361737
+      ],
+      "label": "traffic cone",
+      "pred_id": "traffic cone_inst_0",
+      "pred_pose": [
+        -0.45308972515203283,
+        0.49587242529448283,
+        0.11501563092109961
+      ],
+      "xy_error_m": 0.28588170666713836,
+      "xyz_error_m": 0.31197593280637126
+    },
+    {
+      "gt_id": "trailer_6_0",
+      "gt_pose": [
+        11.4766,
+        10.8355,
+        0.644
+      ],
+      "label": "trailer",
+      "pred_id": "trailer_inst_2",
+      "pred_pose": [
+        11.54393596577463,
+        10.943627100012424,
+        0.12038883175988488
+      ],
+      "xy_error_m": 0.1273797552356693,
+      "xyz_error_m": 0.5388824153279425
+    },
+    {
+      "gt_id": "trolley_1_0",
+      "gt_pose": [
+        8.267175117837024,
+        4.759877403059578,
+        0.06802403132752466
+      ],
+      "label": "trolley",
+      "pred_id": "trolley_inst_5",
+      "pred_pose": [
+        9.202484814178359,
+        4.542058091464228,
+        0.1245058857913547
+      ],
+      "xy_error_m": 0.9603382115556959,
+      "xyz_error_m": 0.9619977549130069
+    }
+  ],
+  "metric_name": "STCM Object Map F1@1m",
+  "per_label": {
+    "basketball": {
+      "count_error": 1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "basketball_inst_0",
+          "label": "basketball",
+          "pose": [
+            8.961488148400969,
+            9.875231353555966,
+            -0.0924387673426187
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 1,
+      "gt_count": 1,
+      "label": "basketball",
+      "matched_pairs": [
+        {
+          "gt_id": "basketball_1_0",
+          "gt_pose": [
+            7.2808762388630495,
+            8.563899059556265,
+            -0.03657944626464229
+          ],
+          "label": "basketball",
+          "pred_id": "basketball_inst_1",
+          "pred_pose": [
+            7.3098955123181675,
+            8.691921196262108,
+            -0.023824277981485772
+          ],
+          "xy_error_m": 0.1312698964675161,
+          "xyz_error_m": 0.13188813455547865
+        }
+      ],
+      "precision": 0.5,
+      "pred_count": 2,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.1312698964675161,
+        "mean_m": 0.1312698964675161,
+        "median_m": 0.1312698964675161,
+        "p95_m": 0.1312698964675161,
+        "rmse_m": 0.1312698964675161
+      },
+      "xyz_error": {
+        "max_m": 0.13188813455547865,
+        "mean_m": 0.13188813455547865,
+        "median_m": 0.13188813455547865,
+        "p95_m": 0.13188813455547865,
+        "rmse_m": 0.13188813455547865
+      }
+    },
+    "cardboard box": {
+      "count_error": 4,
+      "f1": 0.33333333333333337,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "cardboard box_inst_0",
+          "label": "cardboard box",
+          "pose": [
+            1.274620639817954,
+            -2.1502014784393273,
+            0.0339675407239143
+          ]
+        },
+        {
+          "id": "cardboard box_inst_2",
+          "label": "cardboard box",
+          "pose": [
+            10.420401472275316,
+            9.837513211525698,
+            -0.07853593625280589
+          ]
+        },
+        {
+          "id": "cardboard box_inst_4",
+          "label": "cardboard box",
+          "pose": [
+            7.037041912490723,
+            7.850101181933642,
+            -0.04856200996392353
+          ]
+        },
+        {
+          "id": "cardboard box_inst_5",
+          "label": "cardboard box",
+          "pose": [
+            1.6833583604181896,
+            -2.519648736204073,
+            0.03383306389034561
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 4,
+      "gt_count": 1,
+      "label": "cardboard box",
+      "matched_pairs": [
+        {
+          "gt_id": "cardboard box_1_0",
+          "gt_pose": [
+            7.402978770341245,
+            8.50108946160784,
+            -0.09470709482604714
+          ],
+          "label": "cardboard box",
+          "pred_id": "cardboard box_inst_3",
+          "pred_pose": [
+            7.250726798877228,
+            8.401986231389678,
+            -0.011552048587584626
+          ],
+          "xy_error_m": 0.18166483714344397,
+          "xyz_error_m": 0.19979207884517058
+        }
+      ],
+      "precision": 0.2,
+      "pred_count": 5,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.18166483714344397,
+        "mean_m": 0.18166483714344397,
+        "median_m": 0.18166483714344397,
+        "p95_m": 0.18166483714344397,
+        "rmse_m": 0.18166483714344397
+      },
+      "xyz_error": {
+        "max_m": 0.19979207884517058,
+        "mean_m": 0.19979207884517058,
+        "median_m": 0.19979207884517058,
+        "p95_m": 0.19979207884517058,
+        "rmse_m": 0.19979207884517058
+      }
+    },
+    "chair": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "chair_1_0",
+          "label": "chair",
+          "pose": [
+            7.192877560771729,
+            8.567663641816514,
+            0.21978831840626872
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "chair",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "electric scooter": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "electric scooter_1_0",
+          "label": "electric scooter",
+          "pose": [
+            5.14743356196676,
+            11.257586252870846,
+            -0.060255415729294055
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "electric scooter",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "electric utility vehicle": {
+      "count_error": 3,
+      "f1": 0.4,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "electric utility vehicle_inst_0",
+          "label": "electric utility vehicle",
+          "pose": [
+            11.546702108676039,
+            10.586159770306967,
+            0.05964582569370309
+          ]
+        },
+        {
+          "id": "electric utility vehicle_inst_1",
+          "label": "electric utility vehicle",
+          "pose": [
+            10.409615626209593,
+            9.854380316159636,
+            -0.08090588512558115
+          ]
+        },
+        {
+          "id": "electric utility vehicle_inst_2",
+          "label": "electric utility vehicle",
+          "pose": [
+            11.431236241666973,
+            11.221109500133737,
+            0.1112280494520012
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 3,
+      "gt_count": 1,
+      "label": "electric utility vehicle",
+      "matched_pairs": [
+        {
+          "gt_id": "electric utility vehicle_1_0",
+          "gt_pose": [
+            10.27431873499226,
+            11.808277544331792,
+            0.2308692307217199
+          ],
+          "label": "electric utility vehicle",
+          "pred_id": "electric utility vehicle_inst_3",
+          "pred_pose": [
+            10.807305212665458,
+            11.766244118108302,
+            0.18896379600705784
+          ],
+          "xy_error_m": 0.5346413698008863,
+          "xyz_error_m": 0.5362811387334006
+        }
+      ],
+      "precision": 0.25,
+      "pred_count": 4,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.5346413698008863,
+        "mean_m": 0.5346413698008863,
+        "median_m": 0.5346413698008863,
+        "p95_m": 0.5346413698008863,
+        "rmse_m": 0.5346413698008863
+      },
+      "xyz_error": {
+        "max_m": 0.5362811387334006,
+        "mean_m": 0.5362811387334006,
+        "median_m": 0.5362811387334006,
+        "p95_m": 0.5362811387334006,
+        "rmse_m": 0.5362811387334006
+      }
+    },
+    "electric wheelchair": {
+      "count_error": 2,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "electric wheelchair_1_0",
+          "label": "electric wheelchair",
+          "pose": [
+            6.123759784385039,
+            12.515380018649665,
+            0.688181246800806
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "electric wheelchair_inst_0",
+          "label": "electric wheelchair",
+          "pose": [
+            10.210447406953556,
+            11.995489224443387,
+            0.17034622738686384
+          ]
+        },
+        {
+          "id": "electric wheelchair_inst_1",
+          "label": "electric wheelchair",
+          "pose": [
+            6.861804617553917,
+            10.148967587304616,
+            0.13802652682727573
+          ]
+        },
+        {
+          "id": "electric wheelchair_inst_3",
+          "label": "electric wheelchair",
+          "pose": [
+            9.347844267590574,
+            4.559607140847737,
+            0.12192076452638619
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 3,
+      "gt_count": 1,
+      "label": "electric wheelchair",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 3,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "pair of ramps": {
+      "count_error": 8,
+      "f1": 0.19999999999999998,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "pair of ramps_inst_0",
+          "label": "pair of ramps",
+          "pose": [
+            1.2855256710211302,
+            -2.1428844678002767,
+            0.03518268081568612
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_2",
+          "label": "pair of ramps",
+          "pose": [
+            12.86265018425415,
+            5.477387628377571,
+            -0.19460880575246567
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_6",
+          "label": "pair of ramps",
+          "pose": [
+            11.777774660095616,
+            8.036948320698912,
+            -0.01177536190842923
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_7",
+          "label": "pair of ramps",
+          "pose": [
+            10.674627530222153,
+            9.930115483722084,
+            0.11180828905593497
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_10",
+          "label": "pair of ramps",
+          "pose": [
+            9.847262998688505,
+            10.315078502822399,
+            0.12773511566310886
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_12",
+          "label": "pair of ramps",
+          "pose": [
+            10.109379683355863,
+            9.592396651453583,
+            0.1096788167773809
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_1",
+          "label": "pair of ramps",
+          "pose": [
+            3.0669747016047184,
+            -1.4295443189486787,
+            -0.018616721886098628
+          ]
+        },
+        {
+          "id": "pair of ramps_inst_15",
+          "label": "pair of ramps",
+          "pose": [
+            1.6159610402170173,
+            -2.494981207826284,
+            0.029314715654955477
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 8,
+      "gt_count": 1,
+      "label": "pair of ramps",
+      "matched_pairs": [
+        {
+          "gt_id": "pair of ramps_1_0",
+          "gt_pose": [
+            11.476632793288529,
+            8.609326257623563,
+            -0.07426788563660934
+          ],
+          "label": "pair of ramps",
+          "pred_id": "pair of ramps_inst_3",
+          "pred_pose": [
+            11.67541650167536,
+            8.935329455793,
+            -0.04621382238935108
+          ],
+          "xy_error_m": 0.38182855830427537,
+          "xyz_error_m": 0.38285777829554746
+        }
+      ],
+      "precision": 0.1111111111111111,
+      "pred_count": 9,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.38182855830427537,
+        "mean_m": 0.38182855830427537,
+        "median_m": 0.38182855830427537,
+        "p95_m": 0.38182855830427537,
+        "rmse_m": 0.38182855830427537
+      },
+      "xyz_error": {
+        "max_m": 0.38285777829554746,
+        "mean_m": 0.38285777829554746,
+        "median_m": 0.38285777829554746,
+        "p95_m": 0.38285777829554746,
+        "rmse_m": 0.38285777829554746
+      }
+    },
+    "portable power station": {
+      "count_error": 1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "portable power station_inst_2",
+          "label": "portable power station",
+          "pose": [
+            8.946286003695436,
+            11.670008877739077,
+            0.4146817448176006
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 1,
+      "gt_count": 1,
+      "label": "portable power station",
+      "matched_pairs": [
+        {
+          "gt_id": "portable power station_1_0",
+          "gt_pose": [
+            10.419468864532176,
+            9.836831314975376,
+            -0.13619065659024027
+          ],
+          "label": "portable power station",
+          "pred_id": "portable power station_inst_0",
+          "pred_pose": [
+            10.401754993518761,
+            9.8557765550289,
+            -0.07400774381050942
+          ],
+          "xy_error_m": 0.025936525344879058,
+          "xyz_error_m": 0.06737520307009967
+        }
+      ],
+      "precision": 0.5,
+      "pred_count": 2,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.025936525344879058,
+        "mean_m": 0.025936525344879058,
+        "median_m": 0.025936525344879058,
+        "p95_m": 0.025936525344879058,
+        "rmse_m": 0.025936525344879058
+      },
+      "xyz_error": {
+        "max_m": 0.06737520307009967,
+        "mean_m": 0.06737520307009967,
+        "median_m": 0.06737520307009967,
+        "p95_m": 0.06737520307009967,
+        "rmse_m": 0.06737520307009967
+      }
+    },
+    "prohibition sign": {
+      "count_error": 2,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "prohibition sign_1_0",
+          "label": "prohibition sign",
+          "pose": [
+            -1.095565042643216,
+            -3.38356944169975,
+            0.9930410114345801
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "prohibition sign_inst_1",
+          "label": "prohibition sign",
+          "pose": [
+            11.478706652651722,
+            9.773945028909019,
+            0.29752955189639374
+          ]
+        },
+        {
+          "id": "prohibition sign_inst_4",
+          "label": "prohibition sign",
+          "pose": [
+            8.903706744827673,
+            9.85398881686315,
+            -0.0899105783745413
+          ]
+        },
+        {
+          "id": "prohibition sign_inst_7",
+          "label": "prohibition sign",
+          "pose": [
+            8.766427326787973,
+            11.752609413847619,
+            0.38128749876663054
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 3,
+      "gt_count": 1,
+      "label": "prohibition sign",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 3,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "rectangular table": {
+      "count_error": 2,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "rectangular table_4_0",
+          "label": "rectangular table",
+          "pose": [
+            8.034906261468764,
+            13.679342710936847,
+            0.5361809988764671
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "rectangular table_inst_0",
+          "label": "rectangular table",
+          "pose": [
+            11.496331919256415,
+            9.003737970329784,
+            -0.014842589410602975
+          ]
+        },
+        {
+          "id": "rectangular table_inst_2",
+          "label": "rectangular table",
+          "pose": [
+            8.242557893780857,
+            14.694715326116757,
+            0.6182840317799829
+          ]
+        },
+        {
+          "id": "rectangular table_inst_4",
+          "label": "rectangular table",
+          "pose": [
+            7.879299956029453,
+            6.3711255582945885,
+            0.08983753452570144
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 3,
+      "gt_count": 1,
+      "label": "rectangular table",
+      "matched_pairs": [],
+      "precision": 0.0,
+      "pred_count": 3,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "traffic cone": {
+      "count_error": 0,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "traffic cone",
+      "matched_pairs": [
+        {
+          "gt_id": "traffic cone_1_0",
+          "gt_pose": [
+            -0.2008659910322556,
+            0.36129331044529206,
+            0.23991812266361737
+          ],
+          "label": "traffic cone",
+          "pred_id": "traffic cone_inst_0",
+          "pred_pose": [
+            -0.45308972515203283,
+            0.49587242529448283,
+            0.11501563092109961
+          ],
+          "xy_error_m": 0.28588170666713836,
+          "xyz_error_m": 0.31197593280637126
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.28588170666713836,
+        "mean_m": 0.28588170666713836,
+        "median_m": 0.28588170666713836,
+        "p95_m": 0.28588170666713836,
+        "rmse_m": 0.28588170666713836
+      },
+      "xyz_error": {
+        "max_m": 0.31197593280637126,
+        "mean_m": 0.31197593280637126,
+        "median_m": 0.31197593280637126,
+        "p95_m": 0.31197593280637126,
+        "rmse_m": 0.31197593280637126
+      }
+    },
+    "trailer": {
+      "count_error": 1,
+      "f1": 0.15384615384615383,
+      "false_negative_gt_nodes": [
+        {
+          "id": "trailer_1_0",
+          "label": "trailer",
+          "pose": [
+            10.70411883146338,
+            15.510156233554351,
+            0.8440850211383111
+          ]
+        },
+        {
+          "id": "trailer_2_0",
+          "label": "trailer",
+          "pose": [
+            8.470862406625969,
+            16.003822288469422,
+            2.467796565164549
+          ]
+        },
+        {
+          "id": "trailer_3_0",
+          "label": "trailer",
+          "pose": [
+            3.250245940715074,
+            8.166279692539797,
+            1.5759875456626815
+          ]
+        },
+        {
+          "id": "trailer_4_0",
+          "label": "trailer",
+          "pose": [
+            1.2957306517686078,
+            4.8853987938672105,
+            3.0607885083425583
+          ]
+        },
+        {
+          "id": "trailer_5_0",
+          "label": "trailer",
+          "pose": [
+            -0.24920670516252574,
+            0.5041295370854303,
+            1.7307041508623704
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "trailer_inst_0",
+          "label": "trailer",
+          "pose": [
+            11.632471985706921,
+            9.010006713171151,
+            0.009508322627490287
+          ]
+        },
+        {
+          "id": "trailer_inst_1",
+          "label": "trailer",
+          "pose": [
+            10.467393154588658,
+            9.77348426439933,
+            -0.08733465241088834
+          ]
+        },
+        {
+          "id": "trailer_inst_3",
+          "label": "trailer",
+          "pose": [
+            10.228948408360779,
+            12.026577968888681,
+            0.18021269120049574
+          ]
+        },
+        {
+          "id": "trailer_inst_5",
+          "label": "trailer",
+          "pose": [
+            11.262444505891963,
+            11.482942410778918,
+            0.14159044555968855
+          ]
+        },
+        {
+          "id": "trailer_inst_8",
+          "label": "trailer",
+          "pose": [
+            8.23972691459934,
+            14.686042224913846,
+            0.6199120064039653
+          ]
+        },
+        {
+          "id": "trailer_inst_11",
+          "label": "trailer",
+          "pose": [
+            9.414445253329244,
+            4.751676771372971,
+            0.07028538948816068
+          ]
+        }
+      ],
+      "fn": 5,
+      "fp": 6,
+      "gt_count": 6,
+      "label": "trailer",
+      "matched_pairs": [
+        {
+          "gt_id": "trailer_6_0",
+          "gt_pose": [
+            11.4766,
+            10.8355,
+            0.644
+          ],
+          "label": "trailer",
+          "pred_id": "trailer_inst_2",
+          "pred_pose": [
+            11.54393596577463,
+            10.943627100012424,
+            0.12038883175988488
+          ],
+          "xy_error_m": 0.1273797552356693,
+          "xyz_error_m": 0.5388824153279425
+        }
+      ],
+      "precision": 0.14285714285714285,
+      "pred_count": 7,
+      "recall": 0.16666666666666666,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.1273797552356693,
+        "mean_m": 0.1273797552356693,
+        "median_m": 0.1273797552356693,
+        "p95_m": 0.1273797552356693,
+        "rmse_m": 0.1273797552356693
+      },
+      "xyz_error": {
+        "max_m": 0.5388824153279425,
+        "mean_m": 0.5388824153279425,
+        "median_m": 0.5388824153279425,
+        "p95_m": 0.5388824153279425,
+        "rmse_m": 0.5388824153279425
+      }
+    },
+    "trolley": {
+      "count_error": 3,
+      "f1": 0.4,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "trolley_inst_0",
+          "label": "trolley",
+          "pose": [
+            10.214919185926533,
+            12.008132127615575,
+            0.17443027153191384
+          ]
+        },
+        {
+          "id": "trolley_inst_3",
+          "label": "trolley",
+          "pose": [
+            6.914536863540764,
+            10.24890315184986,
+            0.2643373029955385
+          ]
+        },
+        {
+          "id": "trolley_inst_4",
+          "label": "trolley",
+          "pose": [
+            5.5896518967515885,
+            9.331683698261847,
+            0.2970601215546167
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 3,
+      "gt_count": 1,
+      "label": "trolley",
+      "matched_pairs": [
+        {
+          "gt_id": "trolley_1_0",
+          "gt_pose": [
+            8.267175117837024,
+            4.759877403059578,
+            0.06802403132752466
+          ],
+          "label": "trolley",
+          "pred_id": "trolley_inst_5",
+          "pred_pose": [
+            9.202484814178359,
+            4.542058091464228,
+            0.1245058857913547
+          ],
+          "xy_error_m": 0.9603382115556959,
+          "xyz_error_m": 0.9619977549130069
+        }
+      ],
+      "precision": 0.25,
+      "pred_count": 4,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.9603382115556959,
+        "mean_m": 0.9603382115556959,
+        "median_m": 0.9603382115556959,
+        "p95_m": 0.9603382115556959,
+        "rmse_m": 0.9603382115556959
+      },
+      "xyz_error": {
+        "max_m": 0.9619977549130069,
+        "mean_m": 0.9619977549130069,
+        "median_m": 0.9619977549130069,
+        "p95_m": 0.9619977549130069,
+        "rmse_m": 0.9619977549130069
+      }
+    },
+    "umbrella": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "umbrella_1_0",
+          "label": "umbrella",
+          "pose": [
+            7.325516746361698,
+            8.519337088700489,
+            0.055082921371511454
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "umbrella",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    }
+  },
+  "prediction_path": "/home/anhar/codes/stcm-assistive-nav/results/eval/outdoor_livinglab_run1_bt0.35_856c756/stcm.json",
+  "summary": {
+    "count_error": 24,
+    "covered_false_positive_nodes": 0,
+    "duplicate_pair_count": 1,
+    "f1": 0.25806451612903225,
+    "fn": 11,
+    "fp": 35,
+    "gt_nodes": 19,
+    "invalid_ground_truth_nodes": 0,
+    "invalid_prediction_nodes": 0,
+    "precision": 0.18604651162790697,
+    "pred_nodes": 43,
+    "recall": 0.42105263157894735,
+    "tp": 8,
+    "xy_error": {
+      "max_m": 0.9603382115556959,
+      "mean_m": 0.328617607564938,
+      "median_m": 0.23377327190529118,
+      "p95_m": 0.9603382115556959,
+      "rmse_m": 0.4334086520225468
+    },
+    "xyz_error": {
+      "max_m": 0.9619977549130069,
+      "mean_m": 0.3913813045683772,
+      "median_m": 0.34741685555095936,
+      "p95_m": 0.9619977549130069,
+      "rmse_m": 0.4755511580806632
+    }
+  },
+  "wrong_label_near_gt": [
+    {
+      "gt_id": "electric utility vehicle_1_0",
+      "gt_label": "electric utility vehicle",
+      "pred_id": "electric wheelchair_inst_0",
+      "pred_label": "electric wheelchair",
+      "xy_error_m": 0.1978073803366143
+    },
+    {
+      "gt_id": "pair of ramps_1_0",
+      "gt_label": "pair of ramps",
+      "pred_id": "rectangular table_inst_0",
+      "pred_label": "rectangular table",
+      "xy_error_m": 0.39490334853449044
+    },
+    {
+      "gt_id": "portable power station_1_0",
+      "gt_label": "portable power station",
+      "pred_id": "cardboard box_inst_2",
+      "pred_label": "cardboard box",
+      "xy_error_m": 0.0011553095290465906
+    },
+    {
+      "gt_id": "cardboard box_1_0",
+      "gt_label": "cardboard box",
+      "pred_id": "basketball_inst_1",
+      "pred_label": "basketball",
+      "xy_error_m": 0.21232344165293562
+    },
+    {
+      "gt_id": "basketball_1_0",
+      "gt_label": "basketball",
+      "pred_id": "cardboard box_inst_3",
+      "pred_label": "cardboard box",
+      "xy_error_m": 0.1646959400117725
+    },
+    {
+      "gt_id": "chair_1_0",
+      "gt_label": "chair",
+      "pred_id": "basketball_inst_1",
+      "pred_label": "basketball",
+      "xy_error_m": 0.17068433091799698
+    },
+    {
+      "gt_id": "umbrella_1_0",
+      "gt_label": "umbrella",
+      "pred_id": "cardboard box_inst_3",
+      "pred_label": "cardboard box",
+      "xy_error_m": 0.13915732088651367
+    },
+    {
+      "gt_id": "trailer_5_0",
+      "gt_label": "trailer",
+      "pred_id": "traffic cone_inst_0",
+      "pred_label": "traffic cone",
+      "xy_error_m": 0.20405015495012482
+    },
+    {
+      "gt_id": "trailer_6_0",
+      "gt_label": "trailer",
+      "pred_id": "electric utility vehicle_inst_0",
+      "pred_label": "electric utility vehicle",
+      "xy_error_m": 0.25900744349188404
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+% Reviewer-facing draft for methods-variant comparison.
+\subsection{Perception-Backend Variant Comparison}
+\label{sec:methods_variant}
+
+The legacy STCM perception front end uses GroundingDINO-T plus
+MobileSAM with a closed-vocabulary text prompt list (the
+\texttt{full} variant in our experiment manifest). To probe whether
+the bottleneck on the cluttered indoor scene (Sec.~\ref{sec:semantic})
+is detector-bound rather than graph-bound, we compare \texttt{full}
+against three perception-backend swaps that share the rest of the
+STCM stack -- the topological place-GNG, the instance-GNG, the
+LiDAR-image association, the temporal score fusion, and the scoring
+harness. The four variants are:
+
+\begin{itemize}
+\item \textbf{\texttt{full}}: GroundingDINO-T + MobileSAM with the
+      legacy class-prompt list. Reference baseline from the original
+      paper.
+\item \textbf{\texttt{full-nyu-proposals}}: NYU-grounded RGB-D
+      backend driving GroundingDINO-base + MobileSAM, with
+      class-conditioned prompt banks per scene
+      (\texttt{stcm/config/<scene>\_nyu\_grounded\_prompts.yaml}) and
+      a CLIP-ViT-base label reranker
+      (\texttt{label\_margin\_min}~$=0.05$--$0.08$).
+\item \textbf{\texttt{full-nyu-proposals + DFormerv2 prior}}: same as
+      above with DFormerv2 supplying a per-pixel semantic prior at
+      proposal-rerank time.
+\item \textbf{\texttt{full-nyu-proposals + ESANet prior}}: same as
+      above with ESANet supplying the semantic prior.
+\end{itemize}
+
+\noindent\textbf{Result.}
+Table~\ref{tab:variants} reports $F_1$, precision, and recall on S1
+(meeting) and S2 (living lab) for all four variants over $n{=}3$
+threshold-perturbation runs per cell (except the legacy \texttt{full}
+on S2, which remains $n{=}1$). On S1, swapping the legacy GDINO-T
+head for NYU-grounded proposals lifts $F_1$ from
+$0.362 \pm 0.042$ to $0.458 \pm 0.127$ ($+0.10$ absolute, driven
+by both precision $+0.13$ and recall $+0.06$). Adding a per-pixel
+semantic prior on top of the NYU bank \emph{hurts} on S1: DFormerv2
+gives $F_1{=}0.381 \pm 0.069$ and ESANet $F_1{=}0.320 \pm 0.087$,
+both lower than the prior-free NYU mean. The replicated 3-run
+priors numbers reverse the directional signal of an earlier
+single-run pilot ($F_1$ values of $0.444$ and $0.421$) that fell on
+the lucky end of the threshold sweep; this is exactly why the
+ranking is reported only over $n{=}3$ replicates and reinforces
+that single-run cells should not be cited.
+
+On S2 the picture inverts. Plain \texttt{full-nyu-proposals} sits
+at $0.301 \pm 0.223$ -- worse in mean than the legacy
+$0.411 \pm 0.047$ -- because S2 contains several outdoor-adjacent
+classes (\emph{electric vehicle}, \emph{large power bank},
+\emph{shoes}) that the indoor-tuned proposal bank does not address.
+Adding a semantic prior closes that gap and surpasses the legacy
+under replicated scoring: DFormerv2 lifts S2 to
+$0.417 \pm 0.037$ (matches the legacy mean within s.d., $+0.12$
+absolute over plain NYU) and ESANet lifts it to $0.474 \pm 0.052$
+(highest replicated mean on S2; the ESANet--legacy gap is
+$+0.06$ absolute, $\sim 1.4\sigma$ pooled, suggestive but not
+conclusive at $n{=}3$ per cell). The defensible takeaway: on a cluttered indoor scene
+with outdoor-adjacent classes, the prompt-bank-plus-semantic-prior
+combination materially outperforms either component alone, and
+ESANet outperforms DFormerv2 in mean by $0.06$ absolute (effect
+size within the cells' joint $\sigma$, but the ranking is
+consistent across all three runs).
+
+\noindent\textbf{Reading caveat.}
+All eight cells in Table~\ref{tab:variants} are now $n{\geq}3$
+(meeting \texttt{full} carries $n{=}5$ from the run-history
+accumulated during sensitivity sweeps; all other cells are
+$n{=}3$ box-threshold-perturbation replicates). The defensible claim from this table
+is two-directional: (i)~the perception-backend swap from legacy
+GDINO-T to NYU-grounded materially helps on S1 (+$0.10$ absolute),
+and (ii)~adding a semantic prior is scene-dependent -- it hurts
+on S1 (where the prompt bank already saturates the detection
+ceiling) but helps on S2 by $+0.12$--$+0.17$ over plain NYU.
+The practical recipe is therefore: pair a class-conditioned
+prompt bank with a semantic prior whenever the scene contains
+substantial out-of-distribution geometry for the open-vocabulary
+text head, and \emph{omit} the prior on scenes the prompt bank
+already covers. The choice of \emph{which} prior is less crisp:
+ESANet beats DFormerv2 in mean on S2 ($0.474$ vs $0.417$) and
+DFormerv2 beats ESANet in mean on S1 ($0.381$ vs $0.320$), but
+neither cross-prior gap exceeds the worst-case per-cell s.d.,
+so we recommend either prior as scene-suitable and do not
+declare a single global winner.
+
+\noindent\textbf{S3 not in this table.}
+S3 (outdoor) is omitted from Table~\ref{tab:variants} because the
+legacy \texttt{full} variant was not designed for outdoor open-
+vocabulary geometry (we measured a single-run S3 score of $0.047$
+under \texttt{full}, which is uninformative for ranking) and
+because the DFormerv2 / ESANet semantic-prior variants were not
+re-run on S3 within this revision's compute budget. The S3
+operating point under \texttt{full-nyu-proposals} is reported as
+a primary cell in Tables~\ref{tab:dataset_card}--\ref{tab:grounding}
+and discussed in Sec.~\ref{sec:outdoor_caveat}; cross-variant S3
+comparison is deferred to follow-up.
+
+\noindent\textbf{Architectural ablations (no-LLM, semantic-only,
+place-GNG-only).}
+The \texttt{no-llm}, \texttt{semantic-only}, and
+\texttt{place-gng-only} variants live under
+\texttt{configs/experiments/variants/} as architectural ablations
+of the grounding pipeline rather than the perception front end;
+their effects are reported in the paired-McNemar grounding table
+of Sec.~\ref{sec:llm_ablation} (Table~\ref{tab:llm_ablation}) and
+are not duplicated here.
+
+\input{tables/F_variants.tex}

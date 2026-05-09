@@ -1,0 +1,53 @@
+% Reviewer-facing draft for sensitivity sweep (AE-9 / R2-4).
+\subsection{Sensitivity to Detection Threshold and Processing Rate}
+\label{sec:sensitivity}
+
+The reviewer asked for a sensitivity analysis around the most
+operationally relevant knobs (AE-9 / R2-4). We sweep two: the
+GroundingDINO box-confidence threshold (\texttt{box\_threshold}) and
+the per-frame detection period (\texttt{processing\_period} in
+seconds) -- the first because it directly bounds the
+precision/recall trade-off at the front end, the second because it
+controls how aggressively the pipeline samples the bag and therefore
+interacts with the GNG commit logic. All other parameters are held
+at the per-scenario defaults of Sec.~\ref{sec:datasets}; results
+appear in Table~\ref{tab:sensitivity}.
+
+\noindent\textbf{Box-threshold sensitivity.}
+On the legacy \texttt{full} variant the meeting bag is robust across
+$0.45$--$0.55$ ($F_1$ in $[0.339, 0.388]$) and rises at $0.60$ to a
+single-run $0.474$; the living lab is monotonically declining from
+$0.412$ at $0.45$ to $0.143$ at $0.60$, reflecting that the legacy
+text head is already operating near its precision ceiling on the
+cluttered scene and tightening it further wipes out true positives.
+On \texttt{full-nyu-proposals} the picture flips: the prompt-bank
+backend prefers a \emph{looser} box threshold ($0.30$--$0.40$ work
+better than $0.25$ on living lab, peaking at $0.524$ at $0.40$),
+because the per-class prompt rerank and CLIP label margin filter
+already discharge most false-positive responsibility downstream.
+The practical recipe is therefore that the right
+\texttt{box\_threshold} value is backend-specific: the two backends
+do \emph{not} share an operating point, and a value transferred from
+one to the other will under- or over-cut depending on direction.
+
+\noindent\textbf{Processing-period sensitivity.}
+\texttt{processing\_period} sweeps from $0.0$~s (process every frame)
+through $0.7$, $1.0$, $1.3$~s on the meeting bag yield $F_1$ in
+$[0.280, 0.327]$ -- a $\sim 4.7$~percentage-point spread that is
+small relative to the cross-variant gap of Sec.~\ref{sec:methods_variant}
+($\sim 10$~pp) and to the box-threshold spread above. The living-lab
+bag is essentially flat ($0.412$--$0.424$) across the same sweep.
+We interpret this as evidence that the temporal-fusion plus
+GNG-commit pair smooths over per-frame detection noise and is not
+the bottleneck on either scene at the operating point we report.
+
+\noindent\textbf{Reading caveat.}
+A non-trivial number of cells in Table~\ref{tab:sensitivity} are
+single-run point estimates ($n{=}1$, flagged $^{1}$). A wider sweep
+with $\geq 3$ runs per cell is a known follow-up; we keep the
+flagged cells because they support the qualitative directionality of
+the trends rather than a calibrated confidence interval, and we
+prefer to surface them honestly rather than report only the cells
+with full replicates and bias the picture.
+
+\input{tables/G_sensitivity.tex}

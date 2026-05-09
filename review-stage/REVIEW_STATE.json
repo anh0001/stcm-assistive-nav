@@ -1,0 +1,11 @@
+{
+  "round": 2,
+  "threadId": "019e09af-6d76-7121-bb33-cdd0193fe5f9",
+  "status": "completed",
+  "difficulty": "medium",
+  "last_score": 6.0,
+  "last_verdict": "almost ready",
+  "pending_experiments": [],
+  "timestamp": "2026-05-09T11:30:00",
+  "termination_reason": "positive threshold met (score >= 6 + verdict almost)"
+}

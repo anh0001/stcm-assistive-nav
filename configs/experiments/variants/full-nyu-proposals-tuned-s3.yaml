@@ -1,0 +1,81 @@
+offline_sequential: true
+use_sim_time: true
+run_updater: false
+place_gng_enabled: true
+gng_enabled: true
+use_projected_lidar: true
+use_depth_anything_fallback: false
+perception_backend: nyu_grounded_rgbd
+nyu_grounded_repo_path: /home/anhar/codes/nyu-grounded-rgbd
+nyu_prompt_bank_path: stcm/config/meeting_nyu_grounded_prompts.yaml
+nyu_gdino_model_id: IDEA-Research/grounding-dino-base
+nyu_sam_backend: mobilesam
+nyu_sam_model_type: vit_t
+label_rerank_enabled: true
+label_rerank_model: openai/clip-vit-base-patch32
+label_margin_min: 0.1
+box_threshold: 0.3
+text_threshold: 0.3
+gng_min_observations_to_commit: 3
+instance_label_voting_enabled: true
+cross_label_merge_distance_m: 0.8
+cross_label_merge_min_cosine: 0.25
+instance_label_switch_margin: 0.15
+instance_label_switch_min_observations: 2
+target_labels:
+- meeting table set
+- chair
+- bottle
+- cup
+- water fountain
+- cardboard box
+- emergency exit sign
+- trash bin
+- bench
+- door
+target_label_thresholds:
+- 1.6
+- 0.6
+- 0.3
+- 0.5
+- 0.5
+- 1.0
+- 0.3
+- 0.25
+- 0.8
+- 1.0
+per_label_geometry_priors:
+  emergency_exit_sign:
+    min_z: 1.2
+    max_mask_area_frac: 0.03
+    hard_min_z: 1.6
+    hard_max_mask_area_frac: 0.02
+    penalty_factor: 0.2
+  trash_bin:
+    min_z: 0.0
+    max_z: 0.9
+    hard_max_z: 0.8
+    min_mask_area_frac: 0.002
+    max_mask_area_frac: 0.08
+    penalty_factor: 0.35
+  meeting_table_set:
+    min_z: 0.45
+    max_z: 1.1
+    min_mask_area_frac: 0.015
+    hard_min_mask_area_frac: 0.02
+    penalty_factor: 0.35
+  chair:
+    min_z: 0.2
+    max_z: 1.2
+    max_mask_area_frac: 0.06
+    penalty_factor: 0.35
+  bottle:
+    min_z: 0.0
+    max_z: 0.3
+    max_mask_area_frac: 0.02
+    penalty_factor: 0.2
+  cup:
+    min_z: 0.0
+    max_z: 0.3
+    max_mask_area_frac: 0.025
+    penalty_factor: 0.2

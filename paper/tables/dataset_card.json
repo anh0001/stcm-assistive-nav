@@ -2,10 +2,10 @@
   "cards": [
     {
       "scene": "meeting",
-      "bag_path": "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed",
+      "bag_path": "/mnt/STREAM/ranger_recording_20251215_163827_uncompressed",
       "storage_id": "sqlite3",
       "duration_s": 174.793355588,
-      "metadata_path": "/media/dl-box/STREAM1/ranger_recording_20251215_163827_uncompressed/metadata.yaml",
+      "metadata_path": "/mnt/STREAM/ranger_recording_20251215_163827_uncompressed/metadata.yaml",
       "gt_instance_count": 20,
       "label_distribution": {
         "emergency exit sign": 1,
@@ -34,10 +34,10 @@
     },
     {
       "scene": "livinglab",
-      "bag_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737",
+      "bag_path": "/mnt/STREAM/robotics_living_lab_20260417_171737",
       "storage_id": "mcap",
       "duration_s": 153.252430832,
-      "metadata_path": "/media/dl-box/STREAM1/robotics_living_lab_20260417_171737/metadata.yaml",
+      "metadata_path": "/mnt/STREAM/robotics_living_lab_20260417_171737/metadata.yaml",
       "gt_instance_count": 23,
       "label_distribution": {
         "cardboard box": 1,
@@ -64,6 +64,46 @@
         "shoes",
         "trash bin",
         "vacuum cleaner"
+      ]
+    },
+    {
+      "scene": "outdoor_livinglab",
+      "bag_path": "/mnt/STREAM/outdoor_livinglab_01_20260501_162329_0",
+      "storage_id": "mcap",
+      "duration_s": 170.136677024,
+      "metadata_path": "/mnt/STREAM/outdoor_livinglab_01_20260501_162329_0/metadata.yaml",
+      "gt_instance_count": 19,
+      "label_distribution": {
+        "electric utility vehicle": 1,
+        "electric wheelchair": 1,
+        "pair of ramps": 1,
+        "portable power station": 1,
+        "rectangular table": 1,
+        "trolley": 1,
+        "electric scooter": 1,
+        "cardboard box": 1,
+        "basketball": 1,
+        "chair": 1,
+        "umbrella": 1,
+        "trailer": 6,
+        "traffic cone": 1,
+        "prohibition sign": 1
+      },
+      "label_vocabulary": [
+        "basketball",
+        "cardboard box",
+        "chair",
+        "electric scooter",
+        "electric utility vehicle",
+        "electric wheelchair",
+        "pair of ramps",
+        "portable power station",
+        "prohibition sign",
+        "rectangular table",
+        "traffic cone",
+        "trailer",
+        "trolley",
+        "umbrella"
       ]
     }
   ]
