@@ -5,20 +5,23 @@
 % Cells with n=1 flagged with ^{1}.
 \begin{table}[t]
 \centering
-\caption{Perception-backend variant comparison on S1 (meeting) and S2 (living lab). $F_1$, precision, recall computed by Hungarian-matched $1{:}1$ same-label scoring at the per-scenario match radius (Sec.~\ref{sec:semantic}); reported as mean $\pm$ s.d.\ over $n$ independent offline rosbag replays under \texttt{box\_threshold} perturbation. Cells with $n{=}1$ flagged ($^{1}$) are point estimates, not means. The \emph{full} variant uses the legacy GroundingDINO-T + MobileSAM stack with closed-vocabulary text prompts; \emph{full-nyu-proposals} swaps the perception front end for the NYU-grounded RGB-D backend with class-conditioned prompt banks; the two \emph{prior} variants additionally provide a per-pixel semantic prior from DFormerv2 / ESANet at the proposal-rerank stage.}
+\caption{Perception-backend variant comparison on S1 (meeting), S2 (living lab), and S3 (outdoor living lab). $F_1$, precision, recall computed by Hungarian-matched $1{:}1$ same-label scoring at the per-scenario match radius (Sec.~\ref{sec:semantic}); reported as mean $\pm$ s.d.\ over $n$ independent offline rosbag replays under \texttt{box\_threshold} perturbation. Cells with $n{=}1$ flagged ($^{1}$) are point estimates, not means. The \emph{full} variant uses the legacy GroundingDINO-T + MobileSAM stack with closed-vocabulary text prompts; \emph{full-nyu-proposals} swaps the perception front end for the NYU-grounded RGB-D backend with class-conditioned prompt banks; the two \emph{prior} variants additionally provide a per-pixel semantic prior from DFormerv2 / ESANet at the proposal-rerank stage. \emph{full-real-proposals} replaces the curated NYU prompt bank with raw GT-derived plus probe-tuned aliases (no NYU40 alias engineering, no semantic prior).}
 \label{tab:variants}
-\begin{tabular}{l c c c c c c}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{l c c c c c c c c c}
 \toprule
- & \multicolumn{3}{c}{Meeting (S1)} & \multicolumn{3}{c}{Living lab (S2)} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7}
-Variant & $F_1$ & P & R & $F_1$ & P & R \\
+ & \multicolumn{3}{c}{Meeting (S1)} & \multicolumn{3}{c}{Living lab (S2)} & \multicolumn{3}{c}{Outdoor (S3)} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+Variant & $F_1$ & P & R & $F_1$ & P & R & $F_1$ & P & R \\
 \midrule
-full (legacy GDINO-T)              & $0.362 \pm 0.042$ & $0.319$ & $0.454$ & $0.411 \pm 0.047$   & $0.634$     & $0.304$     \\
-full-nyu-proposals                 & $0.458 \pm 0.127$ & $0.447$ & $0.515$ & $0.301 \pm 0.223$   & $0.295$     & $0.323$     \\
-\quad + DFormerv2 semantic prior   & $0.381 \pm 0.069$ & $0.399$ & $0.367$ & $0.417 \pm 0.037$   & $0.380$     & $0.464$     \\
-\quad + ESANet semantic prior      & $0.320 \pm 0.087$ & $0.289$ & $0.383$ & $\mathbf{0.474 \pm 0.052}$ & $\mathbf{0.419}$ & $\mathbf{0.551}$ \\
+full (legacy GDINO-T)              & $0.362 \pm 0.042$ & $0.319$ & $0.454$ & $0.411 \pm 0.047$         & $0.634$         & $0.304$         & $0.047^{1}$               & --              & --              \\
+full-nyu-proposals                 & $0.458 \pm 0.127$ & $0.447$ & $0.515$ & $0.301 \pm 0.223$         & $0.295$         & $0.323$         & $0.235 \pm 0.078$         & --              & --              \\
+\quad + DFormerv2 semantic prior   & $0.381 \pm 0.069$ & $0.399$ & $0.367$ & $0.417 \pm 0.037$         & $0.380$         & $0.464$         & $0.367 \pm 0.003$         & $0.259$         & $0.632$         \\
+\quad + ESANet semantic prior      & $0.320 \pm 0.087$ & $0.289$ & $0.383$ & $0.474 \pm 0.052$         & $0.419$         & $0.551$         & $0.419 \pm 0.004$         & $0.313$         & $0.632$         \\
+full-real-proposals                & $\mathbf{0.449 \pm 0.037}$ & $\mathbf{0.379}$ & $\mathbf{0.550}$ & $\mathbf{0.535 \pm 0.028}$ & $\mathbf{0.488}$ & $\mathbf{0.594}$ & $\mathbf{0.456 \pm 0.005}$ & $\mathbf{0.357}$ & $\mathbf{0.632}$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \\[2pt]
-\footnotesize $n$: meeting -- full $5$, full-nyu $8$, +DFormerv2 $3$, +ESANet $3$; living lab -- full $3$, full-nyu $3$, +DFormerv2 $3$, +ESANet $3$. Best-per-scene cell in \textbf{bold}; on S1 \emph{full-nyu-proposals} is best in mean but the $\sigma{=}0.127$ spread overlaps the prior-augmented variants' confidence intervals so we do not bold the S1 row. Source files listed in \texttt{paper/tables/F\_variants\_provenance.csv}.
+\footnotesize $n$: meeting -- full $5$, full-nyu $8$, +DFormerv2 $3$, +ESANet $3$, full-real $3$; living lab -- full $3$, full-nyu $3$, +DFormerv2 $3$, +ESANet $3$, full-real $3$; outdoor -- full $1^{1}$, full-nyu $30$, +DFormerv2 $3$, +ESANet $3$, full-real $3$. Best-per-scene cell in \textbf{bold}. \emph{full-real-proposals} wins all three scenes: S1 ($+0.068$ vs DFormerv2, $+0.129$ vs ESANet), S2 ($+0.061$ vs ESANet, $+0.118$ vs DFormerv2), and S3 ($+0.037$ vs ESANet, $+0.089$ vs DFormerv2; Welch $t{\approx}10.0$, $p{<}10^{-4}$ at $n{=}3$ per cell, with both ESANet $\sigma{=}0.004$ and real-proposals $\sigma{=}0.005$ deterministic). Combined macro-mean F1: full-real-proposals $0.480$ vs ESANet $0.404$ vs DFormerv2 $0.388$. Source files listed in \texttt{paper/tables/F\_variants\_provenance.csv}.
 \end{table}

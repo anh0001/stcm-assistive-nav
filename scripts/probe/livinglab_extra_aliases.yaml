@@ -1,0 +1,113 @@
+# Extra aliases to probe for S2 living lab GT classes. Solo-prompt format.
+
+classes:
+  bench:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "bench"
+      - "metal bench"
+      - "waiting bench"
+      - "long bench"
+      - "indoor bench"
+
+  cardboard box:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "cardboard box"
+      - "brown cardboard box"
+      - "shipping box"
+      - "package box"
+      - "stacked box"
+      - "box"
+
+  chair:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "chair"
+      - "armless chair"
+      - "office chair"
+      - "swivel chair"
+      - "rolling chair"
+      - "stool chair"
+
+  door:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "door"
+      - "dark door surface"
+      - "wooden door"
+      - "closed door"
+      - "interior door"
+
+  electric vehicle:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "electric vehicle"
+      - "small electric vehicle"
+      - "electric cart"
+      - "small electric cart"
+      - "compact electric car"
+      - "indoor electric vehicle"
+      - "robot platform"
+
+  large power bank:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "large power bank"
+      - "portable power bank battery"
+      - "power bank"
+      - "battery pack"
+      - "large battery"
+      - "portable battery"
+      - "rectangular battery box"
+
+  meeting table set:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "meeting table set"
+      - "large meeting table"
+      - "conference table"
+      - "long table with chairs"
+      - "office meeting table"
+      - "long rectangular table"
+
+  plant pot:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "plant pot"
+      - "potted plant in plastic pot"
+      - "potted plant"
+      - "indoor potted plant"
+      - "flower pot"
+      - "plastic plant pot"
+
+  shoes:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "shoes"
+      - "pair of indoor shoes"
+      - "indoor shoes"
+      - "pair of shoes"
+      - "sneakers"
+      - "slippers"
+      - "shoe pair on floor"
+
+  trash bin:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "trash bin"
+      - "indoor trash bin"
+      - "garbage bin"
+      - "waste bin"
+      - "recycling bin"
+      - "small trash can"
+
+  vacuum cleaner:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "vacuum cleaner"
+      - "upright vacuum cleaner"
+      - "stick vacuum"
+      - "household vacuum"
+      - "robot vacuum"
+      - "cordless vacuum cleaner"

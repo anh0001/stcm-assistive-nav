@@ -1,0 +1,107 @@
+# Extra aliases to probe for S1 meeting GT classes. Each alias is run as its
+# OWN solo prompt so we can attribute detection success to a specific phrasing.
+# Mix: raw GT label + naive plural + stripped-modifier + legacy descriptor +
+# 1-2 alternative visual phrasings.
+
+classes:
+  bench:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "bench"
+      - "metal bench"
+      - "waiting bench"
+      - "sitting bench"
+      - "long bench"
+
+  bottle:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "bottle"
+      - "dark thermos bottle"
+      - "thermos bottle"
+      - "water bottle"
+      - "drink bottle"
+      - "small bottle"
+
+  cardboard box:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "cardboard box"
+      - "brown cardboard box"
+      - "shipping box"
+      - "package box"
+      - "small box"
+      - "box"
+
+  chair:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "chair"
+      - "armless chair"
+      - "office chair"
+      - "wheeled chair"
+      - "swivel chair"
+      - "rolling chair"
+
+  cup:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "cup"
+      - "white drinking cup"
+      - "drinking cup"
+      - "coffee cup"
+      - "paper cup"
+      - "small cup"
+
+  door:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "door"
+      - "dark door surface"
+      - "wooden door"
+      - "closed door"
+      - "interior door"
+      - "single door"
+
+  emergency exit sign:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "emergency exit sign"
+      - "exit sign"
+      - "green emergency exit sign"
+      - "green exit sign"
+      - "running man exit sign"
+      - "fire exit sign"
+      - "evacuation sign"
+
+  meeting table set:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "meeting table set"
+      - "large meeting table"
+      - "conference table"
+      - "metallic desk"
+      - "long table with chairs"
+      - "office meeting table"
+      - "boardroom table"
+
+  trash bin:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "trash bin"
+      - "indoor trash bin"
+      - "garbage bin"
+      - "waste bin"
+      - "recycling bin"
+      - "rubbish bin"
+      - "small trash can"
+
+  water fountain:
+    thresholds: [0.18, 0.18]
+    aliases:
+      - "water fountain"
+      - "metallic water fountain"
+      - "drinking fountain"
+      - "water dispenser"
+      - "wall water fountain"
+      - "stainless water fountain"

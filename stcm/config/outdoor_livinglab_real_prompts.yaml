@@ -1,0 +1,71 @@
+# Real-proposal bank for S3 outdoor living lab. v4 (2026-05-10): full probe-tuned.
+# All 14 classes covered by GDINO probe (round 1 = 7 classes, round 2 = 7 more).
+# Source: scripts/probe/results/probe_outdoor.csv + probe_outdoor_round2.csv.
+# Per class: top 3 aliases by hit_rate * avg_score, raw GT label kept first.
+# Per-class box/text thresholds lowered to 0.20 for classes whose probe avg
+# score < 0.50 (basketball, electric_scooter, electric_wheelchair,
+# prohibition_sign, traffic_cone, umbrella).
+chunks:
+  scene_classes:
+    thresholds: [0.30, 0.30]
+    classes:
+      - label: basketball
+        detect_aliases: [basketball, round orange ball, rubber ball on ground, sports ball]
+        rerank_aliases: [basketball, round orange ball, sports ball]
+        box_threshold: 0.20
+        text_threshold: 0.20
+      - label: cardboard box
+        detect_aliases: [cardboard box, brown cardboard box, small box, outdoor cardboard box]
+        rerank_aliases: [cardboard box, brown cardboard box, small box]
+      - label: chair
+        detect_aliases: [chair, metal chair, outdoor chair, armless chair]
+        rerank_aliases: [chair, metal chair, outdoor chair]
+      - label: electric scooter
+        detect_aliases: [electric scooter, two-wheeled scooter, stand-up scooter, electric kick scooter]
+        rerank_aliases: [electric scooter, stand-up scooter, kick scooter]
+        box_threshold: 0.20
+        text_threshold: 0.20
+      - label: electric utility vehicle
+        detect_aliases: [electric utility vehicle, small electric cart, utility vehicle, small white utility vehicle]
+        rerank_aliases: [electric utility vehicle, small electric cart, utility vehicle]
+      - label: electric wheelchair
+        detect_aliases: [electric wheelchair, powered mobility scooter, motorized wheelchair, mobility chair]
+        rerank_aliases: [electric wheelchair, motorized wheelchair, mobility chair]
+        box_threshold: 0.35
+        text_threshold: 0.35
+      - label: pair of ramps
+        detect_aliases: [pair of ramps, metal ramps on ground, two metal ramps, aluminum ramp]
+        rerank_aliases: [pair of ramps, metal ramps on ground, aluminum ramp]
+        box_threshold: 0.35
+        text_threshold: 0.35
+      - label: portable power station
+        detect_aliases: [portable power station, large power bank, large battery pack, power station]
+        rerank_aliases: [portable power station, power station, large battery pack]
+        box_threshold: 0.35
+        text_threshold: 0.35
+      - label: prohibition sign
+        detect_aliases: [prohibition sign, red circular sign, red sign on ground, no entry sign]
+        rerank_aliases: [prohibition sign, red circular sign, no entry sign]
+        box_threshold: 0.35
+        text_threshold: 0.35
+      - label: rectangular table
+        detect_aliases: [rectangular table, outdoor wooden table, long rectangular table, outdoor table]
+        rerank_aliases: [rectangular table, long rectangular table, outdoor table]
+        box_threshold: 0.35
+        text_threshold: 0.35
+      - label: traffic cone
+        detect_aliases: [traffic cone, construction cone, orange traffic cone, orange cone]
+        rerank_aliases: [traffic cone, construction cone, orange traffic cone]
+        box_threshold: 0.20
+        text_threshold: 0.20
+      - label: trailer
+        detect_aliases: [trailer, utility trailer, open trailer, covered trailer]
+        rerank_aliases: [trailer, utility trailer, open trailer]
+      - label: trolley
+        detect_aliases: [trolley, metal trolley, push cart, utility cart]
+        rerank_aliases: [trolley, metal trolley, utility cart]
+      - label: umbrella
+        detect_aliases: [umbrella, folded umbrella, open umbrella, shade umbrella]
+        rerank_aliases: [umbrella, open umbrella, folded umbrella]
+        box_threshold: 0.20
+        text_threshold: 0.20

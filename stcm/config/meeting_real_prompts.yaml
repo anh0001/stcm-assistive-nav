@@ -1,0 +1,39 @@
+# S1 meeting real-proposal bank. v7 (2026-05-10): HYBRID = legacy text_prompt
+# phrases (from configs/experiments/variants/full.yaml — produced v6 best F1
+# 0.471) UNION top probe winners (from scripts/probe/results/probe_meeting.csv
+# top 1-2 by hit_rate * avg_score per class). Raw GT label first.
+# Uniform 0.30 threshold (matches v6 best). No per-class threshold tuning.
+chunks:
+  scene_classes:
+    thresholds: [0.30, 0.30]
+    classes:
+      - label: meeting table set
+        detect_aliases: [meeting table set, large meeting table, conference table, office meeting table]
+        rerank_aliases: [meeting table set, large meeting table, conference table]
+      - label: chair
+        detect_aliases: [chair, armless chair, wheeled chair, rolling chair, office chair]
+        rerank_aliases: [chair, office chair, armless chair]
+      - label: bottle
+        detect_aliases: [bottle, dark thermos bottle, small bottle]
+        rerank_aliases: [bottle, dark thermos bottle, small bottle]
+      - label: cup
+        detect_aliases: [cup, white drinking cup, small cup]
+        rerank_aliases: [cup, white drinking cup, small cup]
+      - label: water fountain
+        detect_aliases: [water fountain, metallic water fountain, wall water fountain, stainless water fountain]
+        rerank_aliases: [water fountain, metallic water fountain, wall water fountain]
+      - label: cardboard box
+        detect_aliases: [cardboard box, brown cardboard box, small box]
+        rerank_aliases: [cardboard box, brown cardboard box, small box]
+      - label: emergency exit sign
+        detect_aliases: [emergency exit sign, green emergency exit sign, running man exit sign, green exit sign]
+        rerank_aliases: [emergency exit sign, green exit sign, running man exit sign]
+      - label: trash bin
+        detect_aliases: [trash bin, indoor trash bin, small trash can]
+        rerank_aliases: [trash bin, small trash can, indoor trash bin]
+      - label: bench
+        detect_aliases: [bench, metal bench, long bench, waiting bench]
+        rerank_aliases: [bench, long bench, metal bench]
+      - label: door
+        detect_aliases: [door, dark door surface, single door, closed door]
+        rerank_aliases: [door, dark door surface, single door]

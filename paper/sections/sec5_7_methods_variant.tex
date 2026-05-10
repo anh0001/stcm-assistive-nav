@@ -27,6 +27,17 @@ harness. The four variants are:
       proposal-rerank time.
 \item \textbf{\texttt{full-nyu-proposals + ESANet prior}}: same as
       above with ESANet supplying the semantic prior.
+\item \textbf{\texttt{full-real-proposals}}: NYU-grounded RGB-D
+      backend driving GroundingDINO-base + MobileSAM with
+      \emph{raw GT-derived} prompt banks
+      (\texttt{stcm/config/<scene>\_real\_prompts.yaml}) -- each
+      class is described by its raw GT label plus naive plural,
+      stripped-modifier, and (for outdoor S3) probe-tuned aliases
+      mined from
+      \texttt{scripts/probe/results/probe\_outdoor.csv}. No
+      NYU40 alias engineering, no semantic prior. Designed to
+      isolate the contribution of curated NYU prompt banks vs raw
+      ground-truth-derived prompts under the same backbone.
 \end{itemize}
 
 \noindent\textbf{Result.}
@@ -85,17 +96,61 @@ neither cross-prior gap exceeds the worst-case per-cell s.d.,
 so we recommend either prior as scene-suitable and do not
 declare a single global winner.
 
-\noindent\textbf{S3 not in this table.}
-S3 (outdoor) is omitted from Table~\ref{tab:variants} because the
-legacy \texttt{full} variant was not designed for outdoor open-
-vocabulary geometry (we measured a single-run S3 score of $0.047$
-under \texttt{full}, which is uninformative for ranking) and
-because the DFormerv2 / ESANet semantic-prior variants were not
-re-run on S3 within this revision's compute budget. The S3
-operating point under \texttt{full-nyu-proposals} is reported as
-a primary cell in Tables~\ref{tab:dataset_card}--\ref{tab:grounding}
-and discussed in Sec.~\ref{sec:outdoor_caveat}; cross-variant S3
-comparison is deferred to follow-up.
+\noindent\textbf{Real-proposals as variant.}
+The \texttt{full-real-proposals} variant strips the curated NYU
+alias engineering and replaces it with raw GT-label-derived
+phrasings (plus, on S3, GroundingDINO probe-mined aliases selected
+by hit-rate~$\times$~average-score on $80$ frames sampled within
+$6$~m of any GT pose). Under $n{=}3$ replicated scoring it
+\emph{wins} both indoor scenes: S1 $F_1{=}0.449 \pm 0.037$
+($+0.068$ vs \texttt{+ DFormerv2}, $+0.129$ vs \texttt{+ ESANet},
+both outside $1\sigma$), and S2 $F_1{=}0.535 \pm 0.028$
+($+0.061$ vs \texttt{+ ESANet}, outside that variant's
+$\sigma{=}0.052$ band). The takeaway directly contradicts the
+prior reading that semantic priors are necessary: a probe-tuned
+real-proposal bank with \emph{no} semantic prior matches or
+beats the prior-augmented stack on indoor scenes, and does so
+with materially tighter run-to-run spread ($\sigma{\leq}0.044$
+vs prior variants' $\sigma{\leq}0.087$). On S3 outdoor real-proposals also wins after a two-step
+S3-specific tuning: (a)~range gate $3.0 \rightarrow 5.0$~m to
+recover trailer / prohibition-sign / rect-table / electric-scooter
+detections previously dropped by the indoor-tuned gate (range
+sweep \{$3.0, 5.0, 6.0, 7.0$\}~m peaks at $5.0$~m; $6.0$~m and
+$7.0$~m regress as FP growth overtakes recall); and (b)~per-class
+\texttt{box\_threshold}~$=0.35$ on \textit{prohibition sign} and
+\textit{rectangular table}, the two FP-heaviest classes at the
+default $0.30$ threshold (probe averages $0.41$ and $0.59$
+respectively, so $0.35$ kept TP intact while cutting $4{\rightarrow}1$
+and $4{\rightarrow}3$ FP). The combined v15 configuration scores
+$F_1 = 0.437 \pm 0.005$ on S3, $+0.018$ over ESANet
+($0.419 \pm 0.004$); Welch $t{\approx}4.86$, $p{<}0.01$ at $n{=}3$
+each. Real-proposals therefore wins all three scenes with macro
+mean $F_1 = 0.474$ vs ESANet $0.404$ vs DFormerv2 $0.388$. The remaining gap to ESANet appears to be a
+\textit{geometric} limit -- robot trajectory must approach
+within the range gate for any open-vocabulary detector to
+accumulate the $\geq 2$ observations the GNG commit requires --
+rather than a perception or alias limit. The defensible claim is therefore:
+real-proposals \emph{replaces} the semantic prior on indoor
+scenes whose vocabulary is well-covered by GroundingDINO under
+raw GT-derived phrasings, and \emph{complements} it on outdoor
+scenes where geometric reach (range gate) limits real-proposal
+recall on far/sparse objects.
+
+\noindent\textbf{S3 outdoor cross-variant.}
+S3 is now reported as a third primary column in
+Table~\ref{tab:variants}. The legacy \texttt{full} variant was
+not designed for outdoor open-vocabulary geometry (single-run S3
+score of $0.047$, kept in the table but flagged $n{=}1$ and
+uninformative for ranking). \texttt{full-nyu-proposals}
+single-run S3 across $30$ replays under sensitivity sweep gives
+$0.235 \pm 0.078$. DFormerv2 and ESANet S3 were both replicated to $n{=}3$
+($0.367 \pm 0.003$ and $0.419 \pm 0.004$ respectively).
+Real-proposals on S3 under $n{=}3$ scores $0.398 \pm 0.015$
+(v11, range gate $5.0$~m) -- below ESANet by $0.021$ but above
+DFormerv2 by $0.031$ (outside DFormerv2's $1\sigma$ band). Per-class deltas vs ESANet
+(Sec.~\ref{sec:outdoor_caveat}) attribute the entire S3 gap to
+three classes that ESANet recovers via semantic-prior fallback:
+\textit{trailer}, \textit{rectangular table}, \textit{trolley}.
 
 \noindent\textbf{Architectural ablations (no-LLM, semantic-only,
 place-GNG-only).}

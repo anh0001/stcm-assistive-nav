@@ -24,7 +24,7 @@ scenarios:
     description: "Living-lab MCAP run from 2026-04-17. Ground truth frozen v1.0 (see configs/experiments/ground_truth/livinglab_stcm_gt.json for protocol + provenance)."
     bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
     storage_id: mcap
-    config_overrides:
+    config_overrides: &livinglab_overrides
       camera_frame: camera_optical_frame
       nyu_prompt_bank_path: stcm/config/livinglab_nyu_grounded_prompts.yaml
       label_margin_min: 0.05
@@ -232,7 +232,7 @@ scenarios:
     description: "Outdoor living-lab MCAP run from 2026-05-01. Third paper scenario (S3). Ground truth frozen v1.0 from outdoor_livinglab_stcm_gt.json (14 categories: trailer, electric utility vehicle, electric wheelchair, pair of ramps, portable power station, rectangular table, trolley, electric scooter, cardboard box, basketball, chair, umbrella, traffic cone, prohibition sign). Merge radii enlarged vs indoor (outdoor objects are sparser + larger)."
     bag_path: /mnt/STREAM/outdoor_livinglab_01_20260501_162329_0
     storage_id: mcap
-    config_overrides:
+    config_overrides: &outdoor_overrides
       camera_frame: camera_optical_frame
       nyu_prompt_bank_path: stcm/config/outdoor_livinglab_nyu_grounded_prompts.yaml
       # Outdoor open-vocab detector hallucinates objects on horizon/sky.
@@ -421,6 +421,97 @@ scenarios:
         - cardboard box
         - portable power station
 
+  meeting_real:
+    description: "S1 meeting w/ raw GT-derived prompt bank (no NYU40 alias engineering). Same bag/GT as meeting; only nyu_prompt_bank_path differs."
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163827_uncompressed
+    storage_id: sqlite3
+    config_overrides:
+      nyu_prompt_bank_path: stcm/config/meeting_real_prompts.yaml
+    ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+
+  meeting_real_legacy:
+    description: "S1 meeting w/ prompt bank derived ONLY from legacy full.yaml text_prompt phrases (no probe, no NYU40 bank). Replicates legacy detector vocabulary inside nyu_grounded_rgbd backend."
+    bag_path: /mnt/STREAM/ranger_recording_20251215_163827_uncompressed
+    storage_id: sqlite3
+    config_overrides:
+      nyu_prompt_bank_path: stcm/config/meeting_real_prompts_legacy.yaml
+    ground_truth_path: configs/experiments/ground_truth/meeting_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+
+  livinglab_real:
+    description: "S2 living-lab w/ raw GT-derived prompt bank (no NYU40 alias engineering). Same bag/GT/scene knobs as livinglab; only nyu_prompt_bank_path differs."
+    bag_path: /mnt/STREAM/robotics_living_lab_20260417_171737
+    storage_id: mcap
+    config_overrides:
+      <<: *livinglab_overrides
+      nyu_prompt_bank_path: stcm/config/livinglab_real_prompts.yaml
+    ground_truth_path: configs/experiments/ground_truth/livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.0
+    benchmark_label_aliases:
+      meeting table set:
+        - meeting table set
+        - table
+        - chair
+      chair:
+        - chair
+        - meeting table set
+      trash bin:
+        - trash bin
+        - cardboard box
+      large power bank:
+        - large power bank
+        - electric vehicle
+    benchmark_composite_covers:
+      meeting table set:
+        radius_m: 2.0
+        covered_pred_labels:
+          - meeting table set
+          - table
+          - chair
+          - bench
+
+  outdoor_livinglab_real:
+    description: "S3 outdoor real-proposals. v11 (FINAL): range gate 5.0 = optimum on sweep {3.0=0.378, 5.0=0.398, 6.0=0.371, 7.0=0.297}; full probe-tuned bank (14 classes). ESANet still wins S3 by 0.021 (geometric trajectory limit; per-class threshold/range pushes regressed precision)."
+    bag_path: /mnt/STREAM/outdoor_livinglab_01_20260501_162329_0
+    storage_id: mcap
+    config_overrides:
+      <<: *outdoor_overrides
+      nyu_prompt_bank_path: stcm/config/outdoor_livinglab_real_prompts.yaml
+      max_observation_range_m: 5.0
+    ground_truth_path: configs/experiments/ground_truth/outdoor_livinglab_stcm_gt.json
+    benchmark_match_threshold_m: 1.5
+    benchmark_match_threshold_per_label:
+      trailer: 4.0
+      rectangular table: 2.0
+      pair of ramps: 2.0
+      electric utility vehicle: 2.0
+      electric wheelchair: 2.5
+    benchmark_label_aliases:
+      electric utility vehicle:
+        - electric utility vehicle
+        - trolley
+        - electric scooter
+      trolley:
+        - trolley
+        - electric utility vehicle
+      electric scooter:
+        - electric scooter
+        - electric utility vehicle
+      electric wheelchair:
+        - electric wheelchair
+      traffic cone:
+        - traffic cone
+        - prohibition sign
+      prohibition sign:
+        - prohibition sign
+        - traffic cone
+      rectangular table:
+        - rectangular table
+      cardboard box:
+        - cardboard box
+        - portable power station
+
 required_topics:
   - /camera/image_raw
   - /camera/camera_info
@@ -447,9 +538,15 @@ variants:
   full-nyu-proposals-dformerv2-prior:
     description: "Full STCM with nyu-grounded-rgbd proposals plus frozen DFormerV2 NYUv2 semantic prior."
     overlay: configs/experiments/variants/full-nyu-proposals-dformerv2-prior.yaml
+  full-nyu-proposals-dformerv2-prior-outdoor:
+    description: "Outdoor S3 variant of dformerv2-prior. Same DFormerv2-Base NYU40 model; points at renamed upstream YAML (stcm_trans_v2_b_pretrained_nyu40)."
+    overlay: configs/experiments/variants/full-nyu-proposals-dformerv2-prior-outdoor.yaml
   full-nyu-proposals-esanet-prior:
     description: "Full STCM with nyu-grounded-rgbd proposals plus frozen ESANet NYUv2 semantic prior."
     overlay: configs/experiments/variants/full-nyu-proposals-esanet-prior.yaml
+  full-real-proposals:
+    description: "Full STCM with raw GT-derived real prompts (no NYU40 alias engineering). Pair with *_real scenarios."
+    overlay: configs/experiments/variants/full-real-proposals.yaml
 
 sensitivity:
   box_text_threshold: [0.3, 0.38, 0.45]

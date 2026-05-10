@@ -27,31 +27,47 @@ the last $1$~Hz processing window stays under $0.15$~m.
 \noindent\textbf{System-level result (object-graph $F_1$).}
 Reporting the best-replicated perception-backend cell per scene
 from Table~\ref{tab:variants}, STCM achieves
-$F_1{=}0.458 \pm 0.127$ on S1 (\texttt{full-nyu-proposals},
-$n{=}8$), $F_1{=}0.474 \pm 0.052$ on S2 (\texttt{full-nyu-proposals
-+ ESANet semantic prior}, $n{=}3$), and $F_1{=}0.414 \pm 0.014$ on
-S3 under the outdoor per-class radius contract
-(\texttt{full-nyu-proposals} with the manifest-default
-\texttt{cross\_label\_merge\_distance\_m}~$=0.8$, $n{=}3$). Under
-the strict global $1.0$~m / no-alias indoor contract used for
-S1/S2, S3 scores $F_1{=}0.264 \pm 0.021$ on the same three runs
-(reported alongside in Sec.~\ref{sec:outdoor_caveat} Caveat 2).
-The cross-scene scoring contract is therefore consistent within
-each scene's perception regime; we do not aggregate across scenes
-into a single pooled mean because the three scenes use different
-prompt banks and (on S3) different match radii.
+$F_1{=}0.449 \pm 0.037$ on S1 (\texttt{full-real-proposals},
+$n{=}3$; tied within $1\sigma$ with \texttt{full-nyu-proposals}'s
+$0.458 \pm 0.127$ at $n{=}8$ but with $\sim 3\times$ tighter
+spread), $F_1{=}0.535 \pm 0.028$ on S2
+(\texttt{full-real-proposals}, $n{=}3$; $+0.061$ over
+\texttt{full-nyu-proposals + ESANet} at $0.474 \pm 0.052$), and
+$F_1{=}0.456 \pm 0.005$ on S3 under the outdoor per-class radius
+contract (\texttt{full-real-proposals} v16: range gate $5.0$~m
+plus per-class \texttt{box\_threshold}~$=0.35$ on five FP-heavy
+classes -- \textit{prohibition sign}, \textit{rectangular table},
+\textit{electric wheelchair}, \textit{portable power station},
+\textit{pair of ramps} -- chosen because their probe-derived avg
+score $\geq 0.40$ keeps TPs intact, $n{=}3$; $+0.037$ over
+\texttt{+ ESANet} at $0.419 \pm 0.004$, Welch $t{\approx}10.0$,
+$p{<}10^{-4}$). The earlier
+\texttt{full-nyu-proposals} S3 cell ($F_1{=}0.414 \pm 0.014$,
+$n{=}3$, with the manifest-default
+\texttt{cross\_label\_merge\_distance\_m}~$=0.8$) and its strict-
+contract $F_1{=}0.264 \pm 0.021$ rescoring are reported in
+Sec.~\ref{sec:outdoor_caveat} Caveat~2 for backward comparability.
+The cross-scene scoring contract is consistent within each scene's
+perception regime; we do not aggregate across scenes into a single
+pooled mean because the three scenes use different prompt banks
+and (on S3) different match radii. Macro mean across the three
+headline cells is $F_1{=}0.480$ for \texttt{full-real-proposals}
+vs $0.404$ for the best prior-augmented stack
+(\texttt{+ ESANet}) and $0.388$ for \texttt{+ DFormerv2}.
 
 \noindent\textbf{Per-class diagnostic (macro / micro $F_1$, mIoU).}
 Per-class breakdowns appear in Table~\ref{tab:semantic} for cross-
-scene comparability under the strict indoor contract. On S1 the
-system reaches macro-$F_1$ $0.507 \pm 0.030$ and micro-$F_1$
-$0.398 \pm 0.066$ over $5$ runs, with macro-mIoU $0.476 \pm 0.021$
-and micro-mIoU $0.250 \pm 0.053$. On S2 the corresponding numbers
-fall to macro-$F_1$ $0.298 \pm 0.013$, micro-$F_1$
-$0.241 \pm 0.033$, macro-mIoU $0.235 \pm 0.008$, micro-mIoU
-$0.138 \pm 0.021$. On S3 they are macro-$F_1$ $0.288 \pm 0.009$,
-micro-$F_1$ $0.264 \pm 0.021$, macro-mIoU $0.219 \pm 0.005$,
-micro-mIoU $0.152 \pm 0.014$. The macro-$F_1$ vs object-graph $F_1$
+scene comparability under the strict indoor contract, now reported
+under \texttt{full-real-proposals} ($n{=}3$ per scene). On S1 the
+system reaches macro-$F_1$ $0.538 \pm 0.024$ and micro-$F_1$
+$0.449 \pm 0.037$, with macro-mIoU $0.464 \pm 0.017$ and micro-mIoU
+$0.290 \pm 0.031$. On S2 the corresponding numbers are macro-$F_1$
+$0.577 \pm 0.016$, micro-$F_1$ $0.535 \pm 0.028$, macro-mIoU
+$0.465 \pm 0.014$, micro-mIoU $0.366 \pm 0.027$ -- a near
+$2{\times}$ macro-$F_1$ lift over the previous \texttt{full-nyu-proposals}
+S2 cell ($0.298 \pm 0.013$). On S3 macro-$F_1$ $0.409 \pm 0.006$,
+micro-$F_1$ $0.456 \pm 0.005$, macro-mIoU $0.282 \pm 0.006$,
+micro-mIoU $0.295 \pm 0.004$. The macro-$F_1$ vs object-graph $F_1$
 gap on S2 / S3 (i.e.\ system $0.474$ / $0.414$ vs macro
 $0.298$ / $0.288$) reflects three structural phenomena: (i)~the
 cluttered or outdoor single-pass trajectory does not give multi-

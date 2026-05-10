@@ -1,0 +1,47 @@
+# S2 living lab real-proposal bank. v8 (2026-05-10): RESTORED v2 (legacy
+# enriched + naive plural + stripped-modifier). v2 produced best F1 0.458;
+# v7 hybrid (legacy + probe top) regressed to 0.400. Revert. Probe-tuned
+# alias selection apparently overfits S1 only — for S2 the broader v2
+# alias set wins. Threshold uniform 0.30.
+chunks:
+  scene_classes:
+    thresholds: [0.30, 0.30]
+    classes:
+      - label: bench
+        detect_aliases: [bench, benches, metal bench]
+        rerank_aliases: [bench, benches, metal bench]
+      - label: cardboard box
+        detect_aliases: [cardboard box, cardboard boxes, box, brown cardboard box]
+        rerank_aliases: [cardboard box, brown cardboard box, box]
+      - label: chair
+        detect_aliases: [chair, chairs, armless chair]
+        rerank_aliases: [chair, chairs, armless chair]
+      - label: door
+        detect_aliases: [door, doors, dark door surface, door surface]
+        rerank_aliases: [door, doors, dark door surface]
+      - label: electric vehicle
+        detect_aliases: [electric vehicle, electric vehicles, vehicle, small electric vehicle]
+        rerank_aliases: [electric vehicle, small electric vehicle, vehicle]
+      - label: large power bank
+        detect_aliases: [large power bank, large power banks, power bank, portable power bank battery, power bank battery]
+        rerank_aliases: [large power bank, portable power bank battery, power bank]
+      - label: meeting table set
+        detect_aliases: [meeting table set, meeting table sets, table set, large meeting table, conference table, metallic desk, tables]
+        rerank_aliases: [meeting table set, large meeting table, conference table, metallic desk]
+      - label: plant pot
+        detect_aliases: [plant pot, plant pots, pot, potted plant in plastic pot, potted plant, plastic plant pot]
+        rerank_aliases: [plant pot, potted plant, potted plant in plastic pot]
+      - label: shoes
+        detect_aliases: [shoes, shoe, pair of indoor shoes, indoor shoes]
+        rerank_aliases: [shoes, pair of indoor shoes, indoor shoes]
+      # v9 (2026-05-10): trash bin TP=0/5 in v8 despite "small trash can" probe
+      # avg 0.580 / 100% hit. Lower per-class threshold to 0.20 + add probe-top
+      # alias to recover recall. Other classes keep 0.30.
+      - label: trash bin
+        detect_aliases: [trash bin, trash bins, bin, indoor trash bin, small trash can]
+        rerank_aliases: [trash bin, small trash can, indoor trash bin]
+        box_threshold: 0.20
+        text_threshold: 0.20
+      - label: vacuum cleaner
+        detect_aliases: [vacuum cleaner, vacuum cleaners, cleaner, upright vacuum cleaner]
+        rerank_aliases: [vacuum cleaner, upright vacuum cleaner, cleaner]

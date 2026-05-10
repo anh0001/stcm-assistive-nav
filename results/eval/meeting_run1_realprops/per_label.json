@@ -1,0 +1,112 @@
+{
+  "per_label": [
+    {
+      "label": "bench",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "bottle",
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "iou": 0.5,
+      "f1": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "label": "cardboard box",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "chair",
+      "tp": 0,
+      "fp": 2,
+      "fn": 3,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "cup",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "iou": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "label": "door",
+      "tp": 2,
+      "fp": 3,
+      "fn": 0,
+      "iou": 0.4,
+      "f1": 0.5714285714285714,
+      "precision": 0.4,
+      "recall": 1.0
+    },
+    {
+      "label": "emergency exit sign",
+      "tp": 0,
+      "fp": 4,
+      "fn": 1,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "meeting table set",
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "iou": 0.0,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    {
+      "label": "trash bin",
+      "tp": 2,
+      "fp": 3,
+      "fn": 3,
+      "iou": 0.25,
+      "f1": 0.4,
+      "precision": 0.4,
+      "recall": 0.4
+    },
+    {
+      "label": "water fountain",
+      "tp": 1,
+      "fp": 2,
+      "fn": 0,
+      "iou": 0.3333333333333333,
+      "f1": 0.5,
+      "precision": 0.3333333333333333,
+      "recall": 1.0
+    }
+  ],
+  "macro_iou": 0.44833333333333336,
+  "macro_f1": 0.5138095238095238,
+  "micro_iou": 0.2631578947368421,
+  "micro_f1": 0.4166666666666667,
+  "total_tp": 10,
+  "total_fp": 18,
+  "total_fn": 10,
+  "n_labels": 10
+}

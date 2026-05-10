@@ -1,0 +1,83 @@
+# Round-2 probe extras for S3 outdoor classes NOT covered in
+# scripts/probe/outdoor_extra_aliases.yaml (round 1 covered: basketball,
+# umbrella, electric_wheelchair, electric_scooter, prohibition_sign,
+# pair_of_ramps, trailer). Adds: cardboard_box, chair,
+# electric_utility_vehicle, portable_power_station, rectangular_table,
+# traffic_cone, trolley.
+
+classes:
+  cardboard_box:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "cardboard box"
+      - "brown cardboard box"
+      - "shipping box"
+      - "small box"
+      - "package box"
+      - "stacked box"
+      - "outdoor cardboard box"
+
+  chair:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "chair"
+      - "armless chair"
+      - "outdoor chair"
+      - "plastic chair"
+      - "folding chair"
+      - "metal chair"
+
+  electric_utility_vehicle:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "electric utility vehicle"
+      - "small electric cart"
+      - "utility vehicle"
+      - "golf cart"
+      - "electric cart"
+      - "small white utility vehicle"
+      - "white utility cart"
+
+  portable_power_station:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "portable power station"
+      - "large power bank"
+      - "battery box"
+      - "power generator box"
+      - "portable battery"
+      - "power station"
+      - "large battery pack"
+
+  rectangular_table:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "rectangular table"
+      - "outdoor table"
+      - "long rectangular table"
+      - "picnic table"
+      - "folding table"
+      - "work table"
+      - "outdoor wooden table"
+
+  traffic_cone:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "traffic cone"
+      - "road cone"
+      - "safety cone"
+      - "orange cone"
+      - "construction cone"
+      - "orange traffic cone"
+
+  trolley:
+    thresholds: [0.20, 0.20]
+    aliases:
+      - "trolley"
+      - "hand cart"
+      - "hand truck"
+      - "luggage cart"
+      - "flatbed cart"
+      - "push cart"
+      - "utility cart"
+      - "metal trolley"

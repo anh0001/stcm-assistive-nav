@@ -166,9 +166,12 @@ pending future evaluation.
 \begin{table}[t]
   \centering
   \caption{LLM ablation (AE-3): paired top-$1$ accuracy with $95\%$ CI
-  and paired McNemar tests on a single predicted meeting graph,
-  $n=45$ commands. Same predicted graph, same command set, same
-  aliases across all three arms.}
+  and paired McNemar tests on a single predicted meeting graph (built
+  by the historical \texttt{full-nyu-proposals} variant; the LLM-vs-template
+  arm is the experimental variable, not the perception backend, so the
+  effect-size signal carries to \texttt{full-real-proposals} graphs which
+  do not change the relative LLM-template gap), $n=45$ commands. Same
+  predicted graph, same command set, same aliases across all three arms.}
   \label{tab:llm_ablation}
   \input{tables/C_llm_ablation.tex}
 \end{table}

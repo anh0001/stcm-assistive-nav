@@ -1,0 +1,1650 @@
+{
+  "covered_false_positive_nodes": [
+    {
+      "covered_by_gt_id": "meeting table set_1_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_2",
+      "label": "meeting table set",
+      "pose": [
+        4.8813245063586495,
+        7.14522591026248,
+        0.504302776327069
+      ],
+      "xy_error_m": 1.7219779084064961
+    },
+    {
+      "covered_by_gt_id": "meeting table set_1_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_6",
+      "label": "meeting table set",
+      "pose": [
+        4.484248730223177,
+        7.348787778675981,
+        0.4547872710972475
+      ],
+      "xy_error_m": 1.585606949857112
+    },
+    {
+      "covered_by_gt_id": "meeting table set_1_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_15",
+      "label": "chair",
+      "pose": [
+        4.293268131741088,
+        4.914159128584313,
+        0.41176833804777313
+      ],
+      "xy_error_m": 1.40592092136027
+    },
+    {
+      "covered_by_gt_id": "meeting table set_3_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_1",
+      "label": "chair",
+      "pose": [
+        5.030225649582612,
+        -0.15495354395722533,
+        0.35086514997657037
+      ],
+      "xy_error_m": 1.877924325750059
+    },
+    {
+      "covered_by_gt_id": "meeting table set_3_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_0",
+      "label": "meeting table set",
+      "pose": [
+        3.729556314996548,
+        -0.4358735721112947,
+        0.36501951103742436
+      ],
+      "xy_error_m": 0.5473117542334546
+    },
+    {
+      "covered_by_gt_id": "meeting table set_3_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_6",
+      "label": "chair",
+      "pose": [
+        4.148059234073126,
+        -0.18058830139552884,
+        0.27681564637893286
+      ],
+      "xy_error_m": 1.0216690748182675
+    },
+    {
+      "covered_by_gt_id": "meeting table set_3_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_11",
+      "label": "chair",
+      "pose": [
+        3.485118967982339,
+        -0.23422657629984106,
+        0.3452147142605062
+      ],
+      "xy_error_m": 0.42518204669874243
+    },
+    {
+      "covered_by_gt_id": "meeting table set_3_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_12",
+      "label": "chair",
+      "pose": [
+        3.523873575481138,
+        1.3883518277619693,
+        0.37151735091450033
+      ],
+      "xy_error_m": 1.9595298749535457
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_2",
+      "label": "chair",
+      "pose": [
+        4.868782248205192,
+        3.8210717428568395,
+        0.511385779775458
+      ],
+      "xy_error_m": 1.4847910448313506
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_1",
+      "label": "meeting table set",
+      "pose": [
+        4.341672874634825,
+        3.7412497460298964,
+        0.4527970563328416
+      ],
+      "xy_error_m": 1.0116266523915396
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_0",
+      "label": "chair",
+      "pose": [
+        4.709214398349626,
+        4.448117507744205,
+        0.4011790946289003
+      ],
+      "xy_error_m": 1.780766311618512
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_5",
+      "label": "chair",
+      "pose": [
+        5.208282972571231,
+        4.141636928574249,
+        0.45263855466927916
+      ],
+      "xy_error_m": 1.9432654619378111
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "chair_inst_7",
+      "label": "chair",
+      "pose": [
+        4.329762976906345,
+        3.6881709465963066,
+        0.4683601558164853
+      ],
+      "xy_error_m": 0.9675728420705209
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_4",
+      "label": "meeting table set",
+      "pose": [
+        5.322471884588919,
+        3.9274284340306878,
+        0.4974731275386041
+      ],
+      "xy_error_m": 1.9340098643370236
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_7",
+      "label": "meeting table set",
+      "pose": [
+        4.079908706633879,
+        2.9816861706773747,
+        0.4434451060261073
+      ],
+      "xy_error_m": 0.49214737783925405
+    },
+    {
+      "covered_by_gt_id": "meeting table set_4_0",
+      "covered_by_gt_label": "meeting table set",
+      "id": "meeting table set_inst_8",
+      "label": "meeting table set",
+      "pose": [
+        3.7850817176934184,
+        3.5877199975688674,
+        0.42081561453603766
+      ],
+      "xy_error_m": 0.561437215251875
+    }
+  ],
+  "duplicate_pairs": [
+    {
+      "label": "chair",
+      "node_a": "chair_inst_2",
+      "node_b": "chair_inst_5",
+      "xy_distance_m": 0.4669290954086096
+    },
+    {
+      "label": "chair",
+      "node_a": "chair_inst_11",
+      "node_b": "chair_inst_14",
+      "xy_distance_m": 0.28853852636484933
+    },
+    {
+      "label": "meeting table set",
+      "node_a": "meeting table set_inst_2",
+      "node_b": "meeting table set_inst_6",
+      "xy_distance_m": 0.4462136329893823
+    },
+    {
+      "label": "plant pot",
+      "node_a": "plant pot_inst_0",
+      "node_b": "plant pot_inst_1",
+      "xy_distance_m": 0.4136919883478676
+    },
+    {
+      "label": "vacuum cleaner",
+      "node_a": "vacuum cleaner_inst_1",
+      "node_b": "vacuum cleaner_inst_2",
+      "xy_distance_m": 0.4528409389837773
+    }
+  ],
+  "false_negative_gt_nodes": [
+    {
+      "id": "cardboard box_1_0",
+      "label": "cardboard box",
+      "pose": [
+        10.60570385714268,
+        0.06169516697128372,
+        0.048561110333367796
+      ]
+    },
+    {
+      "id": "trash bin_2_0",
+      "label": "trash bin",
+      "pose": [
+        10.611507606110658,
+        0.8173404080753487,
+        0.23767261772249207
+      ]
+    },
+    {
+      "id": "trash bin_4_0",
+      "label": "trash bin",
+      "pose": [
+        10.519093776984416,
+        1.2645371252547146,
+        0.3785566728171425
+      ]
+    },
+    {
+      "id": "chair_1_0",
+      "label": "chair",
+      "pose": [
+        9.509580112723112,
+        4.275245352300954,
+        0.3810372197211736
+      ]
+    },
+    {
+      "id": "chair_3_0",
+      "label": "chair",
+      "pose": [
+        8.772235274145432,
+        5.320172462404326,
+        0.38747685991174796
+      ]
+    },
+    {
+      "id": "chair_4_0",
+      "label": "chair",
+      "pose": [
+        8.452378412424054,
+        5.746044051193608,
+        0.3655481145855746
+      ]
+    },
+    {
+      "id": "chair_5_0",
+      "label": "chair",
+      "pose": [
+        7.967089460856171,
+        6.052071120682545,
+        0.398989429113303
+      ]
+    },
+    {
+      "id": "shoes_1_0",
+      "label": "shoes",
+      "pose": [
+        6.682764588386807,
+        6.113555102372567,
+        -0.09884583611707279
+      ]
+    },
+    {
+      "id": "meeting table set_1_0",
+      "label": "meeting table set",
+      "pose": [
+        3.5212239015257474,
+        6.0891320404889715,
+        0.505793859917478
+      ]
+    },
+    {
+      "id": "door_1_0",
+      "label": "door",
+      "pose": [
+        5.7758,
+        -1.0154,
+        1.1257
+      ]
+    }
+  ],
+  "false_positive_nodes": [
+    {
+      "id": "meeting table set_inst_3",
+      "label": "meeting table set",
+      "pose": [
+        5.409614634365458,
+        7.4819647840258465,
+        0.5405771789706195
+      ]
+    },
+    {
+      "id": "chair_inst_9",
+      "label": "chair",
+      "pose": [
+        5.825738066247243,
+        4.168291611019191,
+        0.430459562567154
+      ]
+    },
+    {
+      "id": "chair_inst_10",
+      "label": "chair",
+      "pose": [
+        5.376827136343689,
+        5.059893699421836,
+        0.39961062532686986
+      ]
+    },
+    {
+      "id": "large power bank_inst_1",
+      "label": "large power bank",
+      "pose": [
+        10.64427142260273,
+        0.5773020960147115,
+        0.5306454042895795
+      ]
+    },
+    {
+      "id": "large power bank_inst_2",
+      "label": "large power bank",
+      "pose": [
+        10.478261833452503,
+        1.0523745092722672,
+        0.3312746968000397
+      ]
+    },
+    {
+      "id": "vacuum cleaner_inst_2",
+      "label": "vacuum cleaner",
+      "pose": [
+        10.105770014111016,
+        2.888104556017631,
+        0.19759764093978
+      ]
+    },
+    {
+      "id": "large power bank_inst_5",
+      "label": "large power bank",
+      "pose": [
+        7.989870581362906,
+        3.148746981528129,
+        -0.00770709891572594
+      ]
+    },
+    {
+      "id": "trash bin_inst_5",
+      "label": "trash bin",
+      "pose": [
+        7.5783582102200615,
+        4.817384202436696,
+        -0.013375145574410609
+      ]
+    },
+    {
+      "id": "large power bank_inst_6",
+      "label": "large power bank",
+      "pose": [
+        3.22418060636279,
+        3.322319134047264,
+        0.3925912909950179
+      ]
+    },
+    {
+      "id": "plant pot_inst_0",
+      "label": "plant pot",
+      "pose": [
+        7.437330868265544,
+        4.20702218654292,
+        -0.03493370430194782
+      ]
+    },
+    {
+      "id": "large power bank_inst_7",
+      "label": "large power bank",
+      "pose": [
+        3.3530714781034976,
+        6.903986846590751,
+        0.209832812175529
+      ]
+    },
+    {
+      "id": "plant pot_inst_2",
+      "label": "plant pot",
+      "pose": [
+        8.08797837896255,
+        4.967329206429281,
+        -0.11616212786037719
+      ]
+    },
+    {
+      "id": "large power bank_inst_8",
+      "label": "large power bank",
+      "pose": [
+        3.7543624496192214,
+        7.2024325505985765,
+        0.34496392542091053
+      ]
+    }
+  ],
+  "ground_truth_path": "/home/anhar/codes/stcm-assistive-nav/configs/experiments/ground_truth/livinglab_stcm_gt.json",
+  "invalid_ground_truth_nodes": [],
+  "invalid_prediction_nodes": [],
+  "match_policy": {
+    "assignment": "one_to_one_hungarian_global_with_label_constraints",
+    "composite_covers": {
+      "meeting table set": {
+        "covered_pred_labels": [
+          "meeting table set",
+          "table",
+          "chair",
+          "bench"
+        ],
+        "radius_m": 2.0
+      }
+    },
+    "duplicate_threshold_m": 0.5,
+    "label": "category_or_label_exact_match_with_configured_gt_aliases",
+    "label_aliases": {
+      "chair": [
+        "chair",
+        "meeting table set"
+      ],
+      "large power bank": [
+        "electric vehicle",
+        "large power bank"
+      ],
+      "meeting table set": [
+        "chair",
+        "meeting table set",
+        "table"
+      ],
+      "trash bin": [
+        "cardboard box",
+        "trash bin"
+      ]
+    },
+    "match_threshold_m": 1.0,
+    "position": "xy_distance_m",
+    "wrong_label_threshold_m": 1.0
+  },
+  "matched_pairs": [
+    {
+      "gt_id": "trash bin_1_0",
+      "gt_label": "trash bin",
+      "gt_pose": [
+        10.71475993052093,
+        0.37474277442534454,
+        0.3705977201416249
+      ],
+      "label": "trash bin",
+      "pred_id": "trash bin_inst_0",
+      "pred_label": "trash bin",
+      "pred_pose": [
+        10.581518529761375,
+        0.06530302930474231,
+        0.10245621290802495
+      ],
+      "xy_error_m": 0.33690685172117185,
+      "xyz_error_m": 0.43058808000010684
+    },
+    {
+      "gt_id": "trash bin_3_0",
+      "gt_label": "trash bin",
+      "gt_pose": [
+        10.552355777242981,
+        1.1209774199747329,
+        0.2252697048794549
+      ],
+      "label": "trash bin",
+      "pred_id": "trash bin_inst_2",
+      "pred_label": "trash bin",
+      "pred_pose": [
+        10.453952557566433,
+        0.9825115392686942,
+        0.25188258116765716
+      ],
+      "xy_error_m": 0.1698705205808529,
+      "xyz_error_m": 0.17194254548174262
+    },
+    {
+      "gt_id": "trash bin_5_0",
+      "gt_label": "trash bin",
+      "gt_pose": [
+        10.437249946559584,
+        1.5642730381533394,
+        0.5236243451468249
+      ],
+      "label": "trash bin",
+      "pred_id": "trash bin_inst_1",
+      "pred_label": "trash bin",
+      "pred_pose": [
+        10.362466530781008,
+        1.7070956956869567,
+        0.44463990248879814
+      ],
+      "xy_error_m": 0.16121684397257105,
+      "xyz_error_m": 0.17952552175798134
+    },
+    {
+      "gt_id": "vacuum cleaner_1_0",
+      "gt_label": "vacuum cleaner",
+      "gt_pose": [
+        10.486743709926747,
+        2.6434385086443917,
+        0.23038075513304537
+      ],
+      "label": "vacuum cleaner",
+      "pred_id": "vacuum cleaner_inst_1",
+      "pred_label": "vacuum cleaner",
+      "pred_pose": [
+        10.458571765395906,
+        2.6042104907220986,
+        0.4060157620319877
+      ],
+      "xy_error_m": 0.048295919587068144,
+      "xyz_error_m": 0.18215419703413938
+    },
+    {
+      "gt_id": "plant pot_1_0",
+      "gt_label": "plant pot",
+      "gt_pose": [
+        7.729945447399262,
+        4.392676215606675,
+        0.08200142941045269
+      ],
+      "label": "plant pot",
+      "pred_id": "plant pot_inst_1",
+      "pred_label": "plant pot",
+      "pred_pose": [
+        7.760943410606037,
+        4.464735173532584,
+        -0.02859853358764801
+      ],
+      "xy_error_m": 0.07844340087181606,
+      "xyz_error_m": 0.13559394881600606
+    },
+    {
+      "gt_id": "chair_2_0",
+      "gt_label": "chair",
+      "gt_pose": [
+        9.066847882064783,
+        4.875148113864935,
+        0.5345642561337066
+      ],
+      "label": "chair",
+      "pred_id": "meeting table set_inst_5",
+      "pred_label": "meeting table set",
+      "pred_pose": [
+        8.984962745869089,
+        5.021895944103724,
+        0.3156449426269401
+      ],
+      "xy_error_m": 0.16804791343417488,
+      "xyz_error_m": 0.2759814613988662
+    },
+    {
+      "gt_id": "shoes_2_0",
+      "gt_label": "shoes",
+      "gt_pose": [
+        6.496618469167823,
+        6.110936301979587,
+        -0.09401499161238573
+      ],
+      "label": "shoes",
+      "pred_id": "shoes_inst_0",
+      "pred_label": "shoes",
+      "pred_pose": [
+        6.422005491686551,
+        6.165843115513432,
+        -0.10172121327810957
+      ],
+      "xy_error_m": 0.09263829975264636,
+      "xyz_error_m": 0.0929582725389324
+    },
+    {
+      "gt_id": "bench_1_0",
+      "gt_label": "bench",
+      "gt_pose": [
+        -0.3787621395630654,
+        2.7750297637833308,
+        0.058686393204340465
+      ],
+      "label": "bench",
+      "pred_id": "bench_inst_1",
+      "pred_label": "bench",
+      "pred_pose": [
+        -0.8228821291282447,
+        3.220704353209915,
+        0.292930515702859
+      ],
+      "xy_error_m": 0.62918074095758,
+      "xyz_error_m": 0.6713707721647036
+    },
+    {
+      "gt_id": "electric vehicle_1_0",
+      "gt_label": "electric vehicle",
+      "gt_pose": [
+        -1.540807268684698,
+        2.372365236707845,
+        0.22959576051988206
+      ],
+      "label": "electric vehicle",
+      "pred_id": "electric vehicle_inst_1",
+      "pred_label": "electric vehicle",
+      "pred_pose": [
+        -1.5073138753686672,
+        2.5513326794018654,
+        0.189152325473828
+      ],
+      "xy_error_m": 0.18207458070872976,
+      "xyz_error_m": 0.1865122633463659
+    },
+    {
+      "gt_id": "meeting table set_3_0",
+      "gt_label": "meeting table set",
+      "gt_pose": [
+        3.192833561980823,
+        -0.543012933306527,
+        0.5224646172333643
+      ],
+      "label": "meeting table set",
+      "pred_id": "chair_inst_14",
+      "pred_label": "chair",
+      "pred_pose": [
+        3.197792526273708,
+        -0.20780694171010083,
+        0.3740680078011913
+      ],
+      "xy_error_m": 0.33524267050750184,
+      "xyz_error_m": 0.36661860539253366
+    },
+    {
+      "gt_id": "meeting table set_4_0",
+      "gt_label": "meeting table set",
+      "gt_pose": [
+        3.594,
+        3.0598,
+        0.5628
+      ],
+      "label": "meeting table set",
+      "pred_id": "chair_inst_3",
+      "pred_label": "chair",
+      "pred_pose": [
+        3.777467933796526,
+        3.497273476581613,
+        0.47725222785114635
+      ],
+      "xy_error_m": 0.47438752665301986,
+      "xyz_error_m": 0.4820393622554094
+    },
+    {
+      "gt_id": "large power bank_1_0",
+      "gt_label": "large power bank",
+      "gt_pose": [
+        8.168935152204785,
+        3.356067558701772,
+        0.04754465497371043
+      ],
+      "label": "large power bank",
+      "pred_id": "electric vehicle_inst_0",
+      "pred_label": "electric vehicle",
+      "pred_pose": [
+        8.136370862737794,
+        3.3672978150191697,
+        0.01426410295068757
+      ],
+      "xy_error_m": 0.034446358377112504,
+      "xyz_error_m": 0.04789725199217174
+    },
+    {
+      "gt_id": "door_2_0",
+      "gt_label": "door",
+      "gt_pose": [
+        8.915178467387975,
+        -0.9721933784024985,
+        1.110547075704272
+      ],
+      "label": "door",
+      "pred_id": "door_inst_1",
+      "pred_label": "door",
+      "pred_pose": [
+        9.173933342795154,
+        -0.9274794284026369,
+        0.8542894921775586
+      ],
+      "xy_error_m": 0.2625898377157331,
+      "xyz_error_m": 0.3669078521734381
+    }
+  ],
+  "metric_name": "STCM Object Map F1@1m",
+  "per_label": {
+    "bench": {
+      "count_error": 0,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "bench",
+      "matched_pairs": [
+        {
+          "gt_id": "bench_1_0",
+          "gt_label": "bench",
+          "gt_pose": [
+            -0.3787621395630654,
+            2.7750297637833308,
+            0.058686393204340465
+          ],
+          "label": "bench",
+          "pred_id": "bench_inst_1",
+          "pred_label": "bench",
+          "pred_pose": [
+            -0.8228821291282447,
+            3.220704353209915,
+            0.292930515702859
+          ],
+          "xy_error_m": 0.62918074095758,
+          "xyz_error_m": 0.6713707721647036
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.62918074095758,
+        "mean_m": 0.62918074095758,
+        "median_m": 0.62918074095758,
+        "p95_m": 0.62918074095758,
+        "rmse_m": 0.62918074095758
+      },
+      "xyz_error": {
+        "max_m": 0.6713707721647036,
+        "mean_m": 0.6713707721647036,
+        "median_m": 0.6713707721647036,
+        "p95_m": 0.6713707721647036,
+        "rmse_m": 0.6713707721647036
+      }
+    },
+    "cardboard box": {
+      "count_error": -1,
+      "f1": null,
+      "false_negative_gt_nodes": [
+        {
+          "id": "cardboard box_1_0",
+          "label": "cardboard box",
+          "pose": [
+            10.60570385714268,
+            0.06169516697128372,
+            0.048561110333367796
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "cardboard box",
+      "matched_pairs": [],
+      "precision": null,
+      "pred_count": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "xy_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      },
+      "xyz_error": {
+        "max_m": null,
+        "mean_m": null,
+        "median_m": null,
+        "p95_m": null,
+        "rmse_m": null
+      }
+    },
+    "chair": {
+      "count_error": 8,
+      "f1": 0.25,
+      "false_negative_gt_nodes": [
+        {
+          "id": "chair_1_0",
+          "label": "chair",
+          "pose": [
+            9.509580112723112,
+            4.275245352300954,
+            0.3810372197211736
+          ]
+        },
+        {
+          "id": "chair_3_0",
+          "label": "chair",
+          "pose": [
+            8.772235274145432,
+            5.320172462404326,
+            0.38747685991174796
+          ]
+        },
+        {
+          "id": "chair_4_0",
+          "label": "chair",
+          "pose": [
+            8.452378412424054,
+            5.746044051193608,
+            0.3655481145855746
+          ]
+        },
+        {
+          "id": "chair_5_0",
+          "label": "chair",
+          "pose": [
+            7.967089460856171,
+            6.052071120682545,
+            0.398989429113303
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "chair_inst_9",
+          "label": "chair",
+          "pose": [
+            5.825738066247243,
+            4.168291611019191,
+            0.430459562567154
+          ]
+        },
+        {
+          "id": "chair_inst_10",
+          "label": "chair",
+          "pose": [
+            5.376827136343689,
+            5.059893699421836,
+            0.39961062532686986
+          ]
+        }
+      ],
+      "fn": 4,
+      "fp": 2,
+      "gt_count": 5,
+      "label": "chair",
+      "matched_pairs": [
+        {
+          "gt_id": "chair_2_0",
+          "gt_label": "chair",
+          "gt_pose": [
+            9.066847882064783,
+            4.875148113864935,
+            0.5345642561337066
+          ],
+          "label": "chair",
+          "pred_id": "meeting table set_inst_5",
+          "pred_label": "meeting table set",
+          "pred_pose": [
+            8.984962745869089,
+            5.021895944103724,
+            0.3156449426269401
+          ],
+          "xy_error_m": 0.16804791343417488,
+          "xyz_error_m": 0.2759814613988662
+        }
+      ],
+      "precision": 0.3333333333333333,
+      "pred_count": 13,
+      "recall": 0.2,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.16804791343417488,
+        "mean_m": 0.16804791343417488,
+        "median_m": 0.16804791343417488,
+        "p95_m": 0.16804791343417488,
+        "rmse_m": 0.16804791343417488
+      },
+      "xyz_error": {
+        "max_m": 0.2759814613988662,
+        "mean_m": 0.2759814613988662,
+        "median_m": 0.2759814613988662,
+        "p95_m": 0.2759814613988662,
+        "rmse_m": 0.2759814613988662
+      }
+    },
+    "door": {
+      "count_error": -1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [
+        {
+          "id": "door_1_0",
+          "label": "door",
+          "pose": [
+            5.7758,
+            -1.0154,
+            1.1257
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 2,
+      "label": "door",
+      "matched_pairs": [
+        {
+          "gt_id": "door_2_0",
+          "gt_label": "door",
+          "gt_pose": [
+            8.915178467387975,
+            -0.9721933784024985,
+            1.110547075704272
+          ],
+          "label": "door",
+          "pred_id": "door_inst_1",
+          "pred_label": "door",
+          "pred_pose": [
+            9.173933342795154,
+            -0.9274794284026369,
+            0.8542894921775586
+          ],
+          "xy_error_m": 0.2625898377157331,
+          "xyz_error_m": 0.3669078521734381
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 0.5,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.2625898377157331,
+        "mean_m": 0.2625898377157331,
+        "median_m": 0.2625898377157331,
+        "p95_m": 0.2625898377157331,
+        "rmse_m": 0.2625898377157331
+      },
+      "xyz_error": {
+        "max_m": 0.3669078521734381,
+        "mean_m": 0.3669078521734381,
+        "median_m": 0.3669078521734381,
+        "p95_m": 0.3669078521734381,
+        "rmse_m": 0.3669078521734381
+      }
+    },
+    "electric vehicle": {
+      "count_error": 1,
+      "f1": 1.0,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [],
+      "fn": 0,
+      "fp": 0,
+      "gt_count": 1,
+      "label": "electric vehicle",
+      "matched_pairs": [
+        {
+          "gt_id": "electric vehicle_1_0",
+          "gt_label": "electric vehicle",
+          "gt_pose": [
+            -1.540807268684698,
+            2.372365236707845,
+            0.22959576051988206
+          ],
+          "label": "electric vehicle",
+          "pred_id": "electric vehicle_inst_1",
+          "pred_label": "electric vehicle",
+          "pred_pose": [
+            -1.5073138753686672,
+            2.5513326794018654,
+            0.189152325473828
+          ],
+          "xy_error_m": 0.18207458070872976,
+          "xyz_error_m": 0.1865122633463659
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 2,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.18207458070872976,
+        "mean_m": 0.18207458070872976,
+        "median_m": 0.18207458070872976,
+        "p95_m": 0.18207458070872976,
+        "rmse_m": 0.18207458070872976
+      },
+      "xyz_error": {
+        "max_m": 0.1865122633463659,
+        "mean_m": 0.1865122633463659,
+        "median_m": 0.1865122633463659,
+        "p95_m": 0.1865122633463659,
+        "rmse_m": 0.1865122633463659
+      }
+    },
+    "large power bank": {
+      "count_error": 5,
+      "f1": 0.25,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "large power bank_inst_1",
+          "label": "large power bank",
+          "pose": [
+            10.64427142260273,
+            0.5773020960147115,
+            0.5306454042895795
+          ]
+        },
+        {
+          "id": "large power bank_inst_2",
+          "label": "large power bank",
+          "pose": [
+            10.478261833452503,
+            1.0523745092722672,
+            0.3312746968000397
+          ]
+        },
+        {
+          "id": "large power bank_inst_5",
+          "label": "large power bank",
+          "pose": [
+            7.989870581362906,
+            3.148746981528129,
+            -0.00770709891572594
+          ]
+        },
+        {
+          "id": "large power bank_inst_6",
+          "label": "large power bank",
+          "pose": [
+            3.22418060636279,
+            3.322319134047264,
+            0.3925912909950179
+          ]
+        },
+        {
+          "id": "large power bank_inst_7",
+          "label": "large power bank",
+          "pose": [
+            3.3530714781034976,
+            6.903986846590751,
+            0.209832812175529
+          ]
+        },
+        {
+          "id": "large power bank_inst_8",
+          "label": "large power bank",
+          "pose": [
+            3.7543624496192214,
+            7.2024325505985765,
+            0.34496392542091053
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 6,
+      "gt_count": 1,
+      "label": "large power bank",
+      "matched_pairs": [
+        {
+          "gt_id": "large power bank_1_0",
+          "gt_label": "large power bank",
+          "gt_pose": [
+            8.168935152204785,
+            3.356067558701772,
+            0.04754465497371043
+          ],
+          "label": "large power bank",
+          "pred_id": "electric vehicle_inst_0",
+          "pred_label": "electric vehicle",
+          "pred_pose": [
+            8.136370862737794,
+            3.3672978150191697,
+            0.01426410295068757
+          ],
+          "xy_error_m": 0.034446358377112504,
+          "xyz_error_m": 0.04789725199217174
+        }
+      ],
+      "precision": 0.14285714285714285,
+      "pred_count": 6,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.034446358377112504,
+        "mean_m": 0.034446358377112504,
+        "median_m": 0.034446358377112504,
+        "p95_m": 0.034446358377112504,
+        "rmse_m": 0.034446358377112504
+      },
+      "xyz_error": {
+        "max_m": 0.04789725199217174,
+        "mean_m": 0.04789725199217174,
+        "median_m": 0.04789725199217174,
+        "p95_m": 0.04789725199217174,
+        "rmse_m": 0.04789725199217174
+      }
+    },
+    "meeting table set": {
+      "count_error": 6,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [
+        {
+          "id": "meeting table set_1_0",
+          "label": "meeting table set",
+          "pose": [
+            3.5212239015257474,
+            6.0891320404889715,
+            0.505793859917478
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "meeting table set_inst_3",
+          "label": "meeting table set",
+          "pose": [
+            5.409614634365458,
+            7.4819647840258465,
+            0.5405771789706195
+          ]
+        }
+      ],
+      "fn": 1,
+      "fp": 1,
+      "gt_count": 3,
+      "label": "meeting table set",
+      "matched_pairs": [
+        {
+          "gt_id": "meeting table set_3_0",
+          "gt_label": "meeting table set",
+          "gt_pose": [
+            3.192833561980823,
+            -0.543012933306527,
+            0.5224646172333643
+          ],
+          "label": "meeting table set",
+          "pred_id": "chair_inst_14",
+          "pred_label": "chair",
+          "pred_pose": [
+            3.197792526273708,
+            -0.20780694171010083,
+            0.3740680078011913
+          ],
+          "xy_error_m": 0.33524267050750184,
+          "xyz_error_m": 0.36661860539253366
+        },
+        {
+          "gt_id": "meeting table set_4_0",
+          "gt_label": "meeting table set",
+          "gt_pose": [
+            3.594,
+            3.0598,
+            0.5628
+          ],
+          "label": "meeting table set",
+          "pred_id": "chair_inst_3",
+          "pred_label": "chair",
+          "pred_pose": [
+            3.777467933796526,
+            3.497273476581613,
+            0.47725222785114635
+          ],
+          "xy_error_m": 0.47438752665301986,
+          "xyz_error_m": 0.4820393622554094
+        }
+      ],
+      "precision": 0.6666666666666666,
+      "pred_count": 9,
+      "recall": 0.6666666666666666,
+      "tp": 2,
+      "xy_error": {
+        "max_m": 0.47438752665301986,
+        "mean_m": 0.4048150985802609,
+        "median_m": 0.4048150985802609,
+        "p95_m": 0.47438752665301986,
+        "rmse_m": 0.41075002956358453
+      },
+      "xyz_error": {
+        "max_m": 0.4820393622554094,
+        "mean_m": 0.42432898382397155,
+        "median_m": 0.42432898382397155,
+        "p95_m": 0.4820393622554094,
+        "rmse_m": 0.4282354192401465
+      }
+    },
+    "plant pot": {
+      "count_error": 2,
+      "f1": 0.5,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "plant pot_inst_0",
+          "label": "plant pot",
+          "pose": [
+            7.437330868265544,
+            4.20702218654292,
+            -0.03493370430194782
+          ]
+        },
+        {
+          "id": "plant pot_inst_2",
+          "label": "plant pot",
+          "pose": [
+            8.08797837896255,
+            4.967329206429281,
+            -0.11616212786037719
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 2,
+      "gt_count": 1,
+      "label": "plant pot",
+      "matched_pairs": [
+        {
+          "gt_id": "plant pot_1_0",
+          "gt_label": "plant pot",
+          "gt_pose": [
+            7.729945447399262,
+            4.392676215606675,
+            0.08200142941045269
+          ],
+          "label": "plant pot",
+          "pred_id": "plant pot_inst_1",
+          "pred_label": "plant pot",
+          "pred_pose": [
+            7.760943410606037,
+            4.464735173532584,
+            -0.02859853358764801
+          ],
+          "xy_error_m": 0.07844340087181606,
+          "xyz_error_m": 0.13559394881600606
+        }
+      ],
+      "precision": 0.3333333333333333,
+      "pred_count": 3,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.07844340087181606,
+        "mean_m": 0.07844340087181606,
+        "median_m": 0.07844340087181606,
+        "p95_m": 0.07844340087181606,
+        "rmse_m": 0.07844340087181606
+      },
+      "xyz_error": {
+        "max_m": 0.13559394881600606,
+        "mean_m": 0.13559394881600606,
+        "median_m": 0.13559394881600606,
+        "p95_m": 0.13559394881600606,
+        "rmse_m": 0.13559394881600606
+      }
+    },
+    "shoes": {
+      "count_error": -1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [
+        {
+          "id": "shoes_1_0",
+          "label": "shoes",
+          "pose": [
+            6.682764588386807,
+            6.113555102372567,
+            -0.09884583611707279
+          ]
+        }
+      ],
+      "false_positive_nodes": [],
+      "fn": 1,
+      "fp": 0,
+      "gt_count": 2,
+      "label": "shoes",
+      "matched_pairs": [
+        {
+          "gt_id": "shoes_2_0",
+          "gt_label": "shoes",
+          "gt_pose": [
+            6.496618469167823,
+            6.110936301979587,
+            -0.09401499161238573
+          ],
+          "label": "shoes",
+          "pred_id": "shoes_inst_0",
+          "pred_label": "shoes",
+          "pred_pose": [
+            6.422005491686551,
+            6.165843115513432,
+            -0.10172121327810957
+          ],
+          "xy_error_m": 0.09263829975264636,
+          "xyz_error_m": 0.0929582725389324
+        }
+      ],
+      "precision": 1.0,
+      "pred_count": 1,
+      "recall": 0.5,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.09263829975264636,
+        "mean_m": 0.09263829975264636,
+        "median_m": 0.09263829975264636,
+        "p95_m": 0.09263829975264636,
+        "rmse_m": 0.09263829975264636
+      },
+      "xyz_error": {
+        "max_m": 0.0929582725389324,
+        "mean_m": 0.0929582725389324,
+        "median_m": 0.0929582725389324,
+        "p95_m": 0.0929582725389324,
+        "rmse_m": 0.0929582725389324
+      }
+    },
+    "trash bin": {
+      "count_error": -1,
+      "f1": 0.6666666666666665,
+      "false_negative_gt_nodes": [
+        {
+          "id": "trash bin_2_0",
+          "label": "trash bin",
+          "pose": [
+            10.611507606110658,
+            0.8173404080753487,
+            0.23767261772249207
+          ]
+        },
+        {
+          "id": "trash bin_4_0",
+          "label": "trash bin",
+          "pose": [
+            10.519093776984416,
+            1.2645371252547146,
+            0.3785566728171425
+          ]
+        }
+      ],
+      "false_positive_nodes": [
+        {
+          "id": "trash bin_inst_5",
+          "label": "trash bin",
+          "pose": [
+            7.5783582102200615,
+            4.817384202436696,
+            -0.013375145574410609
+          ]
+        }
+      ],
+      "fn": 2,
+      "fp": 1,
+      "gt_count": 5,
+      "label": "trash bin",
+      "matched_pairs": [
+        {
+          "gt_id": "trash bin_1_0",
+          "gt_label": "trash bin",
+          "gt_pose": [
+            10.71475993052093,
+            0.37474277442534454,
+            0.3705977201416249
+          ],
+          "label": "trash bin",
+          "pred_id": "trash bin_inst_0",
+          "pred_label": "trash bin",
+          "pred_pose": [
+            10.581518529761375,
+            0.06530302930474231,
+            0.10245621290802495
+          ],
+          "xy_error_m": 0.33690685172117185,
+          "xyz_error_m": 0.43058808000010684
+        },
+        {
+          "gt_id": "trash bin_3_0",
+          "gt_label": "trash bin",
+          "gt_pose": [
+            10.552355777242981,
+            1.1209774199747329,
+            0.2252697048794549
+          ],
+          "label": "trash bin",
+          "pred_id": "trash bin_inst_2",
+          "pred_label": "trash bin",
+          "pred_pose": [
+            10.453952557566433,
+            0.9825115392686942,
+            0.25188258116765716
+          ],
+          "xy_error_m": 0.1698705205808529,
+          "xyz_error_m": 0.17194254548174262
+        },
+        {
+          "gt_id": "trash bin_5_0",
+          "gt_label": "trash bin",
+          "gt_pose": [
+            10.437249946559584,
+            1.5642730381533394,
+            0.5236243451468249
+          ],
+          "label": "trash bin",
+          "pred_id": "trash bin_inst_1",
+          "pred_label": "trash bin",
+          "pred_pose": [
+            10.362466530781008,
+            1.7070956956869567,
+            0.44463990248879814
+          ],
+          "xy_error_m": 0.16121684397257105,
+          "xyz_error_m": 0.17952552175798134
+        }
+      ],
+      "precision": 0.75,
+      "pred_count": 4,
+      "recall": 0.6,
+      "tp": 3,
+      "xy_error": {
+        "max_m": 0.33690685172117185,
+        "mean_m": 0.2226647387581986,
+        "median_m": 0.1698705205808529,
+        "p95_m": 0.33690685172117185,
+        "rmse_m": 0.23689174129375212
+      },
+      "xyz_error": {
+        "max_m": 0.43058808000010684,
+        "mean_m": 0.26068538241327693,
+        "median_m": 0.17952552175798134,
+        "p95_m": 0.43058808000010684,
+        "rmse_m": 0.28705385473077755
+      }
+    },
+    "vacuum cleaner": {
+      "count_error": 1,
+      "f1": 0.6666666666666666,
+      "false_negative_gt_nodes": [],
+      "false_positive_nodes": [
+        {
+          "id": "vacuum cleaner_inst_2",
+          "label": "vacuum cleaner",
+          "pose": [
+            10.105770014111016,
+            2.888104556017631,
+            0.19759764093978
+          ]
+        }
+      ],
+      "fn": 0,
+      "fp": 1,
+      "gt_count": 1,
+      "label": "vacuum cleaner",
+      "matched_pairs": [
+        {
+          "gt_id": "vacuum cleaner_1_0",
+          "gt_label": "vacuum cleaner",
+          "gt_pose": [
+            10.486743709926747,
+            2.6434385086443917,
+            0.23038075513304537
+          ],
+          "label": "vacuum cleaner",
+          "pred_id": "vacuum cleaner_inst_1",
+          "pred_label": "vacuum cleaner",
+          "pred_pose": [
+            10.458571765395906,
+            2.6042104907220986,
+            0.4060157620319877
+          ],
+          "xy_error_m": 0.048295919587068144,
+          "xyz_error_m": 0.18215419703413938
+        }
+      ],
+      "precision": 0.5,
+      "pred_count": 2,
+      "recall": 1.0,
+      "tp": 1,
+      "xy_error": {
+        "max_m": 0.048295919587068144,
+        "mean_m": 0.048295919587068144,
+        "median_m": 0.048295919587068144,
+        "p95_m": 0.048295919587068144,
+        "rmse_m": 0.048295919587068144
+      },
+      "xyz_error": {
+        "max_m": 0.18215419703413938,
+        "mean_m": 0.18215419703413938,
+        "median_m": 0.18215419703413938,
+        "p95_m": 0.18215419703413938,
+        "rmse_m": 0.18215419703413938
+      }
+    }
+  },
+  "prediction_path": "/home/anhar/codes/stcm-assistive-nav/results/eval/artifacts/20260510_102458_livinglab_real_full-real-proposals/stcm.json",
+  "summary": {
+    "count_error": 19,
+    "covered_false_positive_nodes": 16,
+    "duplicate_pair_count": 5,
+    "f1": 0.5306122448979592,
+    "fn": 10,
+    "fp": 13,
+    "gt_nodes": 23,
+    "invalid_ground_truth_nodes": 0,
+    "invalid_prediction_nodes": 0,
+    "precision": 0.5,
+    "pred_nodes": 42,
+    "recall": 0.5652173913043478,
+    "tp": 13,
+    "xy_error": {
+      "max_m": 0.62918074095758,
+      "mean_m": 0.2287185742184599,
+      "median_m": 0.1698705205808529,
+      "p95_m": 0.62918074095758,
+      "rmse_m": 0.2842333299139277
+    },
+    "xyz_error": {
+      "max_m": 0.6713707721647036,
+      "mean_m": 0.276160779565569,
+      "median_m": 0.1865122633463659,
+      "p95_m": 0.6713707721647036,
+      "rmse_m": 0.3249597406879162
+    }
+  },
+  "wrong_label_near_gt": [
+    {
+      "gt_id": "cardboard box_1_0",
+      "gt_label": "cardboard box",
+      "pred_id": "trash bin_inst_0",
+      "pred_label": "trash bin",
+      "xy_error_m": 0.024452949334550732
+    },
+    {
+      "gt_id": "trash bin_1_0",
+      "gt_label": "trash bin",
+      "pred_id": "large power bank_inst_1",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.21447356133397621
+    },
+    {
+      "gt_id": "trash bin_2_0",
+      "gt_label": "trash bin",
+      "pred_id": "large power bank_inst_1",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.24226402730914462
+    },
+    {
+      "gt_id": "trash bin_3_0",
+      "gt_label": "trash bin",
+      "pred_id": "large power bank_inst_2",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.10097659066970435
+    },
+    {
+      "gt_id": "trash bin_4_0",
+      "gt_label": "trash bin",
+      "pred_id": "large power bank_inst_2",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.21605606502273614
+    },
+    {
+      "gt_id": "trash bin_5_0",
+      "gt_label": "trash bin",
+      "pred_id": "large power bank_inst_2",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.513538780168668
+    },
+    {
+      "gt_id": "vacuum cleaner_1_0",
+      "gt_label": "vacuum cleaner",
+      "pred_id": "trash bin_inst_1",
+      "pred_label": "trash bin",
+      "xy_error_m": 0.9445542232362651
+    },
+    {
+      "gt_id": "plant pot_1_0",
+      "gt_label": "plant pot",
+      "pred_id": "trash bin_inst_5",
+      "pred_label": "trash bin",
+      "xy_error_m": 0.4509496252940372
+    },
+    {
+      "gt_id": "chair_2_0",
+      "gt_label": "chair",
+      "pred_id": "plant pot_inst_2",
+      "pred_label": "plant pot",
+      "xy_error_m": 0.9832003142442386
+    },
+    {
+      "gt_id": "chair_3_0",
+      "gt_label": "chair",
+      "pred_id": "plant pot_inst_2",
+      "pred_label": "plant pot",
+      "xy_error_m": 0.7698739259725508
+    },
+    {
+      "gt_id": "chair_4_0",
+      "gt_label": "chair",
+      "pred_id": "plant pot_inst_2",
+      "pred_label": "plant pot",
+      "xy_error_m": 0.8597582182468945
+    },
+    {
+      "gt_id": "meeting table set_1_0",
+      "gt_label": "meeting table set",
+      "pred_id": "large power bank_inst_7",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.8320237932474914
+    },
+    {
+      "gt_id": "meeting table set_4_0",
+      "gt_label": "meeting table set",
+      "pred_id": "large power bank_inst_6",
+      "pred_label": "large power bank",
+      "xy_error_m": 0.45352252386305925
+    }
+  ]
+}

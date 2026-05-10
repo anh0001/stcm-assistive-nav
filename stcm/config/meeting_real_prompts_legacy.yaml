@@ -1,0 +1,40 @@
+# S1 meeting real-proposal bank derived ONLY from legacy `full.yaml` text_prompt
+# phrases (configs/experiments/variants/full.yaml). Each canonical GT label gets
+# the legacy descriptors that point to it. No probe data, no NYU40 alias bank.
+# Replicates the prompt vocabulary that the legacy GDINO-T pipeline used (which
+# achieved F1 0.362 ± 0.042 on S1) but inside the nyu_grounded_rgbd backend
+# (GDINO-Base + CLIP rerank + place GNG).
+chunks:
+  scene_classes:
+    thresholds: [0.30, 0.30]
+    classes:
+      - label: meeting table set
+        detect_aliases: [meeting table set, large meeting table, conference table]
+        rerank_aliases: [meeting table set, large meeting table, conference table]
+      - label: chair
+        detect_aliases: [armless chair]
+        rerank_aliases: [chair, armless chair]
+      - label: bottle
+        detect_aliases: [dark thermos bottle]
+        rerank_aliases: [bottle, dark thermos bottle]
+      - label: cup
+        detect_aliases: [white drinking cup]
+        rerank_aliases: [cup, white drinking cup]
+      - label: water fountain
+        detect_aliases: [metallic water fountain]
+        rerank_aliases: [water fountain, metallic water fountain]
+      - label: cardboard box
+        detect_aliases: [brown cardboard box]
+        rerank_aliases: [cardboard box, brown cardboard box]
+      - label: emergency exit sign
+        detect_aliases: [green emergency exit sign]
+        rerank_aliases: [emergency exit sign, green emergency exit sign]
+      - label: trash bin
+        detect_aliases: [indoor trash bin]
+        rerank_aliases: [trash bin, indoor trash bin]
+      - label: bench
+        detect_aliases: [metal bench]
+        rerank_aliases: [bench, metal bench]
+      - label: door
+        detect_aliases: [dark door surface]
+        rerank_aliases: [door, dark door surface]

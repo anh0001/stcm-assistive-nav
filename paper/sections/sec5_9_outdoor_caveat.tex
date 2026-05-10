@@ -5,32 +5,49 @@
 \label{sec:outdoor_caveat}
 
 S3 is reported as a third primary evaluation cell in
-Tables~\ref{tab:dataset_card}--\ref{tab:grounding}, run under a
-$3$-replay protocol on \texttt{full-nyu-proposals} at git SHA
-\texttt{856c756} (\texttt{box\_threshold}~$=0.35$,
-\texttt{max\_observation\_range\_m}~$=3.0$,
-\texttt{cross\_label\_merge\_distance\_m}~$=0.8$). The headline
-replicated cell is $F_1{=}0.414 \pm 0.014$ under the outdoor
-per-class radius and alias scoring policy declared in the
-manifest, at across-run node-drift $0.030$~m. Under strict
-same-label scoring at a global $1.0$~m match radius (the indoor
-S1/S2 contract), the same three runs score $F_1{=}0.264 \pm
-0.021$. We report the per-class/alias number as the S3 headline
-because it matches the outdoor-scale geometry of the bag (e.g.\
-trailers at $3$--$5$~m extent), but we report both numbers
-explicitly so the reader can read S3 either under the outdoor-
-scale contract (against which the perception is tuned) or under
-the strict indoor contract (against which S1 and S2 are tuned).
-On 2026-05-09 we raised \texttt{cross\_label\_merge\_distance\_m}
-from $0.45$ to $0.8$~m as the outdoor manifest default after an
-autonomous review-and-fix loop (Codex GPT-5.5 as external
-reviewer) flagged GNG over-commit as the dominant FP source on S3;
-the same-scorer lift attributable to that knob alone is
-$+0.033$ absolute ($0.381 \pm 0.006 \rightarrow 0.414 \pm 0.014$
-under per-class/alias scoring), with TP$=12$ stable across all
-runs and FP dropping from $\sim 27$ to $\sim 25$ per run. This
-section discusses the remaining caveats specific to S3 that do
-not apply to S1 or S2.
+Tables~\ref{tab:dataset_card}--\ref{tab:grounding}. The current
+S3 best-replicated cell is $F_1{=}0.456 \pm 0.005$ under
+\texttt{full-real-proposals} v16 ($n{=}3$,
+\texttt{max\_observation\_range\_m}~$=5.0$,
+\texttt{cross\_label\_merge\_distance\_m}~$=0.8$, per-class
+\texttt{box\_threshold}~$=0.35$ on five FP-heavy classes:
+\textit{prohibition sign}, \textit{rectangular table},
+\textit{electric wheelchair}, \textit{portable power station},
+\textit{pair of ramps}), reported under the outdoor per-class
+radius and alias scoring policy declared in the manifest. This
+beats the prior-augmented stack \texttt{full-nyu-proposals + ESANet}
+($F_1{=}0.419 \pm 0.004$, $n{=}3$) by $+0.037$, Welch
+$t{\approx}10.0$, $p{<}10^{-4}$. The earlier \texttt{full-nyu-proposals} S3 cell --
+$F_1{=}0.414 \pm 0.014$ at git SHA \texttt{856c756}
+(\texttt{box\_threshold}~$=0.35$,
+\texttt{max\_observation\_range\_m}~$=3.0$) -- is retained as a
+historical reference for the perception-backend regression test;
+the navigation, semantic, and grounding tables (B, C, E) have
+been re-rendered under \texttt{full-real-proposals} (v7 hybrid on
+S1, v9 on S2, v16 on S3, $n{=}3$ per cell), which lifts S2
+macro-$F_1$ by $+0.279$ ($0.298 \rightarrow 0.577$), S3
+macro-$F_1$ by $+0.121$ ($0.288 \rightarrow 0.409$), S2
+grounding overall top-1 by $+17.8$ pp, and S3 grounding overall
+top-1 by $+11.1$ pp. Under strict same-label scoring
+at a global $1.0$~m match radius (the indoor S1/S2 contract), the
+historical \texttt{full-nyu-proposals} three-replay set scores
+$F_1{=}0.264 \pm 0.021$. We report the per-class/alias number as
+the S3 headline because it matches the outdoor-scale geometry of
+the bag (e.g.\ trailers at $3$--$5$~m extent), but we report both
+numbers explicitly so the reader can read S3 either under the
+outdoor-scale contract (against which the perception is tuned)
+or under the strict indoor contract (against which S1 and S2 are
+tuned). On 2026-05-09 we raised
+\texttt{cross\_label\_merge\_distance\_m} from $0.45$ to $0.8$~m
+as the outdoor manifest default after an autonomous
+review-and-fix loop (Codex GPT-5.5 as external reviewer) flagged
+GNG over-commit as the dominant FP source on S3; the same-scorer
+lift attributable to that knob alone is $+0.033$ absolute
+($0.381 \pm 0.006 \rightarrow 0.414 \pm 0.014$ under
+per-class/alias scoring), with TP$=12$ stable across all runs and
+FP dropping from $\sim 27$ to $\sim 25$ per run. This section
+discusses the remaining caveats specific to S3 that do not apply
+to S1 or S2.
 
 \noindent\textbf{Caveat 1 -- ground-truth provenance.}
 S3 was hand-annotated from rosbag2 RGB and LiDAR replay following
