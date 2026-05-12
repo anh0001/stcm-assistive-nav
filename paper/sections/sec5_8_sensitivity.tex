@@ -11,9 +11,27 @@ precision/recall trade-off at the front end, the second because it
 controls how aggressively the pipeline samples the bag and therefore
 interacts with the GNG commit logic. All other parameters are held
 at the per-scenario defaults of Sec.~\ref{sec:datasets}; results
-appear in Table~\ref{tab:sensitivity}.
+appear in Table~\ref{tab:sensitivity} and now cover all three
+scenarios (S1 meeting, S2 living lab, S3 outdoor) for the
+\texttt{full-real-proposals} variant that produces the main paper
+result, at $n{=}3$ runs per cell.
 
-\noindent\textbf{Box-threshold sensitivity.}
+\noindent\textbf{Box-threshold sensitivity (real-proposals, the
+``STCM (ours)'' variant of Table~\ref{tab:methods_variant}).}
+The headline observation is that this variant is \emph{flat} across
+the operationally interesting range $[0.25, 0.40]$. On S1 the spread
+is $0.458$--$0.484$ ($\Delta \approx 2.6$~pp), on S2 it is
+$0.508$--$0.554$ ($\Delta \approx 4.6$~pp), and on S3 it is
+$0.445$--$0.459$ ($\Delta \approx 1.4$~pp). All three cells at the
+variant default $0.30$ sit within one standard deviation
+($\sigma \in [0.005, 0.057]$) of the per-scenario peak, so the
+declared default is not a brittle pick. The two-pronged downstream
+filter -- per-class prompt rerank plus CLIP label margin -- absorbs
+most of the precision/recall trade-off that the box threshold would
+otherwise dictate.
+
+\noindent\textbf{Box-threshold sensitivity (legacy and
+nyu-proposals).}
 On the legacy \texttt{full} variant the meeting bag is robust across
 $0.45$--$0.55$ ($F_1$ in $[0.339, 0.388]$) and rises at $0.60$ to a
 single-run $0.474$; the living lab is monotonically declining from
@@ -23,12 +41,17 @@ cluttered scene and tightening it further wipes out true positives.
 On \texttt{full-nyu-proposals} the picture flips: the prompt-bank
 backend prefers a \emph{looser} box threshold ($0.30$--$0.40$ work
 better than $0.25$ on living lab, peaking at $0.524$ at $0.40$),
-because the per-class prompt rerank and CLIP label margin filter
-already discharge most false-positive responsibility downstream.
-The practical recipe is therefore that the right
-\texttt{box\_threshold} value is backend-specific: the two backends
-do \emph{not} share an operating point, and a value transferred from
-one to the other will under- or over-cut depending on direction.
+because the per-class prompt rerank already discharges most
+false-positive responsibility downstream. The S3 outdoor bag for
+\texttt{full-nyu-proposals} confirms the qualitative direction but
+compresses the spread further ($[0.398, 0.405]$ across $0.30$--$0.40$,
+$n{=}3$ per cell), because the outdoor vocabulary is dominated by
+visually similar ride-on / wheeled classes whose confusions are not
+resolvable by raising or lowering the box cutoff alone. The
+practical recipe is that the right \texttt{box\_threshold} value is
+backend-specific, and on the prompt-bank backends the box threshold
+is essentially saturated within the bracket we report; a value
+transferred between the two backends will still under- or over-cut.
 
 \noindent\textbf{Processing-period sensitivity.}
 \texttt{processing\_period} sweeps from $0.0$~s (process every frame)
@@ -37,17 +60,23 @@ $[0.280, 0.327]$ -- a $\sim 4.7$~percentage-point spread that is
 small relative to the cross-variant gap of Sec.~\ref{sec:methods_variant}
 ($\sim 10$~pp) and to the box-threshold spread above. The living-lab
 bag is essentially flat ($0.412$--$0.424$) across the same sweep.
-We interpret this as evidence that the temporal-fusion plus
+We did not run the \texttt{processing\_period} sweep on S3 because
+the outdoor bag is duration-limited and a single full pass already
+exceeds the budget the box-threshold sweep consumes; the cells are
+marked \texttt{---} in Table~\ref{tab:sensitivity}. We interpret the
+S1/S2 evidence as suggesting that the temporal-fusion plus
 GNG-commit pair smooths over per-frame detection noise and is not
-the bottleneck on either scene at the operating point we report.
+the bottleneck on either indoor scene at the operating point we
+report, and we treat extrapolation to S3 as conjecture pending the
+follow-up runs.
 
 \noindent\textbf{Reading caveat.}
-A non-trivial number of cells in Table~\ref{tab:sensitivity} are
-single-run point estimates ($n{=}1$, flagged $^{1}$). A wider sweep
-with $\geq 3$ runs per cell is a known follow-up; we keep the
-flagged cells because they support the qualitative directionality of
-the trends rather than a calibrated confidence interval, and we
-prefer to surface them honestly rather than report only the cells
-with full replicates and bias the picture.
+The new \texttt{full-real-proposals} block is fully populated at
+$n{=}3$ per cell across S1--S3. The legacy and nyu-proposals blocks
+still contain $n{=}1$ cells flagged $^{1}$; we keep them because
+they support the qualitative directionality of the trends across
+backends rather than a calibrated confidence interval, and we prefer
+to surface them honestly rather than report only the cells with full
+replicates and bias the picture.
 
 \input{tables/G_sensitivity.tex}

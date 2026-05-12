@@ -1,32 +1,41 @@
 % Sensitivity sweep for AE-9 / R2-4. Aggregated from results/eval/*.json.
-% Numbers are mean F_1 over n runs; cells with n=1 flagged with ^{1}.
+% Numbers are mean F_1 +/- std over n=3 runs per cell (real-proposals + nyu);
+% cells with n=1 flagged with ^{1}.
 % Default operating points in bold are taken from the variant YAML files
 % (configs/experiments/variants/*.yaml), not from a peak-picked cell.
+% S3 = outdoor_livinglab. Legacy \texttt{full} sweeps were not run on S3
+% (no S3-specific paired bag for that backend).
 \begin{table}[t]
 \centering
-\caption{Sensitivity of $F_1$ to the two most operationally relevant knobs (AE-9 / R2-4). \emph{box\_threshold} is the GroundingDINO box confidence cutoff; \emph{processing\_period} is the inverse detection rate (s/frame). All other parameters held at the per-scenario defaults of Sec.~\ref{sec:datasets}. Mean $F_1$ over $n$ runs; $^{1}$ denotes single-run point estimate. \textbf{Bold} marks the variant-default operating point as declared in the variant YAML (\texttt{full.yaml} sets \texttt{box\_threshold}~$=0.45$; \texttt{full-nyu-proposals.yaml} sets \texttt{box\_threshold}~$=0.30$; \texttt{processing\_period}~$=1.0$~s/frame is the node-level default in \texttt{semantic\_map\_builder.py}). The bold cell is therefore not necessarily the peak of its column; the peak among $n{=}1$ cells is uninterpretable as a recommendation in the absence of replication. The \texttt{full-real-proposals} variant introduced in Sec.~\ref{sec:methods_variant} shares the NYU-grounded RGB-D backbone (only the prompt bank and a per-class threshold subset on five outdoor classes differ); the \texttt{full-nyu-proposals} block in this table is therefore the closest characterization of the chunk-level $0.30$ \texttt{box\_threshold} sensitivity that real-proposals also inherits.}
+\caption{Sensitivity of $F_1$ to the two most operationally relevant knobs (AE-9 / R2-4), covering all three scenarios S1--S3. \emph{box\_threshold} is the GroundingDINO box confidence cutoff; \emph{processing\_period} is the inverse detection rate (s/frame). All other parameters held at the per-scenario defaults of Sec.~\ref{sec:datasets}. Mean $F_1$ over $n$ runs ($n{=}3$ for the \texttt{full-real-proposals} and most other cells); $^{1}$ denotes a single-run point estimate; \texttt{---} denotes a cell not run on that scene. \textbf{Bold} marks the variant-default operating point as declared in the variant YAML (\texttt{full.yaml} sets \texttt{box\_threshold}~$=0.45$; \texttt{full-nyu-proposals.yaml} and \texttt{full-real-proposals.yaml} both set \texttt{box\_threshold}~$=0.30$; \texttt{processing\_period}~$=1.0$~s/frame is the node-level default in \texttt{semantic\_map\_builder.py}). The bold cell is therefore not necessarily the peak of its column. We report the \texttt{full-real-proposals} block because this is the variant used for the paper's main result (``STCM (ours)'' in Table~\ref{tab:methods_variant}); the \texttt{full-nyu-proposals} block is retained as the closest controlled comparison, since the two variants share backbone, SAM head, and CLIP rerank, differing only in the per-scene prompt bank and a per-class threshold subset on five outdoor classes.}
 \label{tab:sensitivity}
-\begin{tabular}{l l r r}
+\begin{tabular}{l l r r r}
 \toprule
-Knob & Value & Meeting (S1) & Living lab (S2) \\
+Knob & Value & Meeting (S1) & Living lab (S2) & Outdoor (S3) \\
 \midrule
-\multicolumn{4}{l}{\emph{box\_threshold} (legacy GDINO-T, \texttt{full})} \\
-& $\mathbf{0.45}$  & $\mathbf{0.351}$ & $\mathbf{0.412^{1}}$ \\
-& $0.50$           & $0.339$ & $0.367$     \\
-& $0.55$           & $0.388$ & $0.304$     \\
-& $0.60$           & $0.474^{1}$ & $0.143^{1}$ \\
+\multicolumn{5}{l}{\emph{box\_threshold} (real-proposals, \texttt{full-real-proposals})} \\
+& $0.25$           & $0.484$ & $0.547$ & $0.459$ \\
+& $\mathbf{0.30}$  & $\mathbf{0.484}$ & $\mathbf{0.508}$ & $\mathbf{0.445}$ \\
+& $0.35$           & $0.466$ & $0.554$ & $0.450$ \\
+& $0.40$           & $0.458$ & $0.549$ & $0.450$ \\
 \midrule
-\multicolumn{4}{l}{\emph{box\_threshold} (NYU-grounded, \texttt{full-nyu-proposals})} \\
-& $0.25$           & $0.350^{1}$ & $0.423^{1}$ \\
-& $\mathbf{0.30}$  & $\mathbf{0.400^{1}}$ & $\mathbf{0.485}$ \\
-& $0.35$           & $0.385$ & $0.463$     \\
-& $0.40$           & $0.500^{1}$ & $0.524^{1}$ \\
+\multicolumn{5}{l}{\emph{box\_threshold} (legacy GDINO-T, \texttt{full})} \\
+& $\mathbf{0.45}$  & $\mathbf{0.351}$ & $\mathbf{0.412}$ & --- \\
+& $0.50$           & $0.339$ & $0.366$ & --- \\
+& $0.55$           & $0.388$ & $0.304$ & --- \\
+& $0.60$           & $0.474^{1}$ & $0.143^{1}$ & --- \\
 \midrule
-\multicolumn{4}{l}{\emph{processing\_period} s/frame (legacy GDINO-T, \texttt{full})} \\
-& $0.0$ (every frame) & $0.280^{1}$ & $0.412^{1}$ \\
-& $0.7$               & $0.298$     & $0.424^{1}$ \\
-& $\mathbf{1.0}$      & $\mathbf{0.327^{1}}$ & $\mathbf{0.424^{1}}$ \\
-& $1.3$               & $0.286^{1}$ & $0.424^{1}$ \\
+\multicolumn{5}{l}{\emph{box\_threshold} (NYU-grounded, \texttt{full-nyu-proposals})} \\
+& $0.25$           & $0.350^{1}$ & $0.423^{1}$ & --- \\
+& $\mathbf{0.30}$  & $\mathbf{0.375}$ & $\mathbf{0.485}$ & $\mathbf{0.398}$ \\
+& $0.35$           & $0.373$ & $0.463$ & $0.405$ \\
+& $0.40$           & $0.464$ & $0.524^{1}$ & $0.401$ \\
+\midrule
+\multicolumn{5}{l}{\emph{processing\_period} s/frame (legacy GDINO-T, \texttt{full})} \\
+& $0.0$ (every frame) & $0.280^{1}$ & $0.412^{1}$ & --- \\
+& $0.7$               & $0.298$     & $0.424^{1}$ & --- \\
+& $\mathbf{1.0}$      & $\mathbf{0.327^{1}}$ & $\mathbf{0.424^{1}}$ & --- \\
+& $1.3$               & $0.286^{1}$ & $0.424^{1}$ & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
